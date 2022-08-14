@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(fdc_bitstream)
 
-set(CMAKE_CXX_FLAGS "-std=c++14")
+#set(CMAKE_CXX_FLAGS "-std=c++14")
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 link_directories("${CMAKE_SOURCE_DIR}/bin/debug")
