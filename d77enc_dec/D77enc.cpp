@@ -19,7 +19,7 @@ typedef struct {
 	char	R;
 	char	N;
 	short	SPT;		// Sector per track
-	char	Density;	// 00:”{–§ 40:’P–§
+	char	Density;	// 00:å€å¯† 40:å˜å¯†
 	char	DDM;		// Deleted data mark 00:Normal 10:DDM
 	char	Status;
 	char	Reserve[5];
@@ -63,9 +63,9 @@ void main(int argc, char *argv[])
 			break;
 		default:
 			if(strlen(infile)==0) {
-				strcpy(infile, argv[i]);	// infile‚ª‹ó‚È‚çinfile‚Éargv‚ğİ’è
+				strcpy(infile, argv[i]);	// infileãŒç©ºãªã‚‰infileã«argvã‚’è¨­å®š
 			} else {
-				strcpy(outfile, argv[i]);	// infile‚É‚È‚É‚©“ü‚Á‚Ä‚¢‚ê‚Îoutfile‚Éargv‚ğİ’è
+				strcpy(outfile, argv[i]);	// infileã«ãªã«ã‹å…¥ã£ã¦ã„ã‚Œã°outfileã«argvã‚’è¨­å®š
 			}
 			break;
 		}
@@ -85,25 +85,25 @@ void main(int argc, char *argv[])
 		perror("File open");
 		exit(-1);
 	}
-	DISKIMAGE *dimg = (DISKIMAGE*)new char[2*1024*1024];	// 2MB—pˆÓ‚·‚é
-	char *wptr = (char*)dimg + (17+9+1+1+4+4*164);			// ƒZƒNƒ^î•ñ‘‚«‚İƒ|ƒCƒ“ƒ^(DISKIMAGE‚Ì\‘¢‘Ì•ªi‚ß‚Ä‚¨‚­)
-	// DISKIMAGE\‘¢‘Ì‚É“K“–‚È‰Šú’l‚ğ‘ã“ü‚µ‚Ä‚¨‚­
+	DISKIMAGE *dimg = (DISKIMAGE*)new char[2*1024*1024];	// 2MBç”¨æ„ã™ã‚‹
+	char *wptr = (char*)dimg + (17+9+1+1+4+4*164);			// ã‚»ã‚¯ã‚¿æƒ…å ±æ›¸ãè¾¼ã¿ãƒã‚¤ãƒ³ã‚¿(DISKIMAGEã®æ§‹é€ ä½“åˆ†é€²ã‚ã¦ãŠã)
+	// DISKIMAGEæ§‹é€ ä½“ã«é©å½“ãªåˆæœŸå€¤ã‚’ä»£å…¥ã—ã¦ãŠã
 	strcpy(dimg->DiskName, "Untitled");
 	dimg->DiskSize = 0;
 	dimg->MediaType = 0;		// 2D
 	dimg->WriteProtect = 0;		// No protect
-	for(i=0; i<164; i++) dimg->TrackOffset[i]=0;		// ƒgƒ‰ƒbƒNƒIƒtƒZƒbƒg‰Šú‰»
+	for(int i=0; i<164; i++) dimg->TrackOffset[i]=0;		// ãƒˆãƒ©ãƒƒã‚¯ã‚ªãƒ•ã‚»ãƒƒãƒˆåˆæœŸåŒ–
 
-	int CurrentTrack = -1;		// Œ»İˆ—’†‚Ìƒgƒ‰ƒbƒN”Ô†
-	int NumberOfSector = 0;		// ƒZƒNƒ^[”
-	SECTORIMAGE *SectorTable[512];	// ƒZƒNƒ^ˆÊ’u‚ğ‹L˜^‚·‚éƒe[ƒuƒ‹(ƒgƒ‰ƒbƒN‚ÌØ‚è‘Ö‚í‚è‚ÉSPT‚ğ‘‚«Š·‚¦‚é‚½‚ß‚Ég—p)
+	int CurrentTrack = -1;		// ç¾åœ¨å‡¦ç†ä¸­ã®ãƒˆãƒ©ãƒƒã‚¯ç•ªå·
+	int NumberOfSector = 0;		// ã‚»ã‚¯ã‚¿ãƒ¼æ•°
+	SECTORIMAGE *SectorTable[512];	// ã‚»ã‚¯ã‚¿ä½ç½®ã‚’è¨˜éŒ²ã™ã‚‹ãƒ†ãƒ¼ãƒ–ãƒ«(ãƒˆãƒ©ãƒƒã‚¯ã®åˆ‡ã‚Šæ›¿ã‚ã‚Šæ™‚ã«SPTã‚’æ›¸ãæ›ãˆã‚‹ãŸã‚ã«ä½¿ç”¨)
 	char cmd[256], ope[256];
 	while(!feof(fpi)) {
 		fscanf(fpi, "%s", cmd);
-		fgetc(fpi);					// ƒXƒy[ƒX‚P•¶š“Ç‚İ”ò‚Î‚µ
+		fgetc(fpi);					// ã‚¹ãƒšãƒ¼ã‚¹ï¼‘æ–‡å­—èª­ã¿é£›ã°ã—
 		fgets(ope, 255, fpi);
-		if(cmd[0]=='#' || cmd[0]==';') continue;					// '#', ';'‚©‚çƒRƒƒ“ƒg‚Æ‚İ‚È‚·
-		for(char *ptr=ope; *ptr; ptr++) if(*ptr<' ') *ptr='\0';		// •¶š—ñ’†‚Ì§ŒäƒR[ƒh‚ğ'\0'‚É’u‚«Š·‚¦
+		if(cmd[0]=='#' || cmd[0]==';') continue;					// '#', ';'ã‹ã‚‰ã‚³ãƒ¡ãƒ³ãƒˆã¨ã¿ãªã™
+		for(char *ptr=ope; *ptr; ptr++) if(*ptr<' ') *ptr='\0';		// æ–‡å­—åˆ—ä¸­ã®åˆ¶å¾¡ã‚³ãƒ¼ãƒ‰ã‚’'\0'ã«ç½®ãæ›ãˆ
 		if(stricmp("DiskName____=", cmd)==0) {
 			strncpy(dimg->DiskName, ope, 16);
 			dimg->DiskName[16] = '\0';
@@ -122,10 +122,10 @@ void main(int argc, char *argv[])
 				if(fVerbose) printf(".");
 				char ddm[4], density[4];
 				SECTORIMAGE *sct = SectorTable[NumberOfSector++] = (SECTORIMAGE*)wptr;
-				wptr+=(1+1+1+1+2+1+1+1+5+2);		// SECTORIMAGE\‘¢‘Ì•ªi‚ß‚Ä‚¨‚­
-				sct->Density	= 0x00;		// ”{–§
+				wptr+=(1+1+1+1+2+1+1+1+5+2);		// SECTORIMAGEæ§‹é€ ä½“åˆ†é€²ã‚ã¦ãŠã
+				sct->Density	= 0x00;		// å€å¯†
 				sct->DDM		= 0x00;		// Normal Mark
-				// •¶š—ñ‰ğÍ
+				// æ–‡å­—åˆ—è§£æ
 				int c,h,r,n,status,size;
 				sscanf(ope, "%02X %02X %02X %02X %s %s %02X %d",
 					&c, &h, &r, &n, density, ddm, &status, &size);
@@ -135,22 +135,22 @@ void main(int argc, char *argv[])
 					sct->N = n;
 					sct->Status = status;
 					sct->SectorSize = size;
-				if(stricmp(density, "SD" )==0) sct->Density	= 0x40;	// ’P–§
+				if(stricmp(density, "SD" )==0) sct->Density	= 0x40;	// å˜å¯†
 				if(stricmp(ddm    , "DDM")==0) sct->DDM		= 0x10;	// DDM
-				// ƒf[ƒ^•”“Ç‚İæ‚è
+				// ãƒ‡ãƒ¼ã‚¿éƒ¨èª­ã¿å–ã‚Š
 				for(int i=0; i<sct->SectorSize; i++) {
 					fscanf(fpi, "%02X", &n);
 					*wptr++ = n;
 				}
 			}
 		}
-		// ƒgƒ‰ƒbƒNƒ^ƒOˆ—
+		// ãƒˆãƒ©ãƒƒã‚¯ã‚¿ã‚°å‡¦ç†
 		if(stricmp("TRACK=", cmd)==0) {
 			int tmp = atoi(ope);
 			if(tmp>CurrentTrack && tmp<164) {
 				if(fVerbose) printf("\nTrack %3d", tmp);
-				// Œ»İ‚Ìƒgƒ‰ƒbƒN”Ô†‚æ‚è‘å‚«‚¢ê‡‚Ì‚İƒgƒ‰ƒbƒN”Ô†‚ğİ’è‚·‚é
-				// ‚·‚×‚Ä‚ÌƒZƒNƒ^‚ÉSPT’l‚ğİ’è‚·‚é
+				// ç¾åœ¨ã®ãƒˆãƒ©ãƒƒã‚¯ç•ªå·ã‚ˆã‚Šå¤§ãã„å ´åˆã®ã¿ãƒˆãƒ©ãƒƒã‚¯ç•ªå·ã‚’è¨­å®šã™ã‚‹
+				// ã™ã¹ã¦ã®ã‚»ã‚¯ã‚¿ã«SPTå€¤ã‚’è¨­å®šã™ã‚‹
 				for(int i=0; i<NumberOfSector; i++) {
 					SectorTable[i]->SPT = NumberOfSector;
 				}

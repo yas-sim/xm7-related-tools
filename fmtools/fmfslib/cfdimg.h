@@ -9,7 +9,7 @@
 #define _CFDIMAGE_MAX_FILE_NAME_LENGTH_	(256)
 #define _CFDIMAGE_MAX_TRACK_			(164)
 
-class CSectorImg : public CSector {
+class FMFSLIB_API CSectorImg : public CSector {
 public:
 	unsigned char m_nNumberOfSectors;
 };

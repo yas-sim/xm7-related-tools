@@ -1,0 +1,1 @@
+add_executable(dmp2mot dmp2mot.cpp cmotorolas.cpp)

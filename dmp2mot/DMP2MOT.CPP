@@ -1,13 +1,14 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <tchar.h>
+#include <locale>
 
 #define VERSION	"0.1"
 
 #include "CMotorolaS.h"
 
-// �������P�U�i�����ǂ������ׂ�
+// 文字が１６進数かどうか調べる
 bool ishex( char ch ) {
 	switch(toupper(ch)) {
 	case '0':
@@ -34,44 +35,45 @@ bool ishex( char ch ) {
 
 #define MAX_VAL		(128)
 
-long g_val[MAX_VAL];			// �_���v�̍s�𕪉����āA���l�ɒ������l�̔z��(val[0]�̓A�h���X)
-int g_nov;						// g_val�̗v�f�̐�
+long g_val[MAX_VAL];			// ダンプの行を分解して、数値に直した値の配列(val[0]はアドレス)
+int g_nov;						// g_valの要素の数
 
-// �P�U�i������𐔒l�ɕϊ�
+// １６進文字列を数値に変換
 long hex2val( char *buff ) {
 	char ch;
 	long val = 0l;
 	while(*buff) {
 		ch = toupper(*buff++);
-		if(ch<=' ') continue;							// ����R�[�h \r,\n�Ȃǂ͖�������
-		if(ishex(ch)==false) return -1;					// 16�i�����ȊO���܂܂�Ă����̂�NG
-		val = val*0x10 + ((ch<='9')?ch-'0':ch-'A'+10);	// 16�i�����𐔒l�ɕϊ�
+		if(ch<=' ') continue;							// 制御コード \r,\nなどは無視する
+		if(ishex(ch)==false) return -1;					// 16進文字以外が含まれていたのでNG
+		val = val*0x10 + ((ch<='9')?ch-'0':ch-'A'+10);	// 16進文字を数値に変換
 	}
 	return val;
 }
 
-// �^����ꂽ��������g�[�N���ɕ���������A���l�ɕϊ����Ĕz��(g_val)�Ɋi�[����
+// 与えられた文字列をトークンに分解した後、数値に変換して配列(g_val)に格納する
 bool split( char *string ) {
 	char tmpbuff[256];
 	char *ptr;
 	g_nov = 0;
 	strncpy(tmpbuff, string, 255);
-	ptr = strtok(tmpbuff, " :=\t");			// �ŏ��̃g�[�N����؂�o��
+	ptr = strtok(tmpbuff, " :=\t");			// 最初のトークンを切り出す
 	while(ptr!=NULL) {
-		if(g_nov>=MAX_VAL) break;			// ���l�z��̗v�f���𒴂���Ƃ��͏I������
-		g_val[g_nov++] = hex2val(ptr);		// ���l�ɕϊ�
-		ptr = strtok(NULL, " \t");			// ��ڈȍ~�̃g�[�N����؂�o��
+		if(g_nov>=MAX_VAL) break;			// 数値配列の要素数を超えるときは終了する
+		g_val[g_nov++] = hex2val(ptr);		// 数値に変換
+		ptr = strtok(NULL, " \t");			// 二つ目以降のトークンを切り出す
 	}
 	return true;
 }
 
-// g_val�̍ŏ����A�h���X�A�Ō�̒l���`�F�b�N�T���Ɖ��肵�ă`�F�b�N�T�����v�Z
+// g_valの最初をアドレス、最後の値をチェックサムと仮定してチェックサムを計算
 bool check( void ) {
 	int sum = 0;
-	for(int i=1; i<g_nov-1; i++) {
+	int i;
+	for(i=1; i<g_nov-1; i++) {
 		sum += g_val[i];
 	}
-	if((sum & 0x00ff)==g_val[i]) return true;	// �`�F�b�N�T���������Ă��邩?
+	if((sum & 0x00ff)==g_val[i]) return true;	// チェックサムがあっているか?
 	return false;
 }
 
@@ -88,14 +90,14 @@ void usage( void ) {
 	puts("        Show source string after conversion");
 }
 
-// �ϊ��e�[�u���\����
+// 変換テーブル構造体
 struct ctbl {
 	char	ch;
 	char	str[128];
 	struct ctbl *next;
 };
 
-// �ϊ��e�[�u�����X�g�R���g���[���N���X
+// 変換テーブルリストコントロールクラス
 class CConvertTable {
 	ctbl	*m_root;
 public:
@@ -111,7 +113,7 @@ public:
 			ptr = nptr;
 		}
 	}
-	// �Ō�̃e�[�u������������
+	// 最後のテーブルを検索する
 	ctbl *GetLast( void ) {
 		ctbl *ptr;
 		ptr = m_root;
@@ -132,7 +134,7 @@ public:
 		ptr->next->str[0] = '\0';
 		return ptr->next;
 	}
-	// �w��̔ԍ��̃e�[�u����Ԃ�
+	// 指定の番号のテーブルを返す
 	ctbl *GetTbl( int n ) {
 		if(n<0) return NULL;
 		ctbl *ptr;
@@ -147,7 +149,7 @@ public:
 
 CConvertTable cnvtbl;
 
-// �����ϊ��e�[�u���̓ǂݍ��݁B'cnvtbl.txt'�Ƃ����t�@�C������ǂݍ���
+// 文字変換テーブルの読み込み。'cnvtbl.txt'というファイルから読み込む
 void ReadConvertTable( void ) {
 	FILE *fp;
 	ctbl *ptr;
@@ -156,69 +158,69 @@ void ReadConvertTable( void ) {
 	while(!feof(fp)) {
 		fgets(buff, 127, fp);
 		ptr = cnvtbl.AddTbl();
-		ptr->ch = buff[0];						// �ϊ��������R�s�[
-		_tcsncpy(ptr->str, buff+2, 127);		// �ϊ��Ώە�������R�s�[
+		ptr->ch = buff[0];						// 変換文字をコピー
+		_tcsncpy(ptr->str, buff+2, 127);		// 変換対象文字列をコピー
 		for(char *tmp=ptr->str; *tmp; tmp++) 
-			if((unsigned)*tmp<0x20) *tmp='\0';	// �ϊ��Ώە����G�񂩂琧��R�[�h����������
+			if((unsigned)*tmp<0x20) *tmp='\0';	// 変換対象文字絵列から制御コードを消し去る
 	}
 	fclose(fp);
 }
 
-// OCR�ɂ������_���v�Ɋ܂܂ꂻ���Ȍ�ϊ�����������
+// OCRにかけたダンプに含まれそうな誤変換を除去する
 void ConvertString( char *string ) {
 	ctbl *tblptr;
 	char tmp_r[512];
 	int n = 0;
 	while((tblptr=cnvtbl.GetTbl(n++))!=NULL) {
 		while(1) {
-			int len = _tcslen(string);					// �����񒷂��擾
-			int ptr = _tcscspn(string, tblptr->str);	// �����񒆂́A�ϊ��Ώە����ʒu������
+			int len = _tcslen(string);					// 文字列長を取得
+			int ptr = _tcscspn(string, tblptr->str);	// 文字列中の、変換対象文字位置を検索
 			if(ptr>=len) break;
-			// ���������ʒu���E���݂̂��R�s�[
+			// 見つかった位置より右側のみをコピー
 			_tcscpy(tmp_r, string+ptr+1);
-			string[ptr] = tblptr->ch;			// �Ώە�����u������
-			_tcscpy(string+ptr+1, tmp_r);		// �Ƃ��Ă������Ώە������E����A��
+			string[ptr] = tblptr->ch;			// 対象文字を置き換え
+			_tcscpy(string+ptr+1, tmp_r);		// とっておいた対象文字より右側を連結
 		}
 	}
-	// �S���啶���ɕϊ����Ă���
+	// 全部大文字に変換しておく
 	strupr(string);
 
-	// �_���v���X�g����x�g�[�N���ɐ؂藣���A�ēx��������
-	// �f�[�^����2���ȏ�ɂȂ��Ă���ꍇ�A����𕪗�����(02AF��02 AF)
-	char tmpbuff[256];					// strtok���g�p����̂ŁA�������񂪔j�󂳂�Ȃ��悤�ɂ���o�b�t�@
-	char synth[256];					// �č�������o�b�t�@
+	// ダンプリストを一度トークンに切り離し、再度合成する
+	// データ部が2桁以上になっている場合、それを分離する(02AF→02 AF)
+	char tmpbuff[256];					// strtokを使用するので、元文字列が破壊されないようにするバッファ
+	char synth[256];					// 再合成するバッファ
 	char space[2] = " ";
-	char *ptr;							// strtok�p�A�g�[�N���|�C���^
-	int count = 0;						// �g�[�N���̐��𐔂���
-	synth[0] = '\0';					// �č����o�b�t�@����ɂ���
-	strncpy(tmpbuff, string, 255);		// �e���|�����o�b�t�@�Ɍ���������R�s�[����
-	ptr = strtok(tmpbuff, " \t");		// �ŏ��̃g�[�N����؂�o��
+	char *ptr;							// strtok用、トークンポインタ
+	int count = 0;						// トークンの数を数える
+	synth[0] = '\0';					// 再合成バッファを空にする
+	strncpy(tmpbuff, string, 255);		// テンポラリバッファに元文字列をコピーする
+	ptr = strtok(tmpbuff, " \t");		// 最初のトークンを切り出す
 	while(ptr!=NULL) {
 		if(count==0) {
-			strcpy(synth, ptr);			// �ŏ��̃g�[�N���̓A�h���X�Ȃ̂ŁA�������R�s�[
+			strcpy(synth, ptr);			// 最初のトークンはアドレスなので、無条件コピー
 		} else {
-			// �Q�߈ȍ~�̃g�[�N����2���ȏ゠��ꍇ�͐؂藣��
-			char *dstptr = synth + strlen(synth);	// �č����o�b�t�@�̏I�����擾
-			int chn=0;						// �����J�E���^
+			// ２つめ以降のトークンは2桁以上ある場合は切り離す
+			char *dstptr = synth + strlen(synth);	// 再合成バッファの終わりを取得
+			int chn=0;						// 桁数カウンタ
 			while(*ptr) {
-				if(chn<2) {					// 2���ȉ��Ȃ炻�̂܂�1�����R�s�[
+				if(chn<2) {					// 2桁以下ならそのまま1文字コピー
 					*dstptr++ = *ptr++;
 					chn++;
 				} else {
-					*dstptr++ = ' ';		// 3���ڂɂȂ�����A�X�y�[�X���͂���ŃR�s�[
+					*dstptr++ = ' ';		// 3桁目になったら、スペースをはさんでコピー
 					*dstptr++ = *ptr++;
 					chn=0;
 				}
 			}
-			*dstptr = '\0';					// �č����o�b�t�@�̃^�[�~�l�[�^������
+			*dstptr = '\0';					// 再合成バッファのターミネータをつける
 		}
-		strcat(synth, space);				// �č����o�b�t�@�ɃX�y�[�X��ǉ�
-		count++;							// �g�[�N���J�E���^�𑝂₷
-		ptr = strtok(NULL, " :=\t");		// ��ڈȍ~�̃g�[�N����؂�o��
+		strcat(synth, space);				// 再合成バッファにスペースを追加
+		count++;							// トークンカウンタを増やす
+		ptr = strtok(NULL, " :=\t");		// 二つ目以降のトークンを切り出す
 	}
 	for(ptr=synth; *ptr; ptr++) 
-		if((unsigned)*ptr<0x20) *ptr='\0';			// �ϊ��Ώە����G�񂩂琧��R�[�h����������
-	strcpy(string, synth);							// �č����o�b�t�@�Ō���������㏑��
+		if((unsigned)*ptr<0x20) *ptr='\0';			// 変換対象文字絵列から制御コードを消し去る
+	strcpy(string, synth);							// 再合成バッファで元文字列を上書き
 }
 
 int main( int argc, char *argv[]) {
@@ -227,7 +229,7 @@ int main( int argc, char *argv[]) {
 	
 	char infile[256], outfile[256];
 	infile[0] = outfile[0] = '\0';
-	bool fSUM = false;					// �`�F�b�N�T�����`�F�b�N���邩�ǂ���
+	bool fSUM = false;					// チェックサムをチェックするかどうか
 	bool fVerbose = false;
 	for(int i=1; i<argc; i++) {
 		switch(argv[i][0]) {
@@ -236,24 +238,24 @@ int main( int argc, char *argv[]) {
 			switch(argv[i][1]) {
 			case 's':
 			case 'S':
-				fSUM = true;			// �`�F�b�N�T�����`�F�b�N����
+				fSUM = true;			// チェックサムをチェックする
 				break;
 			case 'v':
 			case 'V':
-				fVerbose = true;		// Verbose���[�h
+				fVerbose = true;		// Verboseモード
 				break;
 			default:
 				usage();
 				exit(1);
 			}
-			// �I�v�V�����w��q�Ŏn�܂�Ƃ�
+			// オプション指定子で始まるとき
 			break;
 		default:
-			// �I�v�V�����w��q�Ŏn�܂�Ȃ��Ƃ��͓��o�̓t�@�C����
+			// オプション指定子で始まらないときは入出力ファイル名
 			if(strlen(infile)==0) {
-				strncpy(infile, argv[i], 255);		// ���̓t�@�C����
+				strncpy(infile, argv[i], 255);		// 入力ファイル名
 			} else {
-				strncpy(outfile, argv[i], 255);		// �o�̓t�@�C����
+				strncpy(outfile, argv[i], 255);		// 出力ファイル名
 			}
 			break;
 		}
@@ -262,43 +264,43 @@ int main( int argc, char *argv[]) {
 	if(strlen(outfile)==0) strcpy(outfile, "test.mot");
 
 	FILE *fpi, *fpo;
-	// ���̓t�@�C���I�[�v��
+	// 入力ファイルオープン
 	if((fpi=fopen(infile, "rt"))==NULL) {
 		perror("Failed to open input file");
 		exit(1);
 	}
-	// �o�̓t�@�C���I�[�v��
+	// 出力ファイルオープン
 	if((fpo=fopen(outfile, "wt"))==NULL) {
 		fclose(fpi);
 		perror("Failed to open output file");
 		exit(1);
 	}
-	ReadConvertTable();		// �����ϊ��e�[�u��'convtbl.txt'��ǂݏo��
+	ReadConvertTable();		// 文字変換テーブル'convtbl.txt'を読み出す
 
 	char buff[512];
 	CMotorolaS mot;
 	while(!feof(fpi)) {
-		if(fgets(buff, 511, fpi)==NULL) break;	// 1�s�ǂݍ���
-		ConvertString(buff);					// �����␳
+		if(fgets(buff, 511, fpi)==NULL) break;	// 1行読み込み
+		ConvertString(buff);					// 文字補正
 		if(fVerbose) puts(buff);
-		split(buff);							// �s�𕪉����āA���l��ɕϊ�
-		if(g_val[0]!=-1) {						// �A�h���X���L�����H
-			if(fSUM==true) {					// �`�F�b�N�T�����胂�[�h���H
+		split(buff);							// 行を分解して、数値列に変換
+		if(g_val[0]!=-1) {						// アドレスが有効か？
+			if(fSUM==true) {					// チェックサムありモードか？
 				if(check()==false) {
 					fprintf(stderr, "Check sum error at $%04x\n", g_val[0]);
 					continue;
 				}
 			}
-			mot.InitSRecord(g_val[0]);			// �A�h���X�l��S���R�[�h��������
-			// �`�F�b�N�T��������ꍇ�A�Ō�̐��l�̓`�F�b�N�T���Ȃ̂�S���R�[�h�o�͂��Ȃ�
+			mot.InitSRecord(g_val[0]);			// アドレス値でSレコードを初期化
+			// チェックサムがある場合、最後の数値はチェックサムなのでSレコード出力しない
 			int maxv;
 			if(fSUM==true) maxv=g_nov-1; else maxv=g_nov;
 
-			for(i=1; i<maxv; i++) {
-				mot.AddData((unsigned char)g_val[i]);	// S���R�[�h�Ƀf�[�^��ǉ�
+			for(int i=1; i<maxv; i++) {
+				mot.AddData((unsigned char)g_val[i]);	// Sレコードにデータを追加
 			}
-			mot.GetSRecordBuff(buff);			// �ϊ�����S���R�[�h���擾
-			fputs(buff, fpo);					// �t�@�C���ɏo��
+			mot.GetSRecordBuff(buff);			// 変換したSレコードを取得
+			fputs(buff, fpo);					// ファイルに出力
 			fputs("\n", fpo);
 		}
 	}

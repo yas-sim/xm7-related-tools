@@ -1,4 +1,4 @@
-#ifndef _CFILESYS_H_
+ï»¿#ifndef _CFILESYS_H_
 #define _CFILESYS_H_
 
 #include "CFDImg.h"
@@ -19,25 +19,25 @@
 #define FM_RANDOM		(0xff)
 #define FM_EOF_CODE		(0x1a)
 
-#define FAT_LBA				(32)	// FAT‚ÌƒXƒ^[ƒgLBA”Ô†
-#define NUMBER_OF_FAT		(1)		// FAT‚Åg‚¤ƒZƒNƒ^”
-#define SECT_SIZE			(256)	// 1ƒZƒNƒ^‚ÌƒTƒCƒY
-#define MAX_CLUSTER			(151)	// ƒNƒ‰ƒXƒ^”Ô†‚ÌÅ‘å’l
+#define FAT_LBA				(32)	// FATã®ã‚¹ã‚¿ãƒ¼ãƒˆLBAç•ªå·
+#define NUMBER_OF_FAT		(1)		// FATã§ä½¿ã†ã‚»ã‚¯ã‚¿æ•°
+#define SECT_SIZE			(256)	// 1ã‚»ã‚¯ã‚¿ã®ã‚µã‚¤ã‚º
+#define MAX_CLUSTER			(151)	// ã‚¯ãƒ©ã‚¹ã‚¿ç•ªå·ã®æœ€å¤§å€¤
 #define SPC					(8)		// Sector/Cluster
-#define FAT_CLUSTER_OFFSET	(5)		// FAT‚Ì‰½ƒoƒCƒg–Ú‚©‚ç‚ª‘æ‚OƒNƒ‰ƒXƒ^‚É‘Î‰‚·‚é‚©
-#define DIR_LBA				(35)	// ƒfƒBƒŒƒNƒgƒŠƒGƒ“ƒgƒŠ‚ÌÅ‰‚ÌƒZƒNƒ^”Ô†(LBA)
-#define MAX_DIR				(231)	// ƒGƒ“ƒgƒŠ‚ÌÅ‘å”
+#define FAT_CLUSTER_OFFSET	(5)		// FATã®ä½•ãƒã‚¤ãƒˆç›®ã‹ã‚‰ãŒç¬¬ï¼ã‚¯ãƒ©ã‚¹ã‚¿ã«å¯¾å¿œã™ã‚‹ã‹
+#define DIR_LBA				(35)	// ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚¨ãƒ³ãƒˆãƒªã®æœ€åˆã®ã‚»ã‚¯ã‚¿ç•ªå·(LBA)
+#define MAX_DIR				(231)	// ã‚¨ãƒ³ãƒˆãƒªã®æœ€å¤§æ•°
 #define BPE					(32)	// Byte/Entry
 #define SPT					(16)	// Sector/Track(Cylinder)
 #define HPT					(2)		// Head/Track(Cylinder)
-#define EPS					(SECT_SIZE/BPE)	// ‚PƒZƒNƒ^“à‚É‚¨‚³‚Ü‚éƒfƒBƒŒƒNƒgƒŠƒGƒ“ƒgƒŠ”
-#define CLUSTER_TOP_SECTOR	(64)	// ‘æ‚OƒNƒ‰ƒXƒ^‚Ìæ“ªƒZƒNƒ^”Ô†(LBA)
+#define EPS					(SECT_SIZE/BPE)	// ï¼‘ã‚»ã‚¯ã‚¿å†…ã«ãŠã•ã¾ã‚‹ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚¨ãƒ³ãƒˆãƒªæ•°
+#define CLUSTER_TOP_SECTOR	(64)	// ç¬¬ï¼ã‚¯ãƒ©ã‚¹ã‚¿ã®å…ˆé ­ã‚»ã‚¯ã‚¿ç•ªå·(LBA)
 
-typedef int FMERR;			// Error code‚ÌŒ^
+typedef int FMERR;			// Error codeã®å‹
 
-class FDHANDLE {
+class FMFSLIB_API FDHANDLE {
 protected:
-	int nRefCount;		// QÆ”
+	int nRefCount;		// å‚ç…§æ•°
 public:
 	CFloppy *pFD;
 public:
@@ -52,7 +52,7 @@ public:
 	int GetRefCount( void );
 };
 
-class FLHANDLE {
+class FMFSLIB_API FLHANDLE {
 public:
 	FDHANDLE *phFD;
 	char pFilename[9];
@@ -62,10 +62,10 @@ public:
 	int fRandom;
 	int nFileType;
 	bool fEOF;
-	char pClusterBuff[SECT_SIZE*SPC];	// ƒNƒ‰ƒXƒ^ƒoƒbƒtƒ@
-	int nClusterNo;						// Œ»İ‚ÌƒNƒ‰ƒXƒ^ƒoƒbƒtƒ@‚ÌƒNƒ‰ƒXƒ^”Ô†
-	int nClusterPtr;					// ƒNƒ‰ƒXƒ^“à‚ÌR/Wƒ|ƒCƒ“ƒ^
-	int nClusterDataSize;				// “Ç‚İ‚ñ‚¾ƒNƒ‰ƒXƒ^‚ÌƒTƒCƒY(ƒNƒ‰ƒXƒ^‚ğg‚¢Ø‚Á‚Ä‚È‚¢ê‡‚É‚ÍƒNƒ‰ƒXƒ^ƒTƒCƒY‚æ‚è¬‚³‚­‚È‚é)
+	char pClusterBuff[SECT_SIZE*SPC];	// ã‚¯ãƒ©ã‚¹ã‚¿ãƒãƒƒãƒ•ã‚¡
+	int nClusterNo;						// ç¾åœ¨ã®ã‚¯ãƒ©ã‚¹ã‚¿ãƒãƒƒãƒ•ã‚¡ã®ã‚¯ãƒ©ã‚¹ã‚¿ç•ªå·
+	int nClusterPtr;					// ã‚¯ãƒ©ã‚¹ã‚¿å†…ã®R/Wãƒã‚¤ãƒ³ã‚¿
+	int nClusterDataSize;				// èª­ã¿è¾¼ã‚“ã ã‚¯ãƒ©ã‚¹ã‚¿ã®ã‚µã‚¤ã‚º(ã‚¯ãƒ©ã‚¹ã‚¿ã‚’ä½¿ã„åˆ‡ã£ã¦ãªã„å ´åˆã«ã¯ã‚¯ãƒ©ã‚¹ã‚¿ã‚µã‚¤ã‚ºã‚ˆã‚Šå°ã•ããªã‚‹)
 public:
 	FLHANDLE() {
 		phFD = NULL;
@@ -84,10 +84,10 @@ public:
 	}
 };
 
-class CEntry {
+class FMFSLIB_API CEntry {
 public:
 	char	pFilename[9];
-    unsigned char	nFileType;			// 00:BASICƒ\[ƒX  01:BASICƒf[ƒ^  02:‹@ŠBŒêƒtƒ@ƒCƒ‹
+    unsigned char	nFileType;			// 00:BASICã‚½ãƒ¼ã‚¹  01:BASICãƒ‡ãƒ¼ã‚¿  02:æ©Ÿæ¢°èªãƒ•ã‚¡ã‚¤ãƒ«
     unsigned char	fAscii;				// 00:BINARY    FF:ASCII
     unsigned char	fRandomAccess;
     unsigned char	nTopCluster;
@@ -98,7 +98,7 @@ public:
 class FMFSLIB_API CFilesys {
 protected:
 	FMERR	m_Error;
-	int		m_nEntryCount;		// FMGetFirstFilename‚ÆFMGetNextFilename‚Åg—p
+	int		m_nEntryCount;		// FMGetFirstFilenameã¨FMGetNextFilenameã§ä½¿ç”¨
 protected:
 	inline int LBA2C( int LBA );
 	inline int LBA2H( int LBA );

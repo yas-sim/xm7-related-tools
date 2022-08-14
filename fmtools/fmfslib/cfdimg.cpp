@@ -1,20 +1,21 @@
-#include "stdafx.h"
+ï»¿#define FMFSLIB_EXPORTS
+
 #include "CFDIMG.H"
 
 #if VERBOSE==1
 #include <stdio.h>
 #endif
 
-// 000318 WriteSectorŠÖ”‚ÅfWriteProtectƒtƒ‰ƒO‚ğŠm”F‚·‚é‚æ‚¤‚É•ÏX
+// 000318 WriteSectoré–¢æ•°ã§fWriteProtectãƒ•ãƒ©ã‚°ã‚’ç¢ºèªã™ã‚‹ã‚ˆã†ã«å¤‰æ›´
 
-// w’è‚Ìƒgƒ‰ƒbƒN‚Ö‚ÌƒIƒtƒZƒbƒg‚ğ‹‚ß‚é
+// æŒ‡å®šã®ãƒˆãƒ©ãƒƒã‚¯ã¸ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’æ±‚ã‚ã‚‹
 long CFDImg::GetTrackOffset( int C, int H ) {
 	int TrackNo;
 	TrackNo = C*2+H;
 	return m_nTrackOffset[TrackNo];
 }
 
-// w’è‚ÌCHR‚ğ‚ÂƒZƒNƒ^‚Ö‚ÌƒIƒtƒZƒbƒg‚ğ‹‚ß‚é
+// æŒ‡å®šã®CHRã‚’æŒã¤ã‚»ã‚¯ã‚¿ã¸ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’æ±‚ã‚ã‚‹
 long CFDImg::GetSectorOffset( int C, int H, int R ) {
 	long Offset = GetTrackOffset(C, H);
 	if(Offset==0) return 0L;
@@ -28,8 +29,8 @@ long CFDImg::GetSectorOffset( int C, int H, int R ) {
 	return Offset;
 }
 
-// w’è‚ÌƒIƒtƒZƒbƒgˆÊ’u‚©‚çƒZƒNƒ^‚ÌIDî•ñ‚ğ“Ç‚İæ‚é
-// ƒZƒNƒ^ƒf[ƒ^‚Ì“Ç‚İo‚µ‚Ís‚í‚È‚¢
+// æŒ‡å®šã®ã‚ªãƒ•ã‚»ãƒƒãƒˆä½ç½®ã‹ã‚‰ã‚»ã‚¯ã‚¿ã®IDæƒ…å ±ã‚’èª­ã¿å–ã‚‹
+// ã‚»ã‚¯ã‚¿ãƒ‡ãƒ¼ã‚¿ã®èª­ã¿å‡ºã—ã¯è¡Œã‚ãªã„
 bool CFDImg::ReadSectorID( long Offset, CSector *sect ) {
 	if(m_hFDImage==INVALID_HANDLE_VALUE) return 0;
 	DWORD NOR;
@@ -49,9 +50,9 @@ bool CFDImg::ReadSectorID( long Offset, CSector *sect ) {
 	return true;
 }
 
-// w’è‚ÌCHR‚ÌƒZƒNƒ^‚ğ“Ç‚İo‚·
-// sect‚Ìm_pSectorData‚ªw‚·—Ìˆæ‚Éƒf[ƒ^‚ğ‘‚«‚ŞB
-// m_pSectorData‚É‚Í—Ìˆæ‚ğŠm•Û‚µ‚Ä‚¨‚­•K—v‚ ‚è
+// æŒ‡å®šã®CHRã®ã‚»ã‚¯ã‚¿ã‚’èª­ã¿å‡ºã™
+// sectã®m_pSectorDataãŒæŒ‡ã™é ˜åŸŸã«ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãè¾¼ã‚€ã€‚
+// m_pSectorDataã«ã¯é ˜åŸŸã‚’ç¢ºä¿ã—ã¦ãŠãå¿…è¦ã‚ã‚Š
 FDC_STATUS	CFDImg::ReadSector( int C, int H, int R, CSector *sect ) {
 	if(m_hFDImage==INVALID_HANDLE_VALUE) return 0;
 	long Offset;
@@ -66,22 +67,22 @@ FDC_STATUS	CFDImg::ReadSector( int C, int H, int R, CSector *sect ) {
 	return 0;
 }
 
-// w’è‚ÌCHR‚ÌƒZƒNƒ^‚ÉAsect.m_pSectorData‚ªw‚·—Ìˆæ‚Ìƒf[ƒ^‚ğ‘‚«‚Ş
-// w’è‚ÌƒZƒNƒ^‚ª‚È‚¢ê‡‚Í‘‚«‚İ‚ğs‚í‚È‚¢(V‹K‚ÉƒZƒNƒ^‚ğì‚Á‚½‚è‚Í‚µ‚È‚¢)
-// sect‚Ì‚Á‚Ä‚¢‚éCHRN‚Íg—p‚µ‚È‚¢(ˆø”‚ÌCHR‚Ì‚İ—LŒø)
+// æŒ‡å®šã®CHRã®ã‚»ã‚¯ã‚¿ã«ã€sect.m_pSectorDataãŒæŒ‡ã™é ˜åŸŸã®ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãè¾¼ã‚€
+// æŒ‡å®šã®ã‚»ã‚¯ã‚¿ãŒãªã„å ´åˆã¯æ›¸ãè¾¼ã¿ã‚’è¡Œã‚ãªã„(æ–°è¦ã«ã‚»ã‚¯ã‚¿ã‚’ä½œã£ãŸã‚Šã¯ã—ãªã„)
+// sectã®æŒã£ã¦ã„ã‚‹CHRNã¯ä½¿ç”¨ã—ãªã„(å¼•æ•°ã®CHRã®ã¿æœ‰åŠ¹)
 FDC_STATUS	CFDImg::WriteSector( int C, int H, int R, CSector *sect ) {
 	if(m_hFDImage==INVALID_HANDLE_VALUE) return 0;
 	long Offset;
 	DWORD NOW;
 	Offset = GetSectorOffset(C, H, R);
 	if(Offset==0) return 1;		// Sector not found
-	ReadSectorID(Offset, sect);	// SectorID‚ğ“Ç‚İ”ò‚Î‚µAƒf[ƒ^•”‚Ì“ª‚¾‚µ‚ğ‚·‚é
+	ReadSectorID(Offset, sect);	// SectorIDã‚’èª­ã¿é£›ã°ã—ã€ãƒ‡ãƒ¼ã‚¿éƒ¨ã®é ­ã ã—ã‚’ã™ã‚‹
 	if(m_fWriteProtect==0x10) return FDC_WRITE_PROTECTED;	// Write Protected!
 	if(WriteFile(m_hFDImage, (LPCVOID)sect->m_pSectorData, sect->m_nSectorSize, &NOW, NULL) == 0) { SHOW_ERROR; }
 	return 0;
 }
 
-// FD Imageƒtƒ@ƒCƒ‹‚ğƒI[ƒvƒ“‚·‚éB¬Œ÷‚µ‚½ê‡A©“®“I‚Éƒwƒbƒ_î•ñ‚à“Ç‚İ‚Ş
+// FD Imageãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚ªãƒ¼ãƒ—ãƒ³ã™ã‚‹ã€‚æˆåŠŸã—ãŸå ´åˆã€è‡ªå‹•çš„ã«ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚‚èª­ã¿è¾¼ã‚€
 bool CFDImg::OpenFDImage( unsigned char *pFileName )
 {
 	m_hFDImage = CreateFile( (LPCTSTR)pFileName, GENERIC_READ | GENERIC_WRITE, 0,
@@ -94,7 +95,7 @@ bool CFDImg::OpenFDImage( unsigned char *pFileName )
 	return true;
 }
 
-// FD Imageƒtƒ@ƒCƒ‹‚ğƒNƒ[ƒY‚·‚é
+// FD Imageãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¯ãƒ­ãƒ¼ã‚ºã™ã‚‹
 bool CFDImg::CloseFDImage( void ) {
 	if(m_hFDImage!=INVALID_HANDLE_VALUE) {
 		CloseHandle(m_hFDImage);
@@ -103,7 +104,7 @@ bool CFDImg::CloseFDImage( void ) {
 	return true;
 }
 
-// FD Image‚Ìƒwƒbƒ_î•ñ‚ğ“Ç‚İo‚·
+// FD Imageã®ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’èª­ã¿å‡ºã™
 bool CFDImg::ReadHeader( void ) {
 	if(m_hFDImage==INVALID_HANDLE_VALUE) return false;
 	DWORD NOR;		// Number Of Read
@@ -119,8 +120,8 @@ bool CFDImg::ReadHeader( void ) {
 	return true;
 }
 
-// ‚e‚cƒCƒ[ƒWƒf[ƒ^‚Ìƒwƒbƒ_î•ñ‚ğƒRƒ“ƒ\[ƒ‹‚É•\¦‚·‚é
-// fShowTrackOfset‚Étrue‚ğw’è‚·‚é‚ÆA‘Sƒgƒ‰ƒbƒN‚ÌƒIƒtƒZƒbƒg’l‚à•\¦‚·‚é
+// ï¼¦ï¼¤ã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ‡ãƒ¼ã‚¿ã®ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ã«è¡¨ç¤ºã™ã‚‹
+// fShowTrackOfsetã«trueã‚’æŒ‡å®šã™ã‚‹ã¨ã€å…¨ãƒˆãƒ©ãƒƒã‚¯ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆå€¤ã‚‚è¡¨ç¤ºã™ã‚‹
 void CFDImg::ShowFDInfo( bool fShowTrackOffset ) {
 #if VERBOSE==1
 	printf("Disk Name :'%s'\n", m_sDiskName);

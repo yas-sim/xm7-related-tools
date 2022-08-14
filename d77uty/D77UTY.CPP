@@ -1,6 +1,7 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale>
 
 #define VERSION	"0.1a"
 
@@ -24,13 +25,13 @@ typedef struct {
 	long	TrackOffset[164];
 } DISKIMAGE;
 
-// w’è‚Ì”Ô†‚ÌƒfƒBƒXƒNƒCƒ[ƒW‚Ö‚ÌƒIƒtƒZƒbƒg‚ğ•Ô‚·
-// ƒfƒBƒXƒN”Ô†‚Íæ“ª‚ÌƒfƒBƒXƒN‚ª1
-// w’è‚Ì”Ô†‚æ‚èƒfƒBƒXƒN”‚ª­‚È‚©‚Á‚½ê‡-1‚ğ•Ô‚·
+// æŒ‡å®šã®ç•ªå·ã®ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ã¸ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’è¿”ã™
+// ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã¯å…ˆé ­ã®ãƒ‡ã‚£ã‚¹ã‚¯ãŒ1
+// æŒ‡å®šã®ç•ªå·ã‚ˆã‚Šãƒ‡ã‚£ã‚¹ã‚¯æ•°ãŒå°‘ãªã‹ã£ãŸå ´åˆ-1ã‚’è¿”ã™
 long GetDiskOffset( FILE *fp, int n ) {
 	long original_pos = ftell(fp);
 	fseek(fp, -1, SEEK_END);
-	long fileend = ftell(fp);		// ƒfƒBƒXƒNƒCƒ[ƒW‘S‘Ì‚Ì‘å‚«‚³‚ğæ“¾
+	long fileend = ftell(fp);		// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸å…¨ä½“ã®å¤§ãã•ã‚’å–å¾—
 	DISKIMAGE img;
 	long pos = 0L;
 	for(int i=1; i<n; i++) {
@@ -102,7 +103,7 @@ void Add( char *filename1, FILE *fp, char *filename2, int order ) {
 	for(int disk=1; disk<=nod; disk++) {
 		ReadHeader(fp, disk, &dimg);
 		fseek(fp, GetDiskOffset(fp, disk), SEEK_SET);
-		if(disk==order) {			// ƒfƒBƒXƒN”Ô†‚Æorder‚ªˆê’v‚µ‚½‚çA’Ç‰Á‚·‚éƒtƒ@ƒCƒ‹‚ğ‘‚«‚Ş
+		if(disk==order) {			// ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã¨orderãŒä¸€è‡´ã—ãŸã‚‰ã€è¿½åŠ ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ›¸ãè¾¼ã‚€
 			while(1) {
 				int ch = fgetc(fpi);
 				if(ch<0 || feof(fpi)) break;
@@ -113,7 +114,7 @@ void Add( char *filename1, FILE *fp, char *filename2, int order ) {
 			fputc(fgetc(fp), fptmp);
 		}
 	}
-	if(order==0) {					// order‚ª0‚Ìê‡‚ÍÅŒã‚É’Ç‰Á‚·‚é
+	if(order==0) {					// orderãŒ0ã®å ´åˆã¯æœ€å¾Œã«è¿½åŠ ã™ã‚‹
 		while(1) {
 			int ch = fgetc(fpi);
 			if(ch<0 || feof(fpi)) break;
@@ -121,12 +122,12 @@ void Add( char *filename1, FILE *fp, char *filename2, int order ) {
 		}
 	}
 	fcloseall();
-	// d77uty.tmp‚Ìƒtƒ@ƒCƒ‹–¼‚ğŒ³‚Ìƒtƒ@ƒCƒ‹–¼‚É•ÏX‚·‚é
+	// d77uty.tmpã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å…ƒã®ãƒ•ã‚¡ã‚¤ãƒ«åã«å¤‰æ›´ã™ã‚‹
 	remove(filename1);
 	rename("D77UTY.TMP", filename1);
 }
 
-// w’è‚ÌƒfƒBƒXƒN”Ô†‚ÌƒCƒ[ƒW‚ğ”²‚«æ‚é
+// æŒ‡å®šã®ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã®ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’æŠœãå–ã‚‹
 void Extract( char *filename1, FILE *fp, char *filename2, int order ) {
 	FILE *fpo = fopen(filename2, "wb");
 	if(fpo==NULL) {
@@ -143,23 +144,23 @@ void Extract( char *filename1, FILE *fp, char *filename2, int order ) {
 	for(int disk=1; disk<=nod; disk++) {
 		ReadHeader(fp, disk, &dimg);
 		fseek(fp, GetDiskOffset(fp, disk), SEEK_SET);
-		if(disk==order) {			// ƒfƒBƒXƒN”Ô†‚Æorder‚ªˆê’v‚µ‚½‚çAíœ‚·‚éƒtƒ@ƒCƒ‹‚ğ‘‚«o‚·
+		if(disk==order) {			// ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã¨orderãŒä¸€è‡´ã—ãŸã‚‰ã€å‰Šé™¤ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ›¸ãå‡ºã™
 			for(int j=0; j<dimg.DiskSize; j++) {
 				fputc(fgetc(fp), fpo);
 			}
-		} else {					// ˆá‚¤ê‡‚Íƒeƒ“ƒ|ƒ‰ƒŠƒtƒ@ƒCƒ‹‚É‘‚«o‚·
+		} else {					// é•ã†å ´åˆã¯ãƒ†ãƒ³ãƒãƒ©ãƒªãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãå‡ºã™
 			for(int j=0; j<dimg.DiskSize; j++) {
 				fputc(fgetc(fp), fptmp);
 			}
 		}
 	}
 	fcloseall();
-	// d77uty.tmp‚Ìƒtƒ@ƒCƒ‹–¼‚ğŒ³‚Ìƒtƒ@ƒCƒ‹–¼‚É•ÏX‚·‚é
+	// d77uty.tmpã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å…ƒã®ãƒ•ã‚¡ã‚¤ãƒ«åã«å¤‰æ›´ã™ã‚‹
 	remove(filename1);
 	rename("D77UTY.TMP", filename1);
 }
 
-// w’è‚ÌƒfƒBƒXƒN”Ô†‚ÌƒCƒ[ƒW‚ğƒRƒs[‚·‚é(Œ³‚Ìƒtƒ@ƒCƒ‹‚É•Ï‰»ƒiƒV)
+// æŒ‡å®šã®ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã®ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’ã‚³ãƒ”ãƒ¼ã™ã‚‹(å…ƒã®ãƒ•ã‚¡ã‚¤ãƒ«ã«å¤‰åŒ–ãƒŠã‚·)
 void Copy( FILE *fp, char *filename2, int pos ) {
 	FILE *fpo = fopen(filename2, "wb");
 	if(fpo==NULL) {
@@ -171,7 +172,7 @@ void Copy( FILE *fp, char *filename2, int pos ) {
 	for(int disk=1; disk<=nod; disk++) {
 		ReadHeader(fp, disk, &dimg);
 		fseek(fp, GetDiskOffset(fp, disk), SEEK_SET);
-		if(disk==pos) {			// ƒfƒBƒXƒN”Ô†‚Æpos‚ªˆê’v‚µ‚½‚çAƒRƒs[‚·‚éƒtƒ@ƒCƒ‹‚É‘‚«o‚·
+		if(disk==pos) {			// ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã¨posãŒä¸€è‡´ã—ãŸã‚‰ã€ã‚³ãƒ”ãƒ¼ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãå‡ºã™
 			for(int j=0; j<dimg.DiskSize; j++) {
 				fputc(fgetc(fp), fpo);
 			}
@@ -180,7 +181,7 @@ void Copy( FILE *fp, char *filename2, int pos ) {
 	fcloseall();
 }
 
-// ƒvƒƒeƒNƒgƒtƒ‰ƒO‚ÌON/OFF‚ğ•ÏX‚·‚é
+// ãƒ—ãƒ­ãƒ†ã‚¯ãƒˆãƒ•ãƒ©ã‚°ã®ON/OFFã‚’å¤‰æ›´ã™ã‚‹
 void ProtectFlag( FILE *fp, bool flag, char *pos ) {
 	int nod = GetNumberOfDisks(fp);
 	int p;
@@ -192,14 +193,14 @@ void ProtectFlag( FILE *fp, bool flag, char *pos ) {
 	}
 	DISKIMAGE dimg;
 	for(int i=1; i<=nod; i++) {
-		if(p!=-1 && i!=p) continue;		// ALLw’è‚Ì‚Æ‚«ˆÈŠO‚ÍAƒfƒBƒXƒN”Ô†‚Æˆê’v‚µ‚È‚¢ê‡‚Íˆ—‚ğ”ò‚Î‚·
+		if(p!=-1 && i!=p) continue;		// ALLæŒ‡å®šã®ã¨ãä»¥å¤–ã¯ã€ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã¨ä¸€è‡´ã—ãªã„å ´åˆã¯å‡¦ç†ã‚’é£›ã°ã™
 		ReadHeader(fp, i, &dimg);
 		dimg.WriteProtect = (flag==false?0:0x10);
 		WriteHeader(fp, i, &dimg);
 	}
 }
 
-// ƒfƒBƒXƒNƒCƒ[ƒW‚Ì–¼‘O‚ğ•ÏX‚·‚é
+// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ã®åå‰ã‚’å¤‰æ›´ã™ã‚‹
 void NameChange( FILE *fp, char *name, int order ) {
 	int nod = GetNumberOfDisks(fp);
 	if(order<1 || order>nod) return;
@@ -210,7 +211,7 @@ void NameChange( FILE *fp, char *name, int order ) {
 	WriteHeader(fp, order, &dimg);
 }
 
-// w’è‚Ì‡”Ô‚ÉƒfƒBƒXƒNƒCƒ[ƒW‚ğ•À‚×‘Ö‚¦‚é
+// æŒ‡å®šã®é †ç•ªã«ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’ä¸¦ã¹æ›¿ãˆã‚‹
 void OrderChange( char *filename1, FILE *fp, char *order ) {
 	FILE *fptmp = fopen("D77UTY.TMP", "wb");
 	if(fptmp==NULL) {
@@ -220,8 +221,8 @@ void OrderChange( char *filename1, FILE *fp, char *order ) {
 	int nod = GetNumberOfDisks(fp);
 	DISKIMAGE dimg;
 	for(int i=0; i<(int)strlen(order); i++) {
-		int ord = order[i] & 0x0f;		// ”Ô†‚Ì•¶š‚ğ”’l‚É•ÏŠ·
-		if(ord<1 || ord>nod) continue;	// ‚¨‚©‚µ‚È”’l‚Ìê‡–³‹
+		int ord = order[i] & 0x0f;		// ç•ªå·ã®æ–‡å­—ã‚’æ•°å€¤ã«å¤‰æ›
+		if(ord<1 || ord>nod) continue;	// ãŠã‹ã—ãªæ•°å€¤ã®å ´åˆç„¡è¦–
 		ReadHeader(fp, ord, &dimg);
 		fseek(fp, GetDiskOffset(fp, ord), SEEK_SET);
 		for(int j=0; j<dimg.DiskSize; j++) {
@@ -229,12 +230,12 @@ void OrderChange( char *filename1, FILE *fp, char *order ) {
 		}
 	}
 	fcloseall();
-	// d77uty.tmp‚Ìƒtƒ@ƒCƒ‹–¼‚ğŒ³‚Ìƒtƒ@ƒCƒ‹–¼‚É•ÏX‚·‚é
+	// d77uty.tmpã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å…ƒã®ãƒ•ã‚¡ã‚¤ãƒ«åã«å¤‰æ›´ã™ã‚‹
 	remove(filename1);
 	rename("D77UTY.TMP", filename1);
 }
 
-// w’è‚Ì”Ô†‚ÌƒCƒ[ƒW‚ğÁ‹‚·‚é
+// æŒ‡å®šã®ç•ªå·ã®ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’æ¶ˆå»ã™ã‚‹
 void Delete( char *filename1, FILE *fp, char *pos ) {
 	FILE *fptmp = fopen("D77UTY.TMP", "wb");
 	if(fptmp==NULL) {
@@ -245,40 +246,40 @@ void Delete( char *filename1, FILE *fp, char *pos ) {
 	int p = atoi(pos);
 	DISKIMAGE dimg;
 	for(int i=1; i<=nod; i++) {
-		if(p==i) continue;				// w’è‚ÌƒfƒBƒXƒN”Ô†‚Ì‚Æ‚«‚ÍƒXƒLƒbƒv‚·‚é
-		ReadHeader(fp, i, &dimg);		// ‚»‚êˆÈŠO‚Ìê‡‚ÍƒRƒs[‚·‚é
+		if(p==i) continue;				// æŒ‡å®šã®ãƒ‡ã‚£ã‚¹ã‚¯ç•ªå·ã®ã¨ãã¯ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹
+		ReadHeader(fp, i, &dimg);		// ãã‚Œä»¥å¤–ã®å ´åˆã¯ã‚³ãƒ”ãƒ¼ã™ã‚‹
 		fseek(fp, GetDiskOffset(fp, i), SEEK_SET);
 		for(int j=0; j<dimg.DiskSize; j++) {
 			fputc(fgetc(fp), fptmp);
 		}
 	}
 	fcloseall();
-	// d77uty.tmp‚Ìƒtƒ@ƒCƒ‹–¼‚ğŒ³‚Ìƒtƒ@ƒCƒ‹–¼‚É•ÏX‚·‚é
+	// d77uty.tmpã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å…ƒã®ãƒ•ã‚¡ã‚¤ãƒ«åã«å¤‰æ›´ã™ã‚‹
 	remove(filename1);
 	rename("D77UTY.TMP", filename1);
 }
 
 void Usage( void ) {
-	puts("D77UTY INFILE [ADD|+] ADDFILE IMG#    ƒfƒBƒXƒNƒCƒ[ƒW‚Ì’Ç‰Á");
-	puts("D77UTY INFILE {L}                     ƒCƒ[ƒWƒŠƒXƒg•\¦");
-	puts("D77UTY INFILE [EXT|-] EXTFILE IMG#    ƒCƒ[ƒWØ‚èo‚µ");
-	puts("D77UTY INFILE CPY     CPYFILE IMG#    ƒCƒ[ƒWƒRƒs[");
-	puts("D77UTY INFILE P[+|-]  [IMG#|ALL]      ƒ‰ƒCƒgƒvƒƒeƒNƒgİ’è");
-	puts("D77UTY INFILE NAM     IMGNAME IMG#    ƒCƒ[ƒW–¼•ÏX");
-	puts("D77UTY INFILE ORD     ORDER           ƒCƒ[ƒW‡˜•ÏX");
-	puts("INFILE, ADDFILE, EXTFILE, CPYFILE : '.D77'Œ`®ƒtƒ@ƒCƒ‹");
-	puts("IMG#    : ƒCƒ[ƒW”Ô†(1`)");
-	puts("IMGNAME : ƒCƒ[ƒW–¼(‚P‚U•¶š‚Ü‚Åj");
-	puts("ORDER   : ANK”š‚P•¶š‚Å‡˜‚ğw’è");
-	puts("ext‚Æcpy‚Ìˆá‚¢: ext‚Ìê‡Ø‚èo‚µ‚½ƒCƒ[ƒW‚ÍINFILE’†‚©‚çíœ‚³‚ê‚éBcpy‚Ííœ‚³‚ê‚È‚¢");
+	puts("D77UTY INFILE [ADD|+] ADDFILE IMG#    ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ã®è¿½åŠ ");
+	puts("D77UTY INFILE {L}                     ã‚¤ãƒ¡ãƒ¼ã‚¸ãƒªã‚¹ãƒˆè¡¨ç¤º");
+	puts("D77UTY INFILE [EXT|-] EXTFILE IMG#    ã‚¤ãƒ¡ãƒ¼ã‚¸åˆ‡ã‚Šå‡ºã—");
+	puts("D77UTY INFILE CPY     CPYFILE IMG#    ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚³ãƒ”ãƒ¼");
+	puts("D77UTY INFILE P[+|-]  [IMG#|ALL]      ãƒ©ã‚¤ãƒˆãƒ—ãƒ­ãƒ†ã‚¯ãƒˆè¨­å®š");
+	puts("D77UTY INFILE NAM     IMGNAME IMG#    ã‚¤ãƒ¡ãƒ¼ã‚¸åå¤‰æ›´");
+	puts("D77UTY INFILE ORD     ORDER           ã‚¤ãƒ¡ãƒ¼ã‚¸é †åºå¤‰æ›´");
+	puts("INFILE, ADDFILE, EXTFILE, CPYFILE : '.D77'å½¢å¼ãƒ•ã‚¡ã‚¤ãƒ«");
+	puts("IMG#    : ã‚¤ãƒ¡ãƒ¼ã‚¸ç•ªå·(1ï½)");
+	puts("IMGNAME : ã‚¤ãƒ¡ãƒ¼ã‚¸å(ï¼‘ï¼–æ–‡å­—ã¾ã§ï¼‰");
+	puts("ORDER   : ANKæ•°å­—1æ–‡å­—ã§é †åºã‚’æŒ‡å®š");
+	puts("extã¨cpyã®é•ã„: extã®å ´åˆåˆ‡ã‚Šå‡ºã—ãŸã‚¤ãƒ¡ãƒ¼ã‚¸ã¯INFILEä¸­ã‹ã‚‰å‰Šé™¤ã•ã‚Œã‚‹ã€‚cpyã¯å‰Šé™¤ã•ã‚Œãªã„");
 	puts("e.g.");
-	puts("d77uty test.d77 add add.d77 2  2”Ô–Ú‚Éadd.d77‚ğ’Ç‰Á");
-	puts("d77uty test.d77                ŠÜ‚Ü‚ê‚Ä‚¢‚éƒCƒ[ƒWˆê——•\¦");
-	puts("d77uty test.d77 ext ext.d77 3  3”Ô–Ú‚ÌƒCƒ[ƒW‚ğext.d77‚Éo—Í");
-	puts("d77uty test.d77 cpy copy.d77 2 2”Ô–Ú‚ÌƒCƒ[ƒW‚ğcopy.d77‚ÉƒRƒs[");
-	puts("d77uty test.d77 p- all         ‘S‚Ä‚ÌƒCƒ[ƒW‚Ìƒ‰ƒCƒgƒvƒƒeƒNƒg‰ğœ");
-	puts("d77uty test.d77 nam game 1     1”Ô–Ú‚ÌƒCƒ[ƒW–¼‚ğ'game'‚Éİ’è");
-	puts("d77uty test.d77 ord 312        3, 1, 2‚Ì‡‚ÉƒCƒ[ƒW‚ğ•À‚×‘Ö‚¦");
+	puts("d77uty test.d77 add add.d77 2  2ç•ªç›®ã«add.d77ã‚’è¿½åŠ ");
+	puts("d77uty test.d77                å«ã¾ã‚Œã¦ã„ã‚‹ã‚¤ãƒ¡ãƒ¼ã‚¸ä¸€è¦§è¡¨ç¤º");
+	puts("d77uty test.d77 ext ext.d77 3  3ç•ªç›®ã®ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’ext.d77ã«å‡ºåŠ›");
+	puts("d77uty test.d77 cpy copy.d77 2 2ç•ªç›®ã®ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’copy.d77ã«ã‚³ãƒ”ãƒ¼");
+	puts("d77uty test.d77 p- all         å…¨ã¦ã®ã‚¤ãƒ¡ãƒ¼ã‚¸ã®ãƒ©ã‚¤ãƒˆãƒ—ãƒ­ãƒ†ã‚¯ãƒˆè§£é™¤");
+	puts("d77uty test.d77 nam game 1     1ç•ªç›®ã®ã‚¤ãƒ¡ãƒ¼ã‚¸åã‚’'game'ã«è¨­å®š");
+	puts("d77uty test.d77 ord 312        3, 1, 2ã®é †ã«ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’ä¸¦ã¹æ›¿ãˆ");
 }
 
 void main( int argc, char *argv[] )

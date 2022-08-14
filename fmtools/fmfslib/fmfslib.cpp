@@ -1,9 +1,10 @@
-// FMFSLIB.cpp : DLL �A�v���P�[�V�����p�̃G���g�� �|�C���g���`���܂��B
+﻿// FMFSLIB.cpp : DLL アプリケーション用のエントリ ポイントを定義します。
 //
+#define FMFSLIB_EXPORTS
 
 #include "stdafx.h"
 #include "FMFSLIB.h"
-
+#if 0
 BOOL APIENTRY DllMain( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 
                        LPVOID lpReserved
@@ -19,19 +20,19 @@ BOOL APIENTRY DllMain( HANDLE hModule,
     }
     return TRUE;
 }
+#endif
 
-
-// ����̓G�N�X�|�[�g���ꂽ�ϐ��̗�ł��B
+// これはエクスポートされた変数の例です。
 //FMFSLIB_API int nFMFSLIB=0;
 
-// ����̓G�N�X�|�[�g���ꂽ�֐��̗�ł��B
+// これはエクスポートされた関数の例です。
 //FMFSLIB_API int fnFMFSLIB(void)
 //{
 //	return 42;
 //}
 
-// ����̓G�N�X�|�[�g���ꂽ�N���X�̃R���X�g���N�^�ł��B
-// �N���X�̒�`�ɂ��Ă� FMFSLIB.h ���Q�Ƃ��Ă��������B
+// これはエクスポートされたクラスのコンストラクタです。
+// クラスの定義については FMFSLIB.h を参照してください。
 //CFMFSLIB::CFMFSLIB()
 //{ 
 //	return; 

@@ -5,7 +5,7 @@
 #include "SYSDEF.H"
 #include <windows.h>
 
-class CSector {
+class FMFSLIB_API CSector {
 public:
 	unsigned char m_nC;
 	unsigned char m_nH;

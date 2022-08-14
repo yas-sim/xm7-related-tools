@@ -1,4 +1,5 @@
-#include "stdafx.h"
+ï»¿#define FMFSLIB_EXPORTS
+
 #include "CFILESYS.H"
 
 bool FDHANDLE::nRefCountUp( void ) {
@@ -44,15 +45,15 @@ inline int CFilesys::Cluster2LBA( int nCluster ) {
 bool CFilesys::ReadCluster( FLHANDLE *hFile, int nCluster ) {
 	if(nCluster<0 || nCluster>MAX_CLUSTER) return false;
 	CSector csect;
-	// FAT‚Ì’l‚ğƒ`ƒFƒbƒN‚µ‚Äg—p‚³‚ê‚Ä‚¢‚éƒNƒ‰ƒXƒ^‚©‚Ç‚¤‚©Šm‚©‚ß‚é
+	// FATã®å€¤ã‚’ãƒã‚§ãƒƒã‚¯ã—ã¦ä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹ã‚¯ãƒ©ã‚¹ã‚¿ã‹ã©ã†ã‹ç¢ºã‹ã‚ã‚‹
 	int FATValue = GetFATValue(hFile->phFD, nCluster);
 	if(FATValue>=0xfd) return false;
-	// ƒNƒ‰ƒXƒ^“à‚Åg—p‚³‚ê‚Ä‚¢‚éƒZƒNƒ^”‚ğ‹‚ß‚é
+	// ã‚¯ãƒ©ã‚¹ã‚¿å†…ã§ä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹ã‚»ã‚¯ã‚¿æ•°ã‚’æ±‚ã‚ã‚‹
 	int UsedSect;
 	if(FATValue>=0xc0 && FATValue<=0xc0+SPC) {
-		UsedSect = FATValue - 0xbf;		// ’†“r”¼’[‚Èê‡
+		UsedSect = FATValue - 0xbf;		// ä¸­é€”åŠç«¯ãªå ´åˆ
 	} else {
-		UsedSect = SPC;					// ƒNƒ‰ƒXƒ^‚ğg‚¢Ø‚Á‚Ä‚¢‚éê‡
+		UsedSect = SPC;					// ã‚¯ãƒ©ã‚¹ã‚¿ã‚’ä½¿ã„åˆ‡ã£ã¦ã„ã‚‹å ´åˆ
 	}
 	hFile->nClusterDataSize = 0;
 	csect.m_pSectorData = (unsigned char*)hFile->pClusterBuff;
@@ -67,8 +68,8 @@ bool CFilesys::ReadCluster( FLHANDLE *hFile, int nCluster ) {
 	return true;
 }
 
-// ƒNƒ‰ƒXƒ^ƒoƒbƒtƒ@‚Ìƒf[ƒ^‚ğw’è‚ÌƒNƒ‰ƒXƒ^”Ô†‚ÌƒNƒ‰ƒXƒ^‚É‘‚«‚Ş
-// FAT‚Í‘€ì‚µ‚È‚¢
+// ã‚¯ãƒ©ã‚¹ã‚¿ãƒãƒƒãƒ•ã‚¡ã®ãƒ‡ãƒ¼ã‚¿ã‚’æŒ‡å®šã®ã‚¯ãƒ©ã‚¹ã‚¿ç•ªå·ã®ã‚¯ãƒ©ã‚¹ã‚¿ã«æ›¸ãè¾¼ã‚€
+// FATã¯æ“ä½œã—ãªã„
 bool CFilesys::WriteCluster( FLHANDLE *hFile, int nCluster ) {
 	if(nCluster<0 || nCluster>MAX_CLUSTER) return false;
 	if(hFile->nClusterPtr==0) return true;
@@ -151,7 +152,7 @@ bool CFilesys::ReadEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
 	return true;
 }
 
-// ƒGƒ“ƒgƒŠî•ñ‚ğƒfƒBƒXƒN‚É‘‚«‚Ş
+// ã‚¨ãƒ³ãƒˆãƒªæƒ…å ±ã‚’ãƒ‡ã‚£ã‚¹ã‚¯ã«æ›¸ãè¾¼ã‚€
 bool CFilesys::WriteEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
     CSector tmpsect;
     unsigned char pSECT[SECT_SIZE];
@@ -161,7 +162,7 @@ bool CFilesys::WriteEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
     		LBA2R(DIR_LBA+sect), &tmpsect)!=0) return false;
 	int pos = (EntryNumber-(EntryNumber/EPS)*EPS)*BPE;
     char fname[20];
-	wsprintf(fname, "%-8s", ent->pFilename);	// ¶‹l‚Ì8•¶š‚Ìƒtƒ@ƒCƒ‹–¼‚ğ¶¬
+	wsprintf(fname, "%-8s", ent->pFilename);	// å·¦è©°ã®8æ–‡å­—ã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ç”Ÿæˆ
 	for(int i=0; i<8; i++) pSECT[pos++] = fname[i];
     pos+=3;		// Skip Reserve
     pSECT[pos++]=ent->nFileType;
@@ -173,7 +174,7 @@ bool CFilesys::WriteEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
 	return true;
 }
 
-// ‹ó‚ÌƒGƒ“ƒgƒŠ‚ğ’T‚µAƒGƒ“ƒgƒŠ”Ô†‚ğ•Ô‚·BŒ©‚Â‚©‚ç‚È‚¢‚Æ‚«‚Í-1
+// ç©ºã®ã‚¨ãƒ³ãƒˆãƒªã‚’æ¢ã—ã€ã‚¨ãƒ³ãƒˆãƒªç•ªå·ã‚’è¿”ã™ã€‚è¦‹ã¤ã‹ã‚‰ãªã„ã¨ãã¯-1
 int CFilesys::FindEmptyEntry( FDHANDLE *hFD ) {
 	CEntry ent;
 	for(int entry=0; entry<=MAX_DIR; entry++) {
@@ -183,7 +184,7 @@ int CFilesys::FindEmptyEntry( FDHANDLE *hFD ) {
 	return -1;	
 }
 
-// ‹ó‚«ƒNƒ‰ƒXƒ^‚ğ’T‚µ‚ÄƒNƒ‰ƒXƒ^”Ô†‚ğ•Ô‚·
+// ç©ºãã‚¯ãƒ©ã‚¹ã‚¿ã‚’æ¢ã—ã¦ã‚¯ãƒ©ã‚¹ã‚¿ç•ªå·ã‚’è¿”ã™
 int CFilesys::FindEmptyCluster( FDHANDLE *hFD ) {
 	int fv;
 	for(int cluster=0; cluster<=MAX_CLUSTER; cluster++) {
@@ -195,15 +196,16 @@ int CFilesys::FindEmptyCluster( FDHANDLE *hFD ) {
 	return -1;
 }
 
-// w’è‚Ìƒtƒ@ƒCƒ‹–¼‚ğ‚ÂƒGƒ“ƒgƒŠ‚ğ’T‚·BŒ©‚Â‚©‚Á‚½ê‡AƒGƒ“ƒgƒŠ”Ô†‚ğ•Ô‚·
+// æŒ‡å®šã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’æŒã¤ã‚¨ãƒ³ãƒˆãƒªã‚’æ¢ã™ã€‚è¦‹ã¤ã‹ã£ãŸå ´åˆã€ã‚¨ãƒ³ãƒˆãƒªç•ªå·ã‚’è¿”ã™
 int CFilesys::FindEntry( FDHANDLE *hFD, char *pFilename ) {
 	CEntry ent;
 	char fname[20];
 	wsprintf(fname, "%-8s", pFilename);
 	for(int entry=0; entry<=MAX_DIR; entry++) {
+		int i;
 		ReadEntry(hFD, entry, &ent);
 		// Compae filename
-		for(int i=0; i<8; i++) {
+		for(i=0; i<8; i++) {
 			if(fname[i]!=ent.pFilename[i]) break;
 		}
 		if(i==8) return entry;
@@ -211,7 +213,7 @@ int CFilesys::FindEntry( FDHANDLE *hFD, char *pFilename ) {
 	return -1;
 }
 
-// C=0,H=0,R=3‚ÌƒZƒNƒ^‚ğ“Ç‚İ‚İƒfƒBƒXƒN‚ÌID‚ğŠm”F‚·‚é
+// C=0,H=0,R=3ã®ã‚»ã‚¯ã‚¿ã‚’èª­ã¿è¾¼ã¿ãƒ‡ã‚£ã‚¹ã‚¯ã®IDã‚’ç¢ºèªã™ã‚‹
 bool CFilesys::CheckDiskID( FDHANDLE *hFD ) {
 	bool result=true;
 	CSector sect;
@@ -224,7 +226,7 @@ bool CFilesys::CheckDiskID( FDHANDLE *hFD ) {
 	return result;
 }
 
-// w’è‚Ìƒtƒ@ƒCƒ‹–¼‚Ìƒtƒ@ƒCƒ‹‚ğƒ}ƒEƒ“ƒg‚µAFDƒnƒ“ƒhƒ‹’l‚ğ•Ô‚·
+// æŒ‡å®šã®ãƒ•ã‚¡ã‚¤ãƒ«åã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ãƒã‚¦ãƒ³ãƒˆã—ã€FDãƒãƒ³ãƒ‰ãƒ«å€¤ã‚’è¿”ã™
 FDHANDLE *CFilesys::FMMountFD( char *fdimage ) {
 	FDHANDLE *ptr = new FDHANDLE();
 	if(ptr==NULL) return NULL;
@@ -235,7 +237,7 @@ FDHANDLE *CFilesys::FMMountFD( char *fdimage ) {
 		return NULL;
 	}
     ptr->pFD = pFDImg;
-	if(CheckDiskID(ptr)==false) {		// F-BASICƒfƒBƒXƒN‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN‚·‚é
+	if(CheckDiskID(ptr)==false) {		// F-BASICãƒ‡ã‚£ã‚¹ã‚¯ã‹ã©ã†ã‹ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 		SetError(FM_NOT_A_FBASIC_DISK);
 		delete ptr;
 		return NULL;
@@ -243,35 +245,35 @@ FDHANDLE *CFilesys::FMMountFD( char *fdimage ) {
 	return ptr;
 }
 
-// w’è‚ÌFDƒnƒ“ƒhƒ‹’l‚ğ‚ÂFDƒCƒ[ƒW‚ğƒAƒ“ƒ}ƒEƒ“ƒg‚·‚é
+// æŒ‡å®šã®FDãƒãƒ³ãƒ‰ãƒ«å€¤ã‚’æŒã¤FDã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’ã‚¢ãƒ³ãƒã‚¦ãƒ³ãƒˆã™ã‚‹
 bool CFilesys::FMUnmountFD( FDHANDLE *hFD ) {
     if(hFD==NULL) return false;
     if(hFD->pFD==NULL) return false;
-	delete hFD->pFD;			// FDƒCƒ[ƒW‚ğíœ
-    delete hFD;					// FDƒnƒ“ƒhƒ‹‚ğíœ
+	delete hFD->pFD;			// FDã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’å‰Šé™¤
+    delete hFD;					// FDãƒãƒ³ãƒ‰ãƒ«ã‚’å‰Šé™¤
 	return true;
 }
 
-// ƒtƒ@ƒCƒ‹‚ğƒI[ƒvƒ“‚·‚é
-// ƒŠ[ƒh‚Ì‚İ‚Ì‚Ífiletype, ascii, random‚Ì’l‚Íg—p‚µ‚È‚¢
+// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚ªãƒ¼ãƒ—ãƒ³ã™ã‚‹
+// ãƒªãƒ¼ãƒ‰ã®ã¿ã®æ™‚ã¯filetype, ascii, randomã®å€¤ã¯ä½¿ç”¨ã—ãªã„
 FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetype,
 						   int ascii, int random) {
 	if(hFD==NULL) return NULL;
-	if((mode&FM_OPEN_READ)!=0 && (mode&FM_OPEN_WRITE)!=0) return NULL;	// READ/WRITE‚ğ“¯‚Éw’è‚Ío—ˆ‚È‚¢
+	if((mode&FM_OPEN_READ)!=0 && (mode&FM_OPEN_WRITE)!=0) return NULL;	// READ/WRITEã‚’åŒæ™‚ã«æŒ‡å®šã¯å‡ºæ¥ãªã„
 	FLHANDLE *hFile = new FLHANDLE();
 	hFile->fOpenMode = mode;
 	hFile->phFD = hFD;
 	memcpy(hFile->pFilename, filename, 8);
-	int entryno = FindEntry(hFD, filename);		// ƒGƒ“ƒgƒŠ‚Í‘¶İ‚·‚é‚©ƒ`ƒFƒbƒN
-	// w’è‚ÌƒGƒ“ƒgƒŠ‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚Æ‚«
+	int entryno = FindEntry(hFD, filename);		// ã‚¨ãƒ³ãƒˆãƒªã¯å­˜åœ¨ã™ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
+	// æŒ‡å®šã®ã‚¨ãƒ³ãƒˆãƒªãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã¨ã
 	if(entryno==-1) {
 		if((mode & FM_OPEN_READ)!=0) {
-			// ƒŠ[ƒhƒ‚[ƒh‚ÍƒGƒ‰[
+			// ãƒªãƒ¼ãƒ‰ãƒ¢ãƒ¼ãƒ‰æ™‚ã¯ã‚¨ãƒ©ãƒ¼
 			m_Error = 1;
 			delete hFile;
 			return NULL;
 		} else {
-			// ƒ‰ƒCƒgƒ‚[ƒh‚ÍV‚µ‚¢ƒGƒ“ƒgƒŠ[‚ğì¬‚·‚é
+			// ãƒ©ã‚¤ãƒˆãƒ¢ãƒ¼ãƒ‰æ™‚ã¯æ–°ã—ã„ã‚¨ãƒ³ãƒˆãƒªãƒ¼ã‚’ä½œæˆã™ã‚‹
 			CEntry ent;
 			entryno = FindEmptyEntry(hFD);
 			if(entryno==-1) {
@@ -285,13 +287,13 @@ FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetyp
 				delete hFile;
 				return NULL;
 			}
-			SetFATValue(hFD, emptycluster, 0xc0);	// ƒNƒ‰ƒXƒ^‚ğg—p’†‚É‚·‚é
+			SetFATValue(hFD, emptycluster, 0xc0);	// ã‚¯ãƒ©ã‚¹ã‚¿ã‚’ä½¿ç”¨ä¸­ã«ã™ã‚‹
 			wsprintf(ent.pFilename, "%-8s", filename);
 			ent.nTopCluster = emptycluster;
 			ent.nFileType = filetype;
 			ent.fAscii = ascii;
 			ent.fRandomAccess = random;
-			WriteEntry(hFD, entryno, &ent);			// ƒGƒ“ƒgƒŠ‚Ì‘‚«o‚µ
+			WriteEntry(hFD, entryno, &ent);			// ã‚¨ãƒ³ãƒˆãƒªã®æ›¸ãå‡ºã—
 			hFile->nClusterNo = emptycluster;
 			hFile->nClusterPtr = 0;
 			hFile->fAscii = ascii;
@@ -299,21 +301,21 @@ FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetyp
 			hFile->fRandom = random;
 		}
 	} else {
-		// ƒGƒ“ƒgƒŠ[‚ªŠù‚É‘¶İ‚·‚é‚Æ‚«
+		// ã‚¨ãƒ³ãƒˆãƒªãƒ¼ãŒæ—¢ã«å­˜åœ¨ã™ã‚‹ã¨ã
 		CEntry ent;
-		ReadEntry(hFD, entryno, &ent);				// ƒGƒ“ƒgƒŠî•ñ‚Ì“Ç‚İo‚µ
-		hFile->nClusterNo = ent.nTopCluster;		// æ“ªƒNƒ‰ƒXƒ^”Ô†‚ğ’²‚×‚é
+		ReadEntry(hFD, entryno, &ent);				// ã‚¨ãƒ³ãƒˆãƒªæƒ…å ±ã®èª­ã¿å‡ºã—
+		hFile->nClusterNo = ent.nTopCluster;		// å…ˆé ­ã‚¯ãƒ©ã‚¹ã‚¿ç•ªå·ã‚’èª¿ã¹ã‚‹
 		if((mode & FM_OPEN_READ)!=0) {
-			ReadCluster(hFile, hFile->nClusterNo);	// ƒŠ[ƒh‚ÍÅ‰‚ÌƒNƒ‰ƒXƒ^‚Ü‚Å“Ç‚İ‚ñ‚Å‚¨‚­
+			ReadCluster(hFile, hFile->nClusterNo);	// ãƒªãƒ¼ãƒ‰æ™‚ã¯æœ€åˆã®ã‚¯ãƒ©ã‚¹ã‚¿ã¾ã§èª­ã¿è¾¼ã‚“ã§ãŠã
 		} else {
-			DeleteChain(hFD, hFile->nClusterNo);	// ƒ‰ƒCƒg‚ÍŠù‘¶‚ÌƒNƒ‰ƒXƒ^ƒ`ƒF[ƒ“‚ğ”jŠü(Á‹)
+			DeleteChain(hFD, hFile->nClusterNo);	// ãƒ©ã‚¤ãƒˆæ™‚ã¯æ—¢å­˜ã®ã‚¯ãƒ©ã‚¹ã‚¿ãƒã‚§ãƒ¼ãƒ³ã‚’ç ´æ£„(æ¶ˆå»)
 		}
-		hFile->nClusterPtr = 0;						// ƒNƒ‰ƒXƒ^“àƒf[ƒ^ƒ|ƒCƒ“ƒ^0‚É‚·‚é
+		hFile->nClusterPtr = 0;						// ã‚¯ãƒ©ã‚¹ã‚¿å†…ãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿0ã«ã™ã‚‹
 		hFile->fAscii = ent.fAscii;
 		hFile->nFileType = ent.nFileType;
 		hFile->fRandom = ent.fRandomAccess;
 	}
-	hFile->lFilePtr = 0L;							// ƒtƒ@ƒCƒ‹ƒ|ƒCƒ“ƒ^‚ğ0‚É‚·‚é
+	hFile->lFilePtr = 0L;							// ãƒ•ã‚¡ã‚¤ãƒ«ãƒã‚¤ãƒ³ã‚¿ã‚’0ã«ã™ã‚‹
 	hFile->fEOF = false;
 	return hFile;
 }
@@ -345,9 +347,9 @@ int CFilesys::Read1( FLHANDLE *hFile ) {
 	if(hFile==NULL) return -1;
 	if(hFile->fEOF==true) return -1;
 	if(hFile->nClusterPtr>=hFile->nClusterDataSize /*SECT_SIZE*SPC*/) {
-		// ƒNƒ‰ƒXƒ^ƒ|ƒCƒ“ƒ^‚ªƒNƒ‰ƒXƒ^ƒTƒCƒY‚ğ’´‚¦‚Ä‚¢‚é‚Æ‚«‚ÍAŸ‚ÌƒNƒ‰ƒXƒ^‚ğ“Ç‚İ‚Ş
+		// ã‚¯ãƒ©ã‚¹ã‚¿ãƒã‚¤ãƒ³ã‚¿ãŒã‚¯ãƒ©ã‚¹ã‚¿ã‚µã‚¤ã‚ºã‚’è¶…ãˆã¦ã„ã‚‹ã¨ãã¯ã€æ¬¡ã®ã‚¯ãƒ©ã‚¹ã‚¿ã‚’èª­ã¿è¾¼ã‚€
 		if(ReadNextCluster(hFile)==false) {
-			// Ÿ‚ÌƒNƒ‰ƒXƒ^‚ğ“Ç‚İ‚ß‚È‚©‚Á‚½‚Æ‚«‚ÍEOFƒtƒ‰ƒO‚ğ—§‚Ä‚é
+			// æ¬¡ã®ã‚¯ãƒ©ã‚¹ã‚¿ã‚’èª­ã¿è¾¼ã‚ãªã‹ã£ãŸã¨ãã¯EOFãƒ•ãƒ©ã‚°ã‚’ç«‹ã¦ã‚‹
 			hFile->fEOF = true;
 			return -1;
 		}
@@ -355,7 +357,7 @@ int CFilesys::Read1( FLHANDLE *hFile ) {
 	}
 	int result;
 	result = (unsigned char)(hFile->pClusterBuff[hFile->nClusterPtr++]);
-	// •¶š‚ª0x1a(ESC)‚©‚ÂAƒAƒXƒL[ƒ‚[ƒhƒI[ƒvƒ“‚Ì‚Æ‚«‚ÍEOFƒtƒ‰ƒO‚ğ—§‚Ä‚é
+	// æ–‡å­—ãŒ0x1a(ESC)ã‹ã¤ã€ã‚¢ã‚¹ã‚­ãƒ¼ãƒ¢ãƒ¼ãƒ‰ã‚ªãƒ¼ãƒ—ãƒ³ã®ã¨ãã¯EOFãƒ•ãƒ©ã‚°ã‚’ç«‹ã¦ã‚‹
 	if(result==FM_EOF_CODE && hFile->fAscii==FM_ASCII) {
 		hFile->fEOF = true;
 	}
@@ -365,6 +367,7 @@ int CFilesys::Read1( FLHANDLE *hFile ) {
 //#include <stdio.h>
 
 int CFilesys::FMRead( FLHANDLE *hFile, char *pBuff, int nNOR ) {
+	int NOR = 0;
 	if(hFile==NULL) return -1;
 	for(int NOR=0; NOR<nNOR; NOR++) {
 		if(hFile->fEOF==true) break;
@@ -380,34 +383,34 @@ int CFilesys::FMRead( FLHANDLE *hFile, char *pBuff, int nNOR ) {
 	return NOR;
 }
 
-// ƒNƒ‰ƒXƒ^ƒoƒbƒtƒ@‚Ì’†g‚ğƒtƒ‰ƒbƒVƒ…‚·‚é
+// ã‚¯ãƒ©ã‚¹ã‚¿ãƒãƒƒãƒ•ã‚¡ã®ä¸­èº«ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã™ã‚‹
 bool CFilesys::FMFlush( FLHANDLE *hFile ) {
 	if(hFile==NULL) return false;
 	if(hFile->nClusterPtr<0) return false;
 	if(hFile->nClusterPtr>0) {
-		WriteCluster(hFile, hFile->nClusterNo);	// ƒNƒ‰ƒXƒ^ƒoƒbƒtƒ@‚Éƒf[ƒ^‚ª‚ ‚é‚Æ‚«‚Í‘‚«‚Ş
-//		hFile->nClusterPtr = 0;					// ƒf[ƒ^ƒ|ƒCƒ“ƒ^‚ÍŠª‚«–ß‚³‚È‚¢I@’Ç‰Á‚Ìƒf[ƒ^‚ª‚ ‚é‚©‚à‚µ‚ê‚È‚¢‚Ì‚ÅB
+		WriteCluster(hFile, hFile->nClusterNo);	// ã‚¯ãƒ©ã‚¹ã‚¿ãƒãƒƒãƒ•ã‚¡ã«ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚‹ã¨ãã¯æ›¸ãè¾¼ã‚€
+//		hFile->nClusterPtr = 0;					// ãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿ã¯å·»ãæˆ»ã•ãªã„ï¼ã€€è¿½åŠ ã®ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚‹ã‹ã‚‚ã—ã‚Œãªã„ã®ã§ã€‚
 	}
 	SetFATValue(hFile->phFD, hFile->nClusterNo,
-		(hFile->nClusterPtr-1)/SECT_SIZE+0xc0);		// ˆê‰FATƒ`ƒF[ƒ“‚ğ•Â‚¶‚é
+		(hFile->nClusterPtr-1)/SECT_SIZE+0xc0);		// ä¸€å¿œFATãƒã‚§ãƒ¼ãƒ³ã‚’é–‰ã˜ã‚‹
 	return true;
 }
 
 bool CFilesys::Write1( FLHANDLE *hFile, char ch ) {
 	if(hFile==NULL) return false;
 	if(hFile->nClusterPtr>=SECT_SIZE*SPC) {
-		// ƒNƒ‰ƒXƒ^ƒoƒbƒtƒ@‚ª‚¢‚Á‚Ï‚¢‚¾‚Á‚½ê‡
+		// ã‚¯ãƒ©ã‚¹ã‚¿ãƒãƒƒãƒ•ã‚¡ãŒã„ã£ã±ã„ã ã£ãŸå ´åˆ
 		WriteCluster(hFile, hFile->nClusterNo);
 		int nextcluster = FindEmptyCluster(hFile->phFD);
 		if(nextcluster>=0) {
-			// Ÿ‚Ì‹ó‚«ƒNƒ‰ƒXƒ^‚ªŒ©‚Â‚©‚Á‚½ê‡
-			SetFATValue(hFile->phFD, hFile->nClusterNo, nextcluster);	// ŒŸõ‚µ‚½Ÿ‚Ì‹ó‚«ƒNƒ‰ƒXƒ^”Ô†‚ğ‘‚«‚Ş
+			// æ¬¡ã®ç©ºãã‚¯ãƒ©ã‚¹ã‚¿ãŒè¦‹ã¤ã‹ã£ãŸå ´åˆ
+			SetFATValue(hFile->phFD, hFile->nClusterNo, nextcluster);	// æ¤œç´¢ã—ãŸæ¬¡ã®ç©ºãã‚¯ãƒ©ã‚¹ã‚¿ç•ªå·ã‚’æ›¸ãè¾¼ã‚€
 			hFile->nClusterNo = nextcluster;
 			hFile->nClusterPtr = 0;
-			SetFATValue(hFile->phFD, hFile->nClusterNo, 0xc0);			// Ÿ‚Ég—p‚·‚éƒNƒ‰ƒXƒ^‚ğg—pÏ‚İ‚É‚µ‚Ä—}‚¦‚Ä‚¨‚­
+			SetFATValue(hFile->phFD, hFile->nClusterNo, 0xc0);			// æ¬¡ã«ä½¿ç”¨ã™ã‚‹ã‚¯ãƒ©ã‚¹ã‚¿ã‚’ä½¿ç”¨æ¸ˆã¿ã«ã—ã¦æŠ‘ãˆã¦ãŠã
 		} else {
-			// Ÿ‚Ì‹ó‚«ƒNƒ‰ƒXƒ^‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡
-			SetFATValue(hFile->phFD, hFile->nClusterNo, 0xc0+SPC);		// ‚±‚ÌƒNƒ‰ƒXƒ^‚ÅI‚í‚è‚Æ‚·‚é
+			// æ¬¡ã®ç©ºãã‚¯ãƒ©ã‚¹ã‚¿ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆ
+			SetFATValue(hFile->phFD, hFile->nClusterNo, 0xc0+SPC);		// ã“ã®ã‚¯ãƒ©ã‚¹ã‚¿ã§çµ‚ã‚ã‚Šã¨ã™ã‚‹
 			SetError(FM_NO_DISK_SPACE);
 			return false;
 		}
@@ -431,7 +434,7 @@ bool CFilesys::FMEof( FLHANDLE *hFile ) {
 	return hFile->fEOF;
 }
 
-// Å‰‚ÌƒGƒ“ƒgƒŠ‚Ì“à—e‚ğ•Ô‚·
+// æœ€åˆã®ã‚¨ãƒ³ãƒˆãƒªã®å†…å®¹ã‚’è¿”ã™
 bool CFilesys::FMGetFirstEntry( FDHANDLE *hFD, CEntry *ent ) {
 	if(hFD==NULL) return false;
 	m_nEntryCount = 0;
@@ -440,7 +443,7 @@ bool CFilesys::FMGetFirstEntry( FDHANDLE *hFD, CEntry *ent ) {
 	return true;
 }
 
-// ƒGƒ“ƒgƒŠ‚Ì“à—e‚ğ•Ô‚·
+// ã‚¨ãƒ³ãƒˆãƒªã®å†…å®¹ã‚’è¿”ã™
 bool CFilesys::FMGetNextEntry( FDHANDLE *hFD, CEntry *ent ) {
 	if(hFD==NULL) return false;
 	ReadEntry(hFD, m_nEntryCount, ent);
@@ -456,20 +459,20 @@ void CFilesys::SetError( FMERR nError ){
 	m_Error = nError;
 };
 
-// w’è‚ÌƒNƒ‰ƒXƒ^”Ô†‚©‚çn‚Ü‚éFATƒ`ƒF[ƒ“‚ğíœ
+// æŒ‡å®šã®ã‚¯ãƒ©ã‚¹ã‚¿ç•ªå·ã‹ã‚‰å§‹ã¾ã‚‹FATãƒã‚§ãƒ¼ãƒ³ã‚’å‰Šé™¤
 bool CFilesys::DeleteChain( FDHANDLE *hFD, int nCluster ) {
 	if(hFD==NULL) return false;
 	if(nCluster<0 || nCluster>MAX_CLUSTER) return false;
 	int nextcluster, cluster = nCluster;
 	do {
 		nextcluster = GetFATValue(hFD, cluster);
-		SetFATValue(hFD, cluster, 0xff);	// ƒNƒ‰ƒXƒ^ŠJ•ú
+		SetFATValue(hFD, cluster, 0xff);	// ã‚¯ãƒ©ã‚¹ã‚¿é–‹æ”¾
 		cluster = nextcluster;
 	} while(cluster<=MAX_CLUSTER);
 	return true;
 };
 
-// w’è‚Ìƒtƒ@ƒCƒ‹‚ğíœ
+// æŒ‡å®šã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‰Šé™¤
 bool CFilesys::FMDeleteFile( FDHANDLE *hFD, char *filename ) {
 	if(hFD==NULL) return false;
 	CEntry ent;
@@ -480,9 +483,9 @@ bool CFilesys::FMDeleteFile( FDHANDLE *hFD, char *filename ) {
 		return false;
 	}
 	ReadEntry(hFD, entno, &ent);
-	ent.pFilename[0] = (char)0xff;		// ƒGƒ“ƒgƒŠÁ‹(ƒtƒ@ƒCƒ‹–¼‚Ìæ“ª‚Ì1ƒoƒCƒg‚ğ0xff‚É‚·‚é)
+	ent.pFilename[0] = (char)0xff;		// ã‚¨ãƒ³ãƒˆãƒªæ¶ˆå»(ãƒ•ã‚¡ã‚¤ãƒ«åã®å…ˆé ­ã®1ãƒã‚¤ãƒˆã‚’0xffã«ã™ã‚‹)
 	WriteEntry(hFD, entno, &ent);
-	return DeleteChain(hFD, ent.nTopCluster); // FATƒ`ƒF[ƒ“‚ğíœ
+	return DeleteChain(hFD, ent.nTopCluster); // FATãƒã‚§ãƒ¼ãƒ³ã‚’å‰Šé™¤
 };
 
 bool CFilesys::FMGetFileInfo( FDHANDLE *hFD, char *filename, CEntry *ent ) {
