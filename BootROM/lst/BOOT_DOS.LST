@@ -1,0 +1,439 @@
+00001                   
+00002                   ;IPLENT EQU     $100            ; IPL ENTRY
+00003                   ;IPLENT EQU     $300            ; IPL ENTRY
+00004                   
+00005 0001              MSG        EQU      1           ; 0=Message非表示  1=表示
+00006                   
+00007 FC7F              STACK      EQU      $FC7F       ; Initial stack pointer
+00008                   
+00009                   
+00010                   ; FDC Status define
+00011 0080              FSNRDY     EQU      $80         ; Not ready
+00012 0040              FSWPRT     EQU      $40         ; Write protect
+00013 0020              FSHLD      EQU      $20         ; Head load
+00014 0010              FSSKER     EQU      $10         ; Seek error
+00015 0008              FSCRC      EQU      $08         ; CRC error
+00016 0004              FSTRK0     EQU      $04         ; Track 0
+00017 0002              FSIDX      EQU      $02         ; Index hole
+00018 0001              FSBSY      EQU      $01         ; Busy
+00019                   
+00020 000E              FCRSTR     EQU      $0E         ; Restore
+00021 001E              FCSEEK     EQU      $1E         ; Seek
+00022 0080              FCRDSC     EQU      $80         ; Read sector  (D3 = SIDE)
+00023 00A0              FCWRSC     EQU      $A0         ; Write sector (D3 = SIDE)
+00024 00C0              FCRDID     EQU      $C0         ; Read ID
+00025 00E0              FCRDTR     EQU      $E0         ; Read track
+00026 00F0              FCWRTR     EQU      $F0         ; Write track
+00027 00D0              FCFIRQ     EQU      $D0         ; Force interrupt( D3-D0 = I3-I0 )
+00028                   
+00029 FD18              FDCSTA     EQU      $FD18       ; (R)Status register
+00030 FD18              FDCCMD     EQU      $FD18       ; (W)Command register
+00031 FD19              FDCTRK     EQU      $FD19       ; Track register
+00032 FD1A              FDCSCT     EQU      $FD1A       ; Sector register
+00033 FD1B              FDCDAT     EQU      $FD1B       ; Data register
+00034 FD1C              FDCSID     EQU      $FD1C       ; Side select
+00035 FD1D              FDCDRV     EQU      $FD1D       ; Drive select
+00036 FD1E              FDCLDR     EQU      $FD1E       ; Logical drive #
+00037 FD1F              FDCDRQ     EQU      $FD1F       ; DRQ/IRQ
+00038                   
+00039 0008              RCBRST     EQU      8           ; RESTORE
+00040 0009              RCBWSC     EQU      9           ; WRITE SECTOR
+00041 000A              RCBRSC     EQU      10          ; READ SECTOR
+00042                   
+00043                   
+00044 0000              RCBCMD     EQU      0
+00045 0001              RCBSTA     EQU      1
+00046 0002              RCBBUF     EQU      2
+00047 0004              RCBTRK     EQU      4
+00048 0005              RCBSCT     EQU      5
+00049 0006              RCBSID     EQU      6
+00050 0007              RCBDRV     EQU      7
+00051                   
+00052                   
+00053 FE00                         ORG      $FE00
+00054                   
+00055 FE00              BOOT       EQU      *
+00056 FE00 2009                    BRA      START
+00057                   
+00058 FE02 7EFE44                  JMP      DRSTR
+00059 FE05 7EFE5A                  JMP      DSKRW
+00060 FE08 7EFE5A                  JMP      DSKRW
+00061                   
+00062 FE0B              START      EQU      *
+00063                   ;       ORCC    #$50
+00064                   ;  IF IPLENT=$300
+00065 FE0B 7DFD0F                  TST      $FD0F       ; BASIC ROMを見せる
+00066                   ;  ENDIF
+00067 FE0E 10CEFC7F                LDS      #STACK
+00068                   
+00069 FE12 86FD                    LDA      #$FD
+00070 FE14 1F8B                    TFR      A,DP
+00071 00FD                         SETDP    $FD
+00072                   
+00073 FE16 1A50                    ORCC     #$50
+00074                   
+00075 FE18                         IF       MSG=1
+00076 FE18 BD8003                  JSR      $8003       ; メッセージ表示
+00077 FFFF                         ENDIF
+00078                   
+00079                   ; 全ドライブリストア(3→0)
+00080 FE1B 8603                    LDA      #3
+00081 FE1D BDFF81       ALLRES     JSR      DRVSEL      ; ドライブ選択
+00082 FE20 BDFF39                  JSR      RESTORE
+00083 FE23 4A                      DECA
+00084 FE24 2AF7                    BPL      ALLRES
+00085                   
+00086 FE26                         IF       MSG=1
+00087 FE26 BD8009                  JSR      $8009       ; INSERT DISKETTE!メッセージ表示
+00088 FFFF                         ENDIF
+00089                   ;       JSR     $800C
+00090                   
+00091 FE29              WAITDSK    EQU      *
+00092 FE29 9618                    LDA      <FDCSTA
+00093 FE2B 2BFC                    BMI      WAITDSK
+00094                   
+00095 FE2D                         IF       MSG=1
+00096 FE2D BD8006                  JSR      $8006       ; 画面消去
+00097 FE30              EXIT       EQU      *
+00098 FE30 9605                    LDA      <$FD05
+00099 FE32 2BFC                    BMI      EXIT        ; サブがREADYになるまで待つ(画面消去終わるまで待つ)
+00100 FFFF                         ENDIF
+00101                   
+00102 FE34              READIPL    EQU      *
+00103 FE34 8EFFC7                  LDX      #IPLRCB
+00104 FE37 BDFE5A                  JSR      DSKRW       ; IPL読み込み
+00105                   ; DISKから読み込んだIPLに制御を渡す
+00106 FE3A                         IF       IPLENT=$300
+00107 FE3A 0F0F                    CLR      $FD0F       ; BASIC ROMを隠す
+00108 FFFF                         ENDIF
+00109 FE3C 4F                      CLRA
+00110 FE3D 1F8B                    TFR      A,DP        ; DP=0
+00111 FE3F 8E0300                  LDX      #IPLENT
+00112 FE42 6E84                    JMP      ,X
+00113                   
+00114                   ; Restore
+00115                   ; IN : RegX = Pointer to RCB
+00116                   ; OUT: AccA = RCB STATUS
+00117 FE44              DRSTR      EQU      *
+00118 FE44 3424                    PSHS     B,Y
+00119 FE46 4F                      CLRA
+00120 FE47 E684                    LDB      <RCBCMD,X
+00121 FE49 C108                    CMPB     #RCBRST     ; リクエスト番号チェック
+00122 FE4B 260B                    BNE      DRSTR_E
+00123 FE4D A607                    LDA      <RCBDRV,X
+00124 FE4F BDFF81                  JSR      DRVSEL      ; ドライブ選択
+00125 FE52 BDFF39                  JSR      RESTORE     ; リストア実行
+00126 FE55 BDFED0                  JSR      CHKERR1     ; CHECK FDC STATUS
+00127 FE58              DRSTR_E    EQU      *
+00128 FE58 35A4                    PULS     B,Y,PC
+00129                   
+00130                   
+00131                   ; RCBのリクエスト番号を見て、DWRITとDREADに振り分ける
+00132 FE5A              DSKRW      EQU      *
+00133 FE5A A684                    LDA      <RCBCMD,X
+00134 FE5C 8109                    CMPA     #RCBWSC
+00135 FE5E 2708                    BEQ      DWRIT
+00136 FE60 810A                    CMPA     #RCBRSC
+00137 FE62 272B                    BEQ      DREAD
+00138 FE64 4F                      CLRA
+00139 FE65 1A01                    ORCC     #$01
+00140 FE67 39                      RTS
+00141                   
+00142                   ; Sector write
+00143                   ; IN : RegX = Pointer to RCB
+00144                   ; OUT: AccA = RCB STATUS
+00145 FE68              DWRIT      EQU      *
+00146 FE68 3444                    PSHS     B,U
+00147 FE6A 3401                    PSHS     CC
+00148 FE6C 1A50                    ORCC     #$50
+00149 FE6E BDFEB6                  JSR      PRESCT      ; Preparation for sector operation
+00150 FE71 BDFF6D                  JSR      MOTORON     ; モータON
+00151 FE74 BDFF4D                  JSR      WRDY        ; FDC READY待ち
+00152 FE77 86A0                    LDA      #FCWRSC     ; WRITE SECTOR CMD.
+00153 FE79 9718                    STA      <FDCCMD
+00154 FE7B 961F         DWRIT_2    LDA      <FDCDRQ
+00155 FE7D 2A06                    BPL      DWRIT_3
+00156 FE7F 3702                    PULU     A
+00157 FE81 971B                    STA      <FDCDAT     ; DATA TFR, IF DRQ=1
+00158 FE83 20F6                    BRA      DWRIT_2
+00159 FE85 48           DWRIT_3    LSLA
+00160 FE86 2AF3                    BPL      DWRIT_2     ; GO TO TFR LOOP, IF IRQ=0
+00161 FE88 3501                    PULS     CC
+00162 FE8A BDFEF3                  JSR      CHKERR2     ; CHECK FDC STATUS
+00163 FE8D 35C4                    PULS     B,U,PC
+00164                   
+00165                   
+00166                   ; Sector read
+00167                   ; IN : RegX = Pointer to RCB
+00168                   ; OUT: AccA = RCB STATUS
+00169 FE8F              DREAD      EQU      *
+00170 FE8F 3444                    PSHS     B,U
+00171 FE91 3401                    PSHS     CC
+00172 FE93 1A50                    ORCC     #$50
+00173 FE95 BDFEB6                  JSR      PRESCT      ; Preparation for sector operation
+00174 FE98 BDFF6D                  JSR      MOTORON     ; モータON
+00175 FE9B BDFF4D                  JSR      WRDY        ; FDC READY待ち
+00176 FE9E 8680                    LDA      #FCRDSC     ; READ SECTOR CMD.
+00177 FEA0 9718                    STA      <FDCCMD
+00178 FEA2 961F         DREAD_2    LDA      <FDCDRQ
+00179 FEA4 2A06                    BPL      DREAD_3
+00180 FEA6 961B                    LDA      <FDCDAT     ; DATA TFR, IF DRQ=1
+00181 FEA8 A7C0                    STA      ,U+
+00182 FEAA 20F6                    BRA      DREAD_2
+00183 FEAC 48           DREAD_3    LSLA
+00184 FEAD 2AF3                    BPL      DREAD_2     ; GO TO TFR LOOP, IF IRQ=0
+00185 FEAF 3501                    PULS     CC
+00186 FEB1 BDFEF3                  JSR      CHKERR2     ; CHECK FDC STATUS
+00187 FEB4 35C4                    PULS     B,U,PC
+00188                   
+00189                   ; Preparation process prior to sector read/write
+00190                   ; IN :  RegX = Pointer to RCB
+00191                   ; OUT:  RegU = Pointer to data buffer
+00192                   ; *AccA will be broken
+00193 FEB6              PRESCT     EQU      *
+00194 FEB6 A607                    LDA      <RCBDRV,X
+00195 FEB8 BDFF81                  JSR      DRVSEL
+00196 FEBB A604                    LDA      <RCBTRK,X   ; TRK
+00197 FEBD 9119                    CMPA     <FDCTRK     ; シークの必要が無ければシークしない
+00198 FEBF 2702                    BEQ      PRESC_1
+00199 FEC1 8D55                    BSR      SEEK        ; SEEK
+00200 FEC3 A606         PRESC_1    LDA      <RCBSID,X   ; SIDE
+00201 FEC5 971C                    STA      <FDCSID
+00202 FEC7 A605                    LDA      <RCBSCT,X   ; SECTOR
+00203 FEC9 971A                    STA      <FDCSCT
+00204 FECB EE02                    LDU      <RCBBUF,X
+00205 FECD A607                    LDA      <RCBDRV,X
+00206 FECF 39                      RTS
+00207                   
+00208                   ; FDC status check and set BIOS error code(for type I cmd)
+00209                   ; OUT: Acca = BIOS error code
+00210 FED0              CHKERR1    EQU      *
+00211 FED0 3404                    PSHS     B
+00212 FED2 4F                      CLRA
+00213 FED3 D618                    LDB      <FDCSTA
+00214 FED5 2718                    BEQ      CHKE1_N     ; NO ERROR
+00215 FED7 860A                    LDA      #$0A
+00216 FED9 C580                    BITB     #$80
+00217 FEDB 260E                    BNE      CHKE1_O     ; DISK NOT READY
+00218 FEDD 4C                      INCA
+00219                   ;       BITB    #$40
+00220                   ;       BNE     CHKE1_O         ; WRITE PROTECTED
+00221 FEDE 4C                      INCA
+00222 FEDF C510                    BITB     #$10
+00223 FEE1 2608                    BNE      CHKE1_O     ; HARD ERROR
+00224 FEE3 4C                      INCA
+00225 FEE4 C508                    BITB     #$08
+00226 FEE6 2603                    BNE      CHKE1_O     ; CRC ERROR
+00227 FEE8 4F                      CLRA
+00228 FEE9 2004                    BRA      CHKE1_N
+00229 FEEB 1A01         CHKE1_O    ORCC     #$01
+00230 FEED 3584                    PULS     B,PC
+00231                   
+00232 FEEF 1CFE         CHKE1_N    ANDCC    #$FE
+00233 FEF1 3584                    PULS     B,PC
+00234                   
+00235                   ; FDC status check and set BIOS error code(for type II cmd)
+00236                   ; OUT: Acca = BIOS error code
+00237 FEF3              CHKERR2    EQU      *
+00238 FEF3 3404                    PSHS     B
+00239 FEF5 4F                      CLRA
+00240 FEF6 D618                    LDB      <FDCSTA
+00241 FEF8 271A                    BEQ      CHKE2_N     ; NO ERROR
+00242 FEFA 860A                    LDA      #$0A
+00243 FEFC C580                    BITB     #$80
+00244 FEFE 2610                    BNE      CHKE2_O     ; DISK NOT READY
+00245 FF00 4C                      INCA
+00246 FF01 C540                    BITB     #$40
+00247 FF03 260B                    BNE      CHKE2_O     ; WRITE PROTECTED
+00248 FF05 4C                      INCA
+00249 FF06 C514                    BITB     #$14
+00250 FF08 2606                    BNE      CHKE2_O     ; HARD ERROR
+00251 FF0A 4C                      INCA
+00252 FF0B C508                    BITB     #$08
+00253 FF0D 2601                    BNE      CHKE2_O     ; CRC ERROR
+00254                   ;       BRA     CHKE2_N
+00255 FF0F 4C                      INCA
+00256 FF10 1A01         CHKE2_O    ORCC     #$01
+00257 FF12 3584                    PULS     B,PC
+00258                   
+00259 FF14 1CFE         CHKE2_N    ANDCC    #$FE
+00260 FF16 3584                    PULS     B,PC
+00261                   
+00262                   ; Head seek
+00263                   ; IN : AccA: Destination track #
+00264                   ; OUT: CC.C = 0:NO ERROR 1:SEEK ERROR
+00265 FF18              SEEK       EQU      *
+00266 FF18 3402                    PSHS     A
+00267 FF1A 971B                    STA      <FDCDAT
+00268 FF1C 8D4F                    BSR      MOTORON     ; モータON
+00269 FF1E 8D2D                    BSR      WRDY        ; WAIT FOR FDC GOES READY
+00270 FF20 861E                    LDA      #FCSEEK
+00271 FF22 9718                    STA      <FDCCMD     ; シークコマンド実行
+00272 FF24 BDFFBE                  JSR      T50US       ; 50us待ち
+00273 FF27 BDFF56                  JSR      WIRQ        ; IRQ待ち
+00274 FF2A 8D33                    BSR      SAVTRK
+00275 FF2C 9618                    LDA      <FDCSTA
+00276 FF2E 4D                      TSTA                 #$10            ; シークエラー?
+00277 FF2F 2704                    BEQ      SEEK_1
+00278 FF31 1A01                    ORCC     #$01        ; SET Carry flag
+00279 FF33 3582                    PULS     A,PC
+00280 FF35 1CFE         SEEK_1     ANDCC    #$FE        ; CLEAR Carry flag
+00281 FF37 3582                    PULS     A,PC
+00282                   
+00283                   ; Restore head
+00284                   ; ドライブ選択は含まない(選択しておいてからコールする)
+00285 FF39              RESTORE    EQU      *
+00286 FF39 3402                    PSHS     A
+00287 FF3B 8D30                    BSR      MOTORON     ; モータON
+00288 FF3D 8D0E                    BSR      WRDY
+00289 FF3F 860E                    LDA      #FCRSTR
+00290 FF41 9718                    STA      <FDCCMD
+00291 FF43 BDFFBE                  JSR      T50US       ; 50us待つ
+00292 FF46 BDFF56                  JSR      WIRQ
+00293 FF49 8D14                    BSR      SAVTRK
+00294 FF4B 3582                    PULS     A,PC
+00295                   
+00296                   ; FDCのステータスのBUSYが落ちるのを待つ
+00297 FF4D              WRDY       EQU      *
+00298 FF4D 3402                    PSHS     A
+00299 FF4F 9618         WRDY_1     LDA      <FDCSTA
+00300 FF51 44                      LSRA
+00301 FF52 25FB                    BCS      WRDY_1
+00302 FF54 3582                    PULS     A,PC
+00303                   
+00304                   ; FDCのIRQが1になるのを待つ
+00305 FF56              WIRQ       EQU      *
+00306 FF56 3402                    PSHS     A
+00307 FF58 961F         WIRQ_1     LDA      <FDCDRQ
+00308 FF5A 48                      LSLA
+00309 FF5B 2AFB                    BPL      WIRQ_1
+00310 FF5D 3582                    PULS     A,PC
+00311                   
+00312                   ; 現在のトラック番号をワークに保存
+00313 FF5F              SAVTRK     EQU      *
+00314 FF5F 3416                    PSHS     A,B,X
+00315 FF61 8EFFE1                  LDX      #FDDHEAD
+00316 FF64 B6FFE0                  LDA      LASTDRV
+00317 FF67 D619                    LDB      <FDCTRK
+00318 FF69 E786                    STB      A,X
+00319 FF6B 3596                    PULS     A,B,X,PC
+00320                   
+00321                   ; FDDのモータを回す
+00322                   ; 回ってなかった場合、２秒待つ
+00323 FF6D              MOTORON    EQU      *
+00324 FF6D 3402                    PSHS     A
+00325 FF6F 961D                    LDA      <FDCDRV
+00326                   ;       BMI     MOTON_E         ; 既にモーター回っている
+00327 FF71 8A80                    ORA      #$80
+00328 FF73 971D                    STA      <FDCDRV     ; モータを回す
+00329                   ;       BSR     T1S
+00330                   ;       BSR     T1S             ; 2秒待つ
+00331 FF75              MOTON_E    EQU      *
+00332 FF75 3582                    PULS     A,PC
+00333                   
+00334                   ; FDDのモータを止める
+00335 FF77              MOTOROF    EQU      *
+00336 FF77 3402                    PSHS     A
+00337 FF79 961D                    LDA      <FDCDRV
+00338 FF7B 847F                    ANDA     #$7F
+00339 FF7D 971D                    STA      <FDCDRV
+00340 FF7F 3582                    PULS     A,PC
+00341                   
+00342                   ; FDCにドライブ番号をセット
+00343                   ; IN : AccA=ドライブ番号
+00344                   ; トラック位置の退避、復元を含む
+00345 FF81              DRVSEL     EQU      *
+00346 FF81 3416                    PSHS     A,B,X
+00347 FF83 8EFFE1                  LDX      #FDDHEAD
+00348 FF86 D61D                    LDB      <FDCDRV     ; モーター回っていたかどうかを後で見るためにスタックに保存
+00349 FF88 3404                    PSHS     B
+00350 FF8A              DRVSEL1    EQU      *
+00351 FF8A 8403                    ANDA     #$03
+00352 FF8C E686                    LDB      A,X
+00353 FF8E D719                    STB      <FDCTRK     ; 選択するドライブのトラック番号をセット
+00354 FF90 B7FFE0                  STA      LASTDRV     ; 最後に選択したドライブ番号を保持
+00355 FF93 E6E0                    LDB      ,S+
+00356 FF95 2A02                    BPL      DRVSEL2     ; 回ってなかったら、まわさない
+00357 FF97 8A80                    ORA      #$80        ; モータ回す
+00358 FF99 971D         DRVSEL2    STA      <FDCDRV     ; ドライブ選択
+00359 FF9B 3596                    PULS     A,B,X,PC
+00360                   
+00361                   ;------------------------------------------------------------
+00362                   ; 1sタイマー
+00363 FF9D              T1S        EQU      *
+00364 FF9D 3402                    PSHS     A
+00365 FF9F 8632                    LDA      #50
+00366 FFA1 8D05         T1S1       BSR      T20MS       ; 20ms * 50 = 1000ms
+00367 FFA3 4A                      DECA
+00368 FFA4 26FB                    BNE      T1S1
+00369 FFA6 3582                    PULS     A,PC
+00370                   
+00371                   ;------------------------------------------------------------
+00372                   ; 20msタイマー
+00373 FFA8              T20MS      EQU      *
+00374 FFA8 3402                    PSHS     A
+00375 FFAA 8614                    LDA      #20
+00376 FFAC 8D05         T20MS1     BSR      T1MS        ; 1ms * 20 = 20ms
+00377 FFAE 4A                      DECA
+00378 FFAF 26FB                    BNE      T20MS1
+00379 FFB1 3582                    PULS     A,PC
+00380                   
+00381                   ;------------------------------------------------------------
+00382                   ; 1msタイマー
+00383                   ; 1.2MHz = 833ns  1ms= 1200
+00384                   ; 2.0MHz = 500ns  1ms= 2000
+00385 FFB3              T1MS       EQU      *
+00386 FFB3 3410                    PSHS     X
+00387 FFB5 8E00FA                  LDX      #2000/8     ; 2.0MHz
+00388 FFB8 301F         TIM1MS1    LEAX     <-1,X       ; ~=4+1 #=2+1
+00389 FFBA 26FC                    BNE      TIM1MS1     ; ~=3 #=2
+00390 FFBC 3590                    PULS     X,PC
+00391                   
+00392                   
+00393                   ;------------------------------------------------------------
+00394                   ; 50usタイマー
+00395 FFBE              T50US      EQU      *
+00396 FFBE 3402                    PSHS     A
+00397 FFC0 8614                    LDA      #20
+00398 FFC2 4A           T50US1     DECA
+00399 FFC3 26FD                    BNE      T50US1
+00400 FFC5 3582                    PULS     A,PC
+00401                   
+00402                   ;------------------------------------------------------------
+00403 FFC7 0A00         IPLRCB     FCB      $0A,$00     ; DREAD, STATUS
+00404 FFC9 0300                    FDB      IPLENT      ; BUFFER
+00405 FFCB 0001                    FCB      $00,$01     ; TRK,SCT
+00406 FFCD 0000                    FCB      $00,$00     ; SID,DRV
+00407                   
+00408                   
+00409                   ;------------------------------------------------------------
+00410 FFDD                         ORG      $FFE0-3
+00411 FFDD              INT_DMY    EQU      *
+00412 FFDD 0D03                    TST      <$FD03
+00413 FFDF 3B                      RTI
+00414                   
+00415                   
+00416                   ;------------------------------------------------------------
+00417 FFE0                         ORG      $FFE0
+00418                   
+00419 FFE0 00           LASTDRV    FCB      0
+00420 FFE1 00000000     FDDHEAD    FCB      0,0,0,0
+00421                   
+00422                   
+00423                   ;------------------------------------------------------------
+00424                   ; INTERRUPT VECTOR TABLE
+00425                   
+00426 FFF0                         ORG      $FFF0
+00427                   
+00428 FFF0 0000                    FDB      $0000
+00429 FFF2 0000         SWI3       FDB      $0000
+00430 FFF4 0000         SWI2       FDB      $0000
+00431 FFF6 0000         FIRQ       FDB      $0000
+00432 FFF8 0000         IRQ        FDB      $0000
+00433 FFFA 0000         SWI        FDB      $0000
+00434 FFFC 0000         NMI        FDB      $0000
+00435 FFFE FE00         RESET      FDB      $FE00
+00436                   
+00437                   
+00438                   
+00439 0000                         END

@@ -1,0 +1,406 @@
+
+	ORG	$8000
+
+	JMP	BIOS
+	JMP	MSGOUT1
+	JMP	MSGOUT2
+	JMP	MSGOUT3
+
+;	JMP	DISPALL
+
+;-----------------------------------------------------------------------
+
+BIOS	EQU	*
+	PSHS	A,B,DP,X,Y,U
+	ORCC	#$50
+	LDA	#$FD
+	TFR	A,DP
+	LDA	,X
+	CMPA	#27
+	BLS	BIOS1
+	LDA	#$01
+	BRA	BIOS2
+BIOS1	LSLA
+	LDY	#JPTBL
+	JSR	[A,Y]
+BIOS2	STA	<1,X
+	TSTA
+	BEQ	BIOS_3
+	ORCC	#$01
+	BRA	BIOS_E
+BIOS_3	ANDCC	#$FE
+BIOS_E	PULS	A,B,DP,X,Y,U,PC
+
+JPTBL	FDB	ANALGP,MOTOR,CTBWRT,CTBRED
+	FDB	INTBBL,SCREEN,WRTBBL,REDBBL
+	FDB	RESTOR,DWRITE,DREAD,RESV
+	FDB	BEEPON,BEEPOF,LPOUT,HDCOPY
+	FDB	SUBOUT,SUBIN,INPUT,INPUTC
+	FDB	OUTPUT,KEYIN,KANJIR,LPCHK
+	FDB	BIINIT,RESV,RESV,RESV
+
+ANALGP	EQU	*
+	CLRA
+	RTS
+
+MOTOR	EQU	*
+	CLRA
+	RTS
+
+CTBWRT	EQU	*
+	CLRA
+	RTS
+
+CTBRED	EQU	*
+	CLRA
+	RTS
+
+INTBBL	EQU	*
+	CLRA
+	RTS
+
+SCREEN	EQU	*
+	CLRA
+	RTS
+
+WRTBBL	EQU	*
+	CLRA
+	RTS
+
+REDBBL	EQU	*
+	CLRA
+	RTS
+
+RESTOR	EQU	*
+	JSR	$FE02
+	CLRA
+	RTS
+
+DWRITE	EQU	*
+	JSR	$FE05
+	CLRA
+	RTS
+
+DREAD	EQU	*
+	JSR	$FE08
+	CLRA
+	RTS
+
+RESV	EQU	*
+	CLRA
+	RTS
+
+BEEPON	EQU	*
+	CLRA
+	RTS
+
+BEEPOF	EQU	*
+	CLRA
+	RTS
+
+LPOUT	EQU	*
+	CLRA
+	RTS
+
+HDCOPY	EQU	*
+	CLRA
+	RTS
+
+SUBOUT	EQU	*
+	JSR	SUBSUB		; RCBで示すバッファの中身をサブシステムに転送
+	CLRA
+	RTS
+
+SUBIN	EQU	*
+	JSR	SUBSUB		; RCBで示すバッファの中身をサブシステムに転送
+	JSR	HALT
+	LDY	<2,X		; データバッファ先頭
+	LDU	#$FC80
+	LDD	<6,X		; 入力バイト数
+	STD	<4,X		; データバイト数更新
+	TSTB
+SUBIN1	BEQ	SUBIN2
+	PULU	A
+	STA	,Y+
+	DECB
+	BRA	SUBIN1
+SUBIN2	LDA	#$80
+	STA	$FC80
+	JSR	RESTART		; サブCPUリスタート
+	CLRA
+	RTS
+
+; SUBOUT/SUBINで共通に利用する出力部分
+SUBSUB	EQU	*
+	JSR	HALT
+	LDU	<2,X		; データバッファ先頭
+	LDY	#$FC80		; 共有RAM先頭
+	LDB	<5,X		; データサイズ
+SUBSUB1	BEQ	SUBSUB2
+	PULU	A
+	STA	,Y+
+	DECB
+	BRA	SUBSUB1
+SUBSUB2	JSR	RESTART		; サブCPUリスタート
+	RTS
+
+
+
+INPUT	EQU	*
+	CLRA
+	RTS
+
+INPUTC	EQU	*
+	CLRA
+	RTS
+
+OUTPUT	EQU	*
+	CLRA
+	RTS
+
+KEYIN	EQU	*
+	JSR	HALT
+	LDA	#$29		; INKEY
+	STA	$FD32
+	LDA	#%00000000	; BIT1=RESET, BIT0=WAIT
+	STA	$FD33
+	JSR	RESTART		; サブCPUリスタート
+	JSR	HALT
+	CLRA
+	LDB	$FC84		; キーが押されていたか？
+	BEQ	INKEY1
+	LDA	$FC83		; キーコード読み出し
+INKEY1	STD	[2,X]		; キーコード、押下フラグ書き込み
+	LDD	#$0002
+	STD	<4,X		; バッファサイズ(常に2)
+	LDA	#$80
+	STA	$FC80		; READY REQUEST
+	JSR	RESTART		; サブCPUリスタート
+	CLRA
+	RTS
+
+KANJIR	EQU	*
+	PSHS	B,Y
+	LDY	<2,X
+	LDD	<4,X
+	BSR	GETFNT
+	PULS	B,Y
+	CLRA
+	RTS
+;
+;; IN : AccD = JIS CODE
+;;    : IY   = FONT BUFFER ADDRESS
+GETFNT	EQU	*
+	PSHS	D,X,Y
+	PSHS	D
+	ANDA	#$0F
+	ANDB	#$1F
+	LSLB
+	LSLB
+	LSLB
+	LSLB
+	ROLA
+	PSHS	D
+	LDA	<2,S
+	ANDA	#$70
+	SUBA	#$20
+	PSHS	A
+	LSLA
+	ADDA	,S
+	LSLA
+	STA	,S
+	LDA	<4,S
+	ANDA	#$60
+	SUBA	#$20
+	ADDA	,S
+	BCS	CNVJHI
+	CMPA	#$40
+	BLO	CNVJLO
+	BHI	CNVJHI
+	LDA	#$10
+	FCB	$8C
+CNVJHI	SUBA	#$20
+CNVJLO	ORA	<1,S
+	LDB	<2,S
+	LEAS	<5,S
+KRRDLP	STD	$FD20
+	LDX	$FD22
+	STX	,Y++
+	INCB
+	BITB	#$0F
+	BNE	KRRDLP
+	PULS	D,X,Y,PC
+
+LPCHK	EQU	*
+	CLRA
+	RTS
+
+BIINIT	EQU	*
+	CLRA
+	RTS
+
+;-----------------------------------------------------------------------
+
+ROMINI	EQU	*
+;	LDX	#$0000
+;	LDY	#$8000
+;ROMINI1	CLR	,X+		; $0000-$7FFFを0クリア
+;	LEAY	<-1,Y
+;	BNE	ROMINI1
+	LDA	#$7E			; BIOSへのフックを設定
+	STA	$00DE
+	LDX	#BIOS
+	STX	$00DF
+	RTS
+
+
+;-----------------------------------------------------------------------
+
+;BOOTSW	EQU	$FD0B
+
+MSGOUT1	EQU	*			; 起動時のメッセージ表示ルーチン
+	PSHS	U
+	LDU	#MSG1
+	JSR	DISPMSG
+;	LDU	#MSGBAS
+;	LDA	BOOTSW		; CHECK BOOT MODE
+;	LSRA
+;	BCC	MSGO11
+;	LDU	#MSGDOS		; DOS MODE
+;MSGO11	EQU	*
+;	JSR	DISPMSG
+	PULS	U,PC
+
+MSGOUT2	EQU	*			; 起動時メッセージ消去用
+	PSHS	U
+	LDU	#MSG2
+	JSR	DISPMSG
+	PULS	U,PC
+
+MSGOUT3	EQU	*			; PLEASE INSERT DISKETTE!!
+	PSHS	U
+	LDU	#MSG3
+	JSR	DISPMSG
+	PULS	U,PC
+
+
+; すべてのアスキー文字を表示
+;DISPALL	EQU	*
+;	PSHS	A
+;	LDA	#$20
+;DISPA1	JSR	DISPL
+;	ADDA	#$10
+;	BNE	DISPA1
+;	PULS	A,PC
+
+; AccAのアスキーコードから$10バイト分表示
+;DISPL	EQU	*
+;	PSHS	A,B,X,U
+;	LDB	#$10
+;	LDX	#$1000			; ASCII BUFER
+;DISPL1	STA	,X+
+;	INCA
+;	DECB
+;	BNE	DISPL1
+;	LDA	#$0D
+;	STA	,X+
+;	CLR	,X+
+;	LDU	#$1000
+;	JSR	DISPMSG
+;	PULS	A,B,X,U,PC
+
+; Uレジスタの指すバッファから文字列を転送する
+; '\0'が出てくるまでを表示する
+DISPMSG	EQU	*
+	PSHS	A,CC,X,U
+	ORCC	#$50
+	LDA	#$03
+DISP_L1	JSR	HALT
+	LDX	#$FC80
+	CLR	,X+
+	CLR	,X+
+	STA	,X+
+	CLR	,X+
+DISP_L2	LDA	,U+
+	BEQ	DISP_E
+	STA	,X+
+	INC	$FC83
+	BRA	DISP_L2
+
+DISP_E	EQU	*
+	JSR	RESTART
+	PULS	A,CC,X,U,PC
+
+MSG1	FCB	$11,$07
+	FCC	/XM7 BOOT LOADER /
+	FCC	/V1.30/
+	FCC	/ ALPHA/
+;	FCC	/ Release Candidate 2/
+	FCB	$0D
+	FCC	/Copyright MMI (C) Apollo. All rights reserved./
+	FCB	$0D,$0D,$00
+
+MSG2	FCB	$0C,$00
+
+MSG3	FCB	$11,$04
+	FCC	/PLEASE INSERT DISKETTE!!/
+	FCC	$00
+
+;MSGBAS	FCC	/BASIC MODE/
+;	FCB	$0D,$0D,$00
+
+;MSGDOS	FCC	/DOS MODE/
+;	FCB	$0D,$0D,$00
+
+; サブシステム停止
+HALT	EQU	*
+	PSHS	A
+HALT1	LDA	$FD05
+	BMI	HALT1
+	LDA	#$80
+	STA	$FD05
+	NOP
+	NOP
+	NOP
+HALT2	LDA	$FD05
+	BPL	HALT2
+	PULS	A,PC
+
+; サブシステムリスタート
+RESTART	EQU	*
+	CLR	$FD05
+	RTS
+
+;-----------------------------------------------------------------------
+
+	ORG	$F17D
+
+	JMP	BIOS
+
+
+	ORG	$F21F
+	JMP	KANJIR		; KOEI対策?
+
+;-----------------------------------------------------------------------
+
+	ORG	$FBFA
+
+	FDB	BIOS
+
+
+;-----------------------------------------------------------------------
+
+	ORG	$FBFE
+
+	FDB	ROMINI
+
+
+;-----------------------------------------------------------------------
+
+	ORG	$FFFE
+
+	FDB	$FE00
+
+;-----------------------------------------------------------------------
+
+	END

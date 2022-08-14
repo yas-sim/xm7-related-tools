@@ -1,0 +1,270 @@
+
+CROSS REFERENCE TABLE:
+
+ABORT      D000      63   166   199  1311 
+ATTEN      D404      41  1197  1231 
+ATTR_BK    0000      21 
+ATTR_BL    0001      22 
+ATTR_CY    0005      26 
+ATTR_F     0080      17 
+ATTR_GR    0004      25 
+ATTR_M     0040      18 
+ATTR_MG    0003      24 
+ATTR_P     0010      19 
+ATTR_R     0008      20 
+ATTR_RD    0002      23 
+ATTR_WH    0007      28 
+ATTR_YE    0006      27 
+BEEP       D403      40   387 
+BOOT       E000     112  1339  1342 
+BUSYF      D40A      44   204   212 
+CCOL       D023      95   309   443  1045 
+CHAIN      E656     327   660 
+CHGCOL     E666     328   676 
+CHLINE     E67E     328   700 
+CLRAM      E016     127   129 
+CLS0       E564     170   430   527 
+CLS0_1     E572     536   545 
+CLS1       E58D     550 
+CLS1_1     E596     554   603 
+CLS1_2     E598     555   600 
+CLS1_B1    E59A     556   568 
+CLS1_G1    E5E6     586   598 
+CLS1_R1    E5C0     571   583 
+CLS2       E616     608 
+CMD0120    E17F     225   246 
+CMD292C    E186     230   252 
+CMD3D3F    E18F     235   259 
+CMD64      E198     238   266 
+CMD7F      E19C     241   269 
+CMDLP1     E13B     202   209 
+CMDLP2     E143     205   210 
+CMDLP_E    E14F     207   212 
+CMDPRC     E15F     220   223 
+CMDWAIT    E133     198   219 
+CONCTL     E64A     326   648 
+CONT       E799     266   871 
+CRTSW      D408      42   529   546   611   613 
+CSRD1      E7D0     908   910 
+CSRD2      E7DF     905   912   915   918 
+CSRDEC     E7BD     392   900 
+CSRDN      E7ED     523   930 
+CSRDNE     E7F9     935   937 
+CSRI1      E7AC     888   890 
+CSRI2      E7BB     894   897 
+CSRINC     E7A3     357   407   464   884 
+CSRLF      E7FB     515   940 
+CSRLFE     E806     943   946 
+CSRRG      E808     511   949 
+CSRRGE     E815     954   956 
+CSRUP      E7E1     519   921 
+CSRUPE     E7EB     924   927 
+CSRX       D021      93   304   400   424   435   450   891   892   895   903
+                    911   913   942   945   952   953   955  1099 
+CSRY       D022      94   305   414   415   419   425   452   902   914   917
+                    923   926   932   933   936  1092 
+CWID       D024      96   306   307   341   887   907   961  1008  1100 
+DEFPF      E6AE     330   726 
+DEFPF1     E6BE     736   740 
+DEFPF9     E6C7     736   741 
+DRAW       E890    1013  1023  1028  1040 
+DRAW1      E8A6    1048  1050 
+DRAW2      E8AD    1051  1053 
+DRAW3      E8B4    1054  1056 
+ECCOORD    003D       5 
+ECHARN     0042      10 
+ECMD       0046      14   878 
+ECMDPRM    0045      13 
+ECOLORN    0043      11 
+ECOORDN    0041       9 
+EFUNCC     0040       8 
+EGCOORD    003F       7 
+ENCDAT     D431      50  1298 
+ENCSTA     D432      51  1300 
+ENLARG1    E8BF    1068  1074 
+ENLARG2    E8C6    1071  1073 
+ENLARGE    E8B9    1021  1025  1064 
+EORDSQ     003E       6 
+EPARAM     003C       4 
+EPFNUM     0044      12 
+ERASE      E43F     325   345 
+ERASE2     E64E     326   652 
+FC_AND     0003      33 
+FC_NOT     0005      35 
+FC_OR      0002      32 
+FC_PRES    0001      31 
+FC_PSET    0000      30 
+FC_XOR     0004      34 
+FIRQ       FFF6    1335 
+FONBASE    D800      59  1083 
+GCURS      E67A     328   696 
+GET        E62A     325   616 
+GETBA      E642     326   640 
+GETBL1     E66A     328   680 
+GETBL2     E672     328   688 
+GETC       E62E     325   620 
+GETCB1     E632     325   624 
+GETCB2     E63A     325   632 
+GETFON     E8CC    1004  1079 
+GETPF      E6CB     330   744 
+GETVRA1    E8EB    1101  1103 
+GETVRAM    E8D8    1006  1090 
+GETXMAX    E817     944   951   959 
+GETXMXE    E81E     962   964 
+HFIRQ      EE88     143  1204 
+HFIRQ2     EE95    1211  1232 
+HINT       EF1C     147  1308 
+HNMI       EDE4     155  1113 
+HNMIW      EDE4    1114 
+ILGCMD     E17B     228   233   243 
+INICON     E1BC     164   302 
+INIKEY     EEF7     163   712  1240  1276 
+INIT       E42D     325   334 
+INIT1      E438     339   341 
+INITIM1    E1B3     293   295 
+INITIMR    E1AA     162   288 
+INKEY      E682     330   705 
+INKEY2     E693     711   713   716 
+INKEY3     E6A3     714   720 
+INKEYE     E6A9     719   722 
+INSLED     D40D      45 
+INTCTL     E6CF     330   748 
+INTF       D009      73   167  1142  1144  1156  1158  1188  1190  1192  1196
+INTINT     EE66    1182 
+INTTM1     EE22    1121  1126  1131  1136  1141  1145 
+INTTM2     EE3C    1148  1151  1155  1159 
+INTTM3     EE56    1161  1165  1169  1173 
+INTTM4     EE76    1175  1177  1185  1191 
+INTTM6     EE85    1115  1193  1198 
+INTTRP     EF23     137   151  1312 
+IRQ        FFF8    1336 
+IRQACK     D402      39  1309 
+JPTBL01    E3DD     181   248   324 
+JPTBL29    E41F     183   255   330 
+JPTBL3D    E427     185   262   332 
+KEYBUF     D360     105  1250  1252  1267  1269  1279 
+KEYMD      D003      66   502   506  1238 
+KEYN       D004      67   495   713  1242  1246  1260  1263  1278 
+KEYRP      D005      68   496  1264  1270  1281 
+KEYWP      D007      69   497  1247  1253  1280 
+KYBDH      D400      37  1206 
+KYBDL      D401      38 
+LDKEY      EEDC     720  1258 
+LDKEY1     EEF3    1268  1270 
+LDKEY_E    EEF5    1261  1271 
+LINE       E652     327   656 
+MAINLP     E153     174   217   221 
+MAINLP1    E157     219 
+NMI        FFFC    1338 
+NMIMSK     D430      49   122 
+NOCMD      E79A     243   324   326   326   326   327   327   327   327   876
+ORDESC1    E53E     476   488 
+ORDESC2    E540     478   491 
+ORDESC3    E542     480   494 
+ORDESC4    E54A     482   500 
+ORDESC5    E550     484   505 
+ORDESCE    E53B     485   489   492   498   503   507 
+ORDHT1     E4C6     404   409 
+ORDHT2     E4D2     405   410 
+ORDLF_E    E4E5     417   421 
+ORDRPC1    E511     461   466 
+ORDRPC2    E51D     462   467 
+ORDTBL     E469     365   375 
+ORD_BL     E4AB     375   386 
+ORD_BS     E4AF     376   390 
+ORD_CR     E4F2     376   434 
+ORD_DC     E560     378   522 
+ORD_EA     E4EC     376   428 
+ORD_EL     E4AA     375   383 
+ORD_ESC    E523     378   472 
+ORD_HM     E4E7     376   423   429 
+ORD_HT     E4BB     376   397 
+ORD_LC     E558     378   514 
+ORD_LF     E4D4     376   412   896 
+ORD_NOP    E4A9     375   375   375   375   375   375   376   376   377   377
+                    377   377   377   378   378   378   380 
+ORD_RC     E554     378   510 
+ORD_RPC    E509     377   456 
+ORD_SC     E4FB     377   447 
+ORD_SF     E4F5     377   441 
+ORD_UC     E55C     378   518 
+PAINT      E65E     327   668 
+PFKEY      EE98    1208  1214 
+PFKEY1     EEA9    1225  1229 
+PFKEY9     EEB2    1225  1230 
+PFTBL      D2C0     101   732  1218 
+POINT      E65A     327   664 
+PUT        E443     325   349 
+PUT1       E448     352   359 
+PUT2       E456     358   369 
+PUTBL1     E66E     328   684 
+PUTBL2     E676     328   692 
+PUTC40     E875    1009  1019  1031 
+PUTC80     E868    1011  1016 
+PUTCB1     E636     325   628 
+PUTCB2     E63E     326   636 
+PUTCRA1    E858    1004 
+PUTCRAW    E856     356   394   406   463  1002 
+PUTENC     EF0F    1286  1288  1296 
+PUTENC1    EF14    1299  1302 
+PUTORD     E45D     355   363 
+PUT_E      E459     352   360 
+RAMCLR     E1A0     277   612 
+RAMCLR1    E1A2     279   281 
+RDTIM      E71C     332   791 
+RDTIMW     E71C     792   793 
+RESET      FFFE    1339 
+SCRL10     E82B     975 
+SCRL8      E820     420   968 
+SCROLL     E834     972   979 
+SCROLL1    E841     985   990 
+SETTIM     E6D3     332   752 
+SETTIM1    E6E7     760   763 
+SETTIM2    E6F2     764   769 
+SETTIM3    E6FD     770   775 
+SETTIM4    E708     776   781 
+SETTIM5    E715     782   787 
+SETTIMW    E6D5     754   755 
+SH_CMD     D382      57   200   206   269 
+SH_CNT     D381      56 
+SH_ERR     D380      55   201   203   208   342   346   360   617   621   625
+                    629   633   637   641   645   649   653   657   661   665
+                    669   673   677   681   685   689   693   697   701   722
+                    741   745   749   787   815   834   839   879 
+SH_RAM     D380      54   337   350   707   709   717   718   721   757   795
+                    823  1194  1195  1216 
+SKEY1      EEC1    1239  1241 
+SKEY2      EED8    1251  1253 
+SKEY3      EEDA    1244  1254 
+STACK      D000       1   114   218 
+STOKEY     EEB9    1210  1227  1236 
+SUBTYPE    0001     120   131   436  1283  1294  1321  1331 
+SWI        FFFA    1337 
+SWI2       FFF4    1334 
+SWI3       FFF2    1333 
+SYMBOL     E662     328   672 
+T1         D00C      85   291   766   768   798   800  1118  1119  1122  1123
+                   1124  1127  1128  1129  1132  1133  1134  1137  1146  1149
+T1INT      EE30    1152 
+T1_I       D010      86   772   774   802   804  1147  1150 
+T2         D014      87   778   780   806   808  1160  1163  1164  1167  1168
+                   1171  1172  1174  1176  1179  1181 
+T2_D       D018      88   784   786   810   812  1178  1180 
+TABSET     E646     326   644 
+TACC       D00A      80   168   290   296   754   756   788   792   794   814
+                   1114  1117  1199 
+TBLDMY     E087     187   189 
+TC         D00B      81   160   762   796  1139  1153  1183  1187 
+TCEND      E76F     826   838 
+TCJMP      E78B     830   859 
+TCJSR      E78F     832   864 
+TCMOV      E774     828   843 
+TCMOV1     E77D     849   852 
+TEST       E751     332   821 
+TESTLP     E756     824   856   861   869 
+VOFSTW     D01F      91   312   981   983 
+VRAMF      D409      43   311   314   552   604   980   991  1046  1056 
+VRAMOH     D40E      46   313   984 
+VRAMOL     D40F      47 
+ZEROINT    EE16    1138 
+

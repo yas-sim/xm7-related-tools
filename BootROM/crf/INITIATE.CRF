@@ -1,0 +1,15 @@
+
+CROSS REFERENCE TABLE:
+
+BASIC      6015      19    21 
+BOOTBAS    7800      16    51 
+BOOTDOS    7A00      20    55 
+BOOTSW     FD0B       6    17 
+FDCLDR     FD1E       8 
+IROMDR     FD10       4    45 
+LOOP1      601C      24    27 
+MSR1       FD93       5    14    32 
+SUBP_E     6047      36    47 
+SUBP_S     603F      34    36    43 
+TFR_L      6035      37    40 
+

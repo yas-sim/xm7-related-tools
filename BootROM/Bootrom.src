@@ -1,0 +1,439 @@
+
+;IPLENT	EQU	$100		; IPL ENTRY
+;IPLENT	EQU	$300		; IPL ENTRY
+
+MSG	EQU	1		; 0=Message非表示  1=表示
+
+STACK	EQU	$FC7F		; Initial stack pointer
+
+
+; FDC Status define
+FSNRDY	EQU	$80		; Not ready
+FSWPRT	EQU	$40		; Write protect
+FSHLD	EQU	$20		; Head load
+FSSKER	EQU	$10		; Seek error
+FSCRC	EQU	$08		; CRC error
+FSTRK0	EQU	$04		; Track 0
+FSIDX	EQU	$02		; Index hole
+FSBSY	EQU	$01		; Busy
+
+FCRSTR	EQU	$0E		; Restore
+FCSEEK	EQU	$1E		; Seek
+FCRDSC	EQU	$80		; Read sector  (D3 = SIDE)
+FCWRSC	EQU	$A0		; Write sector (D3 = SIDE)
+FCRDID	EQU	$C0		; Read ID
+FCRDTR	EQU	$E0		; Read track
+FCWRTR	EQU	$F0		; Write track
+FCFIRQ	EQU	$D0		; Force interrupt( D3-D0 = I3-I0 )
+
+FDCSTA	EQU	$FD18		; (R)Status register
+FDCCMD	EQU	$FD18		; (W)Command register
+FDCTRK	EQU	$FD19		; Track register
+FDCSCT	EQU	$FD1A		; Sector register
+FDCDAT	EQU	$FD1B		; Data register
+FDCSID	EQU	$FD1C		; Side select
+FDCDRV	EQU	$FD1D		; Drive select
+FDCLDR	EQU	$FD1E		; Logical drive #
+FDCDRQ	EQU	$FD1F		; DRQ/IRQ
+
+RCBRST	EQU	8		; RESTORE
+RCBWSC	EQU	9		; WRITE SECTOR
+RCBRSC	EQU	10		; READ SECTOR
+
+
+RCBCMD	EQU	0
+RCBSTA	EQU	1
+RCBBUF	EQU	2
+RCBTRK	EQU	4
+RCBSCT	EQU	5
+RCBSID	EQU	6
+RCBDRV	EQU	7
+
+
+	ORG	$FE00
+
+BOOT	EQU	*
+	BRA	START
+
+	JMP	DRSTR
+	JMP	DSKRW
+	JMP	DSKRW
+
+START	EQU	*
+;	ORCC	#$50
+;  IF IPLENT=$300
+  	TST	$FD0F		; BASIC ROMを見せる
+;  ENDIF
+	LDS	#STACK
+
+	LDA	#$FD
+	TFR	A,DP
+	SETDP	$FD
+
+	ORCC	#$50
+
+  IF MSG=1
+	JSR	$8003		; メッセージ表示
+  ENDIF
+
+; 全ドライブリストア(3→0)
+	LDA	#3
+ALLRES	JSR	DRVSEL		; ドライブ選択
+	JSR	RESTORE
+	DECA
+	BPL	ALLRES
+
+  IF MSG=1
+	JSR	$8009		; INSERT DISKETTE!メッセージ表示
+  ENDIF
+;	JSR	$800C
+
+WAITDSK	EQU	*
+	LDA	<FDCSTA
+	BMI	WAITDSK
+
+  IF MSG=1
+	JSR	$8006		; 画面消去
+EXIT	EQU	*
+	LDA	<$FD05
+	BMI	EXIT		; サブがREADYになるまで待つ(画面消去終わるまで待つ)
+  ENDIF
+
+READIPL	EQU	*
+	LDX	#IPLRCB
+	JSR	DSKRW		; IPL読み込み
+; DISKから読み込んだIPLに制御を渡す
+  IF IPLENT=$300
+  	CLR	$FD0F		; BASIC ROMを隠す
+  ENDIF
+	CLRA
+	TFR	A,DP		; DP=0
+	LDX	#IPLENT
+	JMP	,X
+
+; Restore
+; IN : RegX = Pointer to RCB
+; OUT: AccA = RCB STATUS
+DRSTR	EQU	*
+	PSHS	B,Y
+	CLRA
+	LDB	<RCBCMD,X
+	CMPB	#RCBRST		; リクエスト番号チェック
+	BNE	DRSTR_E
+	LDA	<RCBDRV,X
+	JSR	DRVSEL		; ドライブ選択
+	JSR	RESTORE		; リストア実行
+	JSR	CHKERR1		; CHECK FDC STATUS
+DRSTR_E	EQU	*
+	PULS	B,Y,PC
+
+
+; RCBのリクエスト番号を見て、DWRITとDREADに振り分ける
+DSKRW	EQU	*
+	LDA	<RCBCMD,X
+	CMPA	#RCBWSC
+	BEQ	DWRIT
+	CMPA	#RCBRSC
+	BEQ	DREAD
+	CLRA
+	ORCC	#$01
+	RTS
+
+; Sector write
+; IN : RegX = Pointer to RCB
+; OUT: AccA = RCB STATUS
+DWRIT	EQU	*
+	PSHS	B,U
+	PSHS	CC
+	ORCC	#$50
+	JSR	PRESCT		; Preparation for sector operation
+	JSR	MOTORON		; モータON
+	JSR	WRDY		; FDC READY待ち
+	LDA	#FCWRSC		; WRITE SECTOR CMD.
+	STA	<FDCCMD
+DWRIT_2	LDA	<FDCDRQ
+	BPL	DWRIT_3
+	PULU	A
+	STA	<FDCDAT		; DATA TFR, IF DRQ=1
+	BRA	DWRIT_2
+DWRIT_3	LSLA
+	BPL	DWRIT_2		; GO TO TFR LOOP, IF IRQ=0
+	PULS	CC
+	JSR	CHKERR2		; CHECK FDC STATUS
+	PULS	B,U,PC
+
+
+; Sector read
+; IN : RegX = Pointer to RCB
+; OUT: AccA = RCB STATUS
+DREAD	EQU	*
+	PSHS	B,U
+	PSHS	CC
+	ORCC	#$50
+	JSR	PRESCT		; Preparation for sector operation
+	JSR	MOTORON		; モータON
+	JSR	WRDY		; FDC READY待ち
+	LDA	#FCRDSC		; READ SECTOR CMD.
+	STA	<FDCCMD
+DREAD_2	LDA	<FDCDRQ
+	BPL	DREAD_3
+	LDA	<FDCDAT		; DATA TFR, IF DRQ=1
+	STA	,U+
+	BRA	DREAD_2
+DREAD_3	LSLA
+	BPL	DREAD_2		; GO TO TFR LOOP, IF IRQ=0
+	PULS	CC
+	JSR	CHKERR2		; CHECK FDC STATUS
+	PULS	B,U,PC
+
+; Preparation process prior to sector read/write
+; IN :  RegX = Pointer to RCB
+; OUT:  RegU = Pointer to data buffer
+; *AccA will be broken
+PRESCT	EQU	*
+	LDA	<RCBDRV,X
+	JSR	DRVSEL
+	LDA	<RCBTRK,X	; TRK
+	CMPA	<FDCTRK		; シークの必要が無ければシークしない
+	BEQ	PRESC_1
+	BSR	SEEK		; SEEK
+PRESC_1	LDA	<RCBSID,X	; SIDE
+	STA	<FDCSID
+	LDA	<RCBSCT,X	; SECTOR
+	STA	<FDCSCT
+	LDU	<RCBBUF,X
+	LDA	<RCBDRV,X
+	RTS
+
+; FDC status check and set BIOS error code(for type I cmd)
+; OUT: Acca = BIOS error code
+CHKERR1	EQU	*
+	PSHS	B
+	CLRA
+	LDB	<FDCSTA
+	BEQ	CHKE1_N		; NO ERROR
+	LDA	#$0A
+	BITB	#$80
+	BNE	CHKE1_O		; DISK NOT READY
+	INCA
+;	BITB	#$40
+;	BNE	CHKE1_O		; WRITE PROTECTED
+	INCA
+	BITB	#$10
+	BNE	CHKE1_O		; HARD ERROR
+	INCA
+	BITB	#$08
+	BNE	CHKE1_O		; CRC ERROR
+	CLRA
+	BRA	CHKE1_N
+CHKE1_O	ORCC	#$01
+	PULS	B,PC
+
+CHKE1_N	ANDCC	#$FE
+	PULS	B,PC
+
+; FDC status check and set BIOS error code(for type II cmd)
+; OUT: Acca = BIOS error code
+CHKERR2	EQU	*
+	PSHS	B
+	CLRA
+	LDB	<FDCSTA
+	BEQ	CHKE2_N		; NO ERROR
+	LDA	#$0A
+	BITB	#$80
+	BNE	CHKE2_O		; DISK NOT READY
+	INCA
+	BITB	#$40
+	BNE	CHKE2_O		; WRITE PROTECTED
+	INCA
+	BITB	#$14
+	BNE	CHKE2_O		; HARD ERROR
+	INCA
+	BITB	#$08
+	BNE	CHKE2_O		; CRC ERROR
+;	BRA	CHKE2_N
+	INCA
+CHKE2_O	ORCC	#$01
+	PULS	B,PC
+
+CHKE2_N	ANDCC	#$FE
+	PULS	B,PC
+
+; Head seek
+; IN : AccA: Destination track #
+; OUT: CC.C = 0:NO ERROR 1:SEEK ERROR
+SEEK	EQU	*
+	PSHS	A
+	STA	<FDCDAT
+	BSR	MOTORON		; モータON
+	BSR	WRDY		; WAIT FOR FDC GOES READY
+	LDA	#FCSEEK
+	STA	<FDCCMD		; シークコマンド実行
+	JSR	T50US		; 50us待ち
+	JSR	WIRQ		; IRQ待ち
+	BSR	SAVTRK
+	LDA	<FDCSTA
+	TSTA	#$10		; シークエラー?
+	BEQ	SEEK_1
+	ORCC	#$01		; SET Carry flag
+	PULS	A,PC
+SEEK_1	ANDCC	#$FE		; CLEAR Carry flag
+	PULS	A,PC
+
+; Restore head
+; ドライブ選択は含まない(選択しておいてからコールする)
+RESTORE	EQU	*
+	PSHS	A
+	BSR	MOTORON		; モータON
+	BSR	WRDY
+	LDA	#FCRSTR
+	STA	<FDCCMD
+	JSR	T50US		; 50us待つ
+	JSR	WIRQ
+	BSR	SAVTRK
+	PULS	A,PC
+
+; FDCのステータスのBUSYが落ちるのを待つ
+WRDY	EQU	*
+	PSHS	A
+WRDY_1	LDA	<FDCSTA
+	LSRA
+	BCS	WRDY_1
+	PULS	A,PC
+
+; FDCのIRQが1になるのを待つ
+WIRQ	EQU	*
+	PSHS	A
+WIRQ_1	LDA	<FDCDRQ
+	LSLA
+	BPL	WIRQ_1
+	PULS	A,PC
+
+; 現在のトラック番号をワークに保存
+SAVTRK	EQU	*
+	PSHS	A,B,X
+	LDX	#FDDHEAD
+	LDA	LASTDRV
+	LDB	<FDCTRK
+	STB	A,X
+	PULS	A,B,X,PC
+
+; FDDのモータを回す
+; 回ってなかった場合、２秒待つ
+MOTORON	EQU	*
+	PSHS	A
+	LDA	<FDCDRV
+;	BMI	MOTON_E		; 既にモーター回っている
+	ORA	#$80
+	STA	<FDCDRV		; モータを回す
+;	BSR	T1S
+;	BSR	T1S		; 2秒待つ
+MOTON_E	EQU	*
+	PULS	A,PC
+
+; FDDのモータを止める
+MOTOROF	EQU	*
+	PSHS	A
+	LDA	<FDCDRV
+	ANDA	#$7F
+	STA	<FDCDRV
+	PULS	A,PC
+
+; FDCにドライブ番号をセット
+; IN : AccA=ドライブ番号
+; トラック位置の退避、復元を含む
+DRVSEL	EQU	*
+	PSHS	A,B,X
+	LDX	#FDDHEAD
+	LDB	<FDCDRV		; モーター回っていたかどうかを後で見るためにスタックに保存
+	PSHS	B
+DRVSEL1	EQU	*
+	ANDA	#$03
+	LDB	A,X
+	STB	<FDCTRK		; 選択するドライブのトラック番号をセット
+	STA	LASTDRV		; 最後に選択したドライブ番号を保持
+	LDB	,S+
+	BPL	DRVSEL2		; 回ってなかったら、まわさない
+	ORA	#$80		; モータ回す
+DRVSEL2	STA	<FDCDRV		; ドライブ選択
+	PULS	A,B,X,PC
+
+;------------------------------------------------------------
+; 1sタイマー
+T1S	EQU	*
+	PSHS	A
+	LDA	#50
+T1S1	BSR	T20MS		; 20ms * 50 = 1000ms
+	DECA
+	BNE	T1S1
+	PULS	A,PC
+
+;------------------------------------------------------------
+; 20msタイマー
+T20MS	EQU	*
+	PSHS	A
+	LDA	#20
+T20MS1	BSR	T1MS		; 1ms * 20 = 20ms
+	DECA
+	BNE	T20MS1
+	PULS	A,PC
+
+;------------------------------------------------------------
+; 1msタイマー
+; 1.2MHz = 833ns  1ms= 1200
+; 2.0MHz = 500ns  1ms= 2000
+T1MS	EQU	*
+	PSHS	X
+	LDX	#2000/8		; 2.0MHz
+TIM1MS1	LEAX	<-1,X		; ~=4+1 #=2+1
+	BNE	TIM1MS1		; ~=3 #=2
+	PULS	X,PC
+
+
+;------------------------------------------------------------
+; 50usタイマー
+T50US	EQU	*
+	PSHS	A
+	LDA	#20
+T50US1	DECA
+	BNE	T50US1
+	PULS	A,PC
+
+;------------------------------------------------------------
+IPLRCB	FCB	$0A,$00		; DREAD, STATUS
+	FDB	IPLENT		; BUFFER
+	FCB	$00,$01		; TRK,SCT
+	FCB	$00,$00		; SID,DRV
+
+
+;------------------------------------------------------------
+	ORG	$FFE0-3
+INT_DMY	EQU	*
+	TST	<$FD03
+	RTI
+
+
+;------------------------------------------------------------
+	ORG	$FFE0
+
+LASTDRV	FCB	0
+FDDHEAD	FCB	0,0,0,0
+
+
+;------------------------------------------------------------
+; INTERRUPT VECTOR TABLE
+
+	ORG	$FFF0
+
+	FDB	$0000
+SWI3	FDB	$0000
+SWI2	FDB	$0000
+FIRQ	FDB	$0000
+IRQ	FDB	$0000
+SWI	FDB	$0000
+NMI	FDB	$0000
+RESET	FDB	$FE00
+
+
+
+	END

@@ -1,0 +1,60 @@
+
+CROSS REFERENCE TABLE:
+
+ANALGP     806A      34    42 
+BEEPOF     808D      37    97 
+BEEPON     808B      37    93 
+BIINIT     815E      40   238 
+BIOS       800C       4    13   252   378   388 
+BIOS1      801E      20    23 
+BIOS2      8025      22    26 
+BIOS_3     802E      28    31 
+BIOS_E     8030      30    32 
+CNVJHI     8145     216   219   222 
+CNVJLO     8147     218   223 
+CTBRED     8070      34    54 
+CTBWRT     806E      34    50 
+DISPMSG    8188     264   277   283   314 
+DISP_E     81A7     325   330 
+DISP_L1    818E     318 
+DISP_L2    819C     324   328 
+DREAD      8084      36    84 
+DWRITE     807F      36    79 
+GETFNT     8115     186   193 
+HALT       8218     116   135   162   168   318   356 
+HALT1      821A     358   359 
+HALT2      8227     365   366 
+HDCOPY     8091      37   105 
+INKEY1     80F6     171   173 
+INPUT      80D4      38   149 
+INPUTC     80D6      38   153 
+INTBBL     8072      35    58 
+JPTBL      8032      24    34 
+KANJIR     8108      39   182   382 
+KEYIN      80DA      39   161 
+KRRDLP     814D     226   231 
+LPCHK      815C      39   234 
+LPOUT      808F      37   101 
+MOTOR      806C      34    46 
+MSG1       81AC     263   334 
+MSG2       81FB     276   343 
+MSG3       81FD     282   345 
+MSGOUT1    816A       5   261 
+MSGOUT2    8174       6   274 
+MSGOUT3    817E       7   280 
+OUTPUT     80D8      39   157 
+REDBBL     8078      35    70 
+RESTART    822E     129   144   167   178   331   370 
+RESTOR     807A      36    74 
+RESV       8089      36    40    40    40    89 
+ROMINI     8160     244   395 
+SCREEN     8074      35    62 
+SUBIN      8098      38   114 
+SUBIN1     80A9     122   126 
+SUBIN2     80B2     122   127 
+SUBOUT     8093      38   109 
+SUBSUB     80BC     110   115   134 
+SUBSUB1    80C7     139   143 
+SUBSUB2    80D0     139   144 
+WRTBBL     8076      35    66 
+

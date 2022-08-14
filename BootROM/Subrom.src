@@ -1,0 +1,1342 @@
+STACK	EQU	$D000
+
+; サブシステムが返すエラーの定義
+EPARAM	EQU	$3C		; INITコマンドのパラメータに誤りがあります
+ECCOORD	EQU	$3D		; コンソール座標値に誤りがあります
+EORDSQ	EQU	$3E		; オーダシーケンスに誤りがあります
+EGCOORD	EQU	$3F		; グラフィック座標値に誤りがあります
+EFUNCC	EQU	$40		; ファンクションコードに誤りがあります
+ECOORDN	EQU	$41		; 座標数に誤りがあります
+ECHARN	EQU	$42		; 文字数に誤りがあります
+ECOLORN	EQU	$43		; 色数に誤りがあります
+EPFNUM	EQU	$44		; PFキー番号に誤りがあります
+ECMDPRM	EQU	$45		; コマンド、パラメータに誤りがあります
+ECMD	EQU	$46		; コマンドコードに誤りがあります
+
+; アトリビュート定義
+ATTR_F	EQU	$80		; フィールドスタートフラグ
+ATTR_M	EQU	$40		; モディファイフラグ
+ATTR_P	EQU	$10		; フィールド保護フラグ
+ATTR_R	EQU	$08		; 反転文字指定
+ATTR_BK	EQU	$00
+ATTR_BL	EQU	$01
+ATTR_RD	EQU	$02
+ATTR_MG	EQU	$03
+ATTR_GR	EQU	$04
+ATTR_CY	EQU	$05
+ATTR_YE	EQU	$06
+ATTR_WH	EQU	$07
+
+FC_PSET	EQU	$00		; PSET
+FC_PRES	EQU	$01		; PRESET
+FC_OR	EQU	$02		; OR
+FC_AND	EQU	$03		; AND
+FC_XOR	EQU	$04		; XOR
+FC_NOT	EQU	$05		; NOT
+
+KYBDH	EQU	$D400		; Key data D8
+KYBDL	EQU	$D401		; Key data D7-D0
+IRQACK	EQU	$D402		; キャンセルIRQのアクノレッジ
+BEEP	EQU	$D403
+ATTEN	EQU	$D404		; メインCPUへのアテンションIRQ
+CRTSW	EQU	$D408		; CRTのON/OFF(R=ON/W=*OFF)
+VRAMF	EQU	$D409		; VRAMアクセスフラグ(R=SET/W=*RESET)
+BUSYF	EQU	$D40A		; BUSYフラグ(R=READY/W=*BUSY)
+INSLED	EQU	$D40D		; INS LEDのON/OFF(R=ON/W=*OFF)
+VRAMOH	EQU	$D40E		; VRAMオフセットレジスタH (D13-D8)
+VRAMOL	EQU	$D40F		; VRAMオフセットレジスタL (D7-D0)
+
+NMIMSK	EQU	$D430
+ENCDAT	EQU	$D431		; キーエンコーダデータ
+ENCSTA	EQU	$D432		; キーエンコーダステータス D7=LATCH(0:受信可), D0=ACK(1:送信完了)
+
+; 共有RAM定義
+SH_RAM	EQU	$D380
+SH_ERR	EQU	$D380
+SH_CNT	EQU	$D381
+SH_CMD	EQU	$D382
+
+FONBASE	EQU	$D800		; フォントテーブルのベースアドレス
+
+
+	ORG	$D000
+ABORT	FCB	0		; アボートフラグ
+
+	ORG	$D003
+KEYMD	FCB	0		; KEY BUFFERING MODE (0=NOT BUFFERD, NOT0=BUFFERD)
+KEYN	FCB	0
+KEYRP	FDB	0		; KEY READ POINTER
+KEYWP	FDB	0		; KEY WRITE POINTER
+
+
+	ORG	$D009
+INTF	FCB	0		; メインに通知する割り込みを保持
+;				; D3-D0 PFキー割り込み
+;				; D4    タイマー割り込み
+;				; D5    インターバルタイマー割り込み
+;				; D6    0時割り込み
+
+	ORG	$D00A		; ワークエリアの位置を合わせる
+TACC	FCB	0		; タイマアクセスフラグ(0=Not Access)
+TC	FCB	0		; D3=0時割り込み
+;				; D2=INTERVAL ONE SHOT INTERRUPT
+;				; D1=INTERVAL INTERRUPT
+;				; D0=TIMER INTERRUPT
+T1	FCB	0,0,0,0		; H,M,S,20ms
+T1_I	FCB	0,0,0,0		; H,M,S,20ms (割り込み時刻)
+T2	FCB	0,0,0,0		; 20msデクリメントタイマ
+T2_D	FCB	0,0,0,0		; 20msデクリメントタイマリロード値
+
+	ORG	$D01F		; VRAMオフセット
+VOFSTW	FDB	0		; VRAMオフセット値
+
+CSRX	FCB	0		; 現在のカーソル座標(X)
+CSRY	FCB	0		; 現在のカーソル座標(Y)
+CCOL	FCB	0		; 現在の文字色
+CWID	FCB	0		; 文字サイズ(0=40文字 NOT0=80文字)
+
+	ORG	$D0A0		; 補助ワークエリア
+
+	ORG	$D2C0		; PFキーテーブル
+PFTBL	RMB	16*10
+
+	ORG	$D360		; キーバッファ
+
+KEYBUF	RMB	32		; KEY BUFFER
+
+
+;---------------------------------------------------------------------------
+
+	ORG	$E000
+
+BOOT	EQU	*
+	ORCC	#$50
+	LDS	#STACK
+
+	LDA	#$D0
+	TFR	A,DP
+	SETDP	$D0
+
+  IF SUBTYPE>0
+	LDA	#$84
+	STA	NMIMSK 		; NMIマスク、オフセットレジスタ下位イネーブル
+  ENDIF
+
+	LDX	#$D000
+	LDY	#$0400-12	; 途中でNMIが入ってしまったりするとスタックを使うので、その分はあけておく
+CLRAM	CLR	,X+
+	LEAY	<-1,Y
+	BNE	CLRAM		; ワークRAM & 共有RAMクリア
+
+  IF SUBTYPE>0
+; SubSystem Type-A,B用のフック用ワークエリア設定
+	LDA	#$7E		; JMP命令
+	LDX	#$D2A8
+;	 SWI3
+	STA	,X+
+	LDU	#INTTRP
+	STU	,X++
+;	 SWI2
+	STA	,X+
+	STU	,X++
+;	 FIRQ
+	LDU	#HFIRQ
+	STA	,X+
+	STU	,X++
+;	 IRQ
+	LDU	#HINT
+	STA	,X+
+	STU	,X++
+;	 SWI
+	LDU	#INTTRP
+	STA	,X+
+	STU	,X++
+;	 NMI
+	LDU	#HNMI
+	STA	,X+
+	STU	,X++
+  ENDIF
+
+	CLR 	TC		; タイマコンディションクリア
+
+	JSR	INITIMR		; タイマクリア
+	JSR	INIKEY		; キーボードバッファクリア
+	JSR	INICON		; 文字関係初期化
+
+	CLR	ABORT		; アボートフラグクリア
+	CLR	INTF		; メインに通知する割り込みクリア
+	CLR	TACC		; タイマアクセスフラグ消去
+
+	JSR	CLS0		; VRAMクリア
+
+	ANDCC	#$AF
+
+	JMP	MAINLP
+
+
+; RELICS対策のコマンドテーブル
+	ORG	$E077
+
+	FCB	$00,$20
+	FDB	JPTBL01
+	FCB	$29,$2C
+	FDB	JPTBL29
+	FCB	$3D,$3F
+	FDB	JPTBL3D
+	FCB	$40,$7F
+	FDB	TBLDMY
+
+TBLDMY	EQU	*
+	RTS
+
+
+;---------------------------------------------------------------------------
+; コマンドを待つ
+; OUT: AccA = コマンド
+	ORG	$E133
+
+CMDWAIT	EQU	*
+	CLR	ABORT		; アボートフラグクリア
+	CLR	SH_CMD		; コマンドクリア
+	LDA	SH_ERR
+CMDLP1	ANDA	#$7F
+	STA	SH_ERR		; 
+	LDA	BUSYF		; READY
+CMDLP2	EQU	*
+	LDA	SH_CMD
+	BNE	CMDLP_E
+	LDA	SH_ERR
+	BMI	CMDLP1
+	BRA	CMDLP2
+
+CMDLP_E	STA	BUSYF		; BUSY
+	RTS
+
+
+; コマンド待ちの無限ループ
+MAINLP	EQU	*
+	LDS	#STACK
+MAINLP1	JSR	CMDWAIT		; コマンド待ち
+	JSR	CMDPRC
+	BRA	MAINLP
+
+CMDPRC	EQU	*
+	CMPA	#$20
+	BLS	CMD0120
+
+	CMPA	#$29
+	BLO	ILGCMD
+	CMPA	#$2C
+	BLS	CMD292C
+
+	CMPA	#$3D
+	BLO	ILGCMD
+	CMPA	#$3F
+	BLS	CMD3D3F
+
+	CMPA	#$64
+	BEQ	CMD64
+
+	CMPA	#$7F
+	BEQ	CMD7F
+
+ILGCMD	JSR	NOCMD
+	RTS
+
+CMD0120	EQU	*
+	LSLA
+	LDX	#JPTBL01
+	JSR	[A,X]
+	RTS
+
+CMD292C	EQU	*
+	SUBA	#$29
+	LSLA
+	LDX	#JPTBL29
+	JSR	[A,X]
+	RTS
+
+CMD3D3F	EQU	*
+	SUBA	#$3D
+	LSLA
+	LDX	#JPTBL3D
+	JSR	[A,X]
+	RTS
+
+CMD64	JSR	CONT
+	RTS
+
+CMD7F	JSR	SH_CMD+1		; 共有ＲＡＭ上の機械語を実行
+	RTS
+
+
+;---------------------------------------------------------------------------
+; メモリクリア
+; IN : RegX = クリア開始アドレス
+;      RegY = クリアバイト数
+RAMCLR	EQU	*
+	PSHS	X,Y
+RAMCLR1	CLR	,X+
+	LEAY	<-1,Y
+	BNE	RAMCLR1
+        PULS	X,Y,PC
+
+
+
+;---------------------------------------------------------------------------
+; タイマー初期化
+INITIMR	EQU	*
+	PSHS	B,X
+	COM	TACC
+	LDX	#T1
+	LDB	#16
+INITIM1	CLR	,X+
+	DECB
+	BNE	INITIM1
+	CLR	TACC
+       	PULS	B,X,PC
+
+;---------------------------------------------------------------------------
+; コンソールイニシャライズ
+; 文字色とか文字幅を元に戻すだけ
+INICON	EQU	*
+	PSHS	A
+	CLR	CSRX
+	CLR	CSRY
+	CLR	CWID
+	COM	CWID
+	LDA	#7
+	STA	CCOL
+	LDD	#$0000
+	TST	VRAMF		; VRAMアクセスフラグセット
+	STD	VOFSTW		; VRAMオフセット値を戻す
+	STD	VRAMOH
+	CLR	VRAMF		; VRAMアクセスフラグリセット
+	PULS	A,PC
+
+
+	ORG	$E3DC		; RELICS対策
+	RTS
+
+
+;---------------------------------------------------------------------------
+; JUMP TABLE OF CMD $00 TO $20
+JPTBL01	FDB	NOCMD	($00)
+	FDB	INIT,ERASE,PUT,GET,GETC,GETCB1,PUTCB1,GETCB2
+	FDB	PUTCB2,GETBA,TABSET,CONCTL,ERASE2,NOCMD,NOCMD,NOCMD
+	FDB	NOCMD,NOCMD,NOCMD,NOCMD,LINE,CHAIN,POINT,PAINT
+	FDB	SYMBOL,CHGCOL,GETBL1,PUTBL1,GETBL2,PUTBL2,GCURS,CHLINE
+; JUMP TABLE FOR CMD $29 TO $2C
+JPTBL29	FDB	INKEY,DEFPF,GETPF,INTCTL
+; JUMP TABLE FOR CMD $3D TO $3F
+JPTBL3D	FDB	SETTIM,RDTIM,TEST
+
+INIT	EQU	*
+	PSHS	A,B
+	CLRB
+	LDA	SH_RAM+4	; 画面桁数
+	CMPA	#40
+	BEQ	INIT1
+	COMB
+INIT1	STB	CWID
+	CLR	SH_ERR
+	PULS	A,B,PC
+
+ERASE	EQU	*
+	CLR	SH_ERR
+	RTS
+
+PUT	EQU	*
+	LDX	#SH_RAM+3
+	LDB	,X+		; 文字数
+PUT1	BEQ	PUT_E
+	LDA	,X+
+	CMPA	#$20
+	BLO	PUTORD		; オーダーコード処理
+	JSR	PUTCRAW		; １文字表示
+	JSR	CSRINC		; カーソルを進める
+PUT2	DECB
+	BRA	PUT1
+PUT_E	CLR	SH_ERR
+	RTS
+
+PUTORD	EQU	*		; PUTコマンドのオーダーコード処理
+	PSHS	U
+	LDU	#ORDTBL
+	LSLA
+	JSR	[A,U]
+	PULS	U
+	BRA	PUT2
+
+
+
+
+; オーダーコード処理ルーチンジャンプテーブル
+ORDTBL	FDB	ORD_NOP,ORD_NOP,ORD_NOP,ORD_NOP,ORD_NOP,ORD_EL,ORD_NOP,ORD_BL
+	FDB	ORD_BS,ORD_HT,ORD_LF,ORD_HM,ORD_EA,ORD_CR,ORD_NOP,ORD_NOP
+	FDB	ORD_NOP,ORD_SF,ORD_SC,ORD_RPC,ORD_NOP,ORD_NOP,ORD_NOP,ORD_NOP
+	FDB	ORD_NOP,ORD_NOP,ORD_NOP,ORD_ESC,ORD_RC,ORD_LC,ORD_UC,ORD_DC
+
+ORD_NOP	EQU	* 		; NO OPERATION
+	RTS
+
+ORD_EL	EQU	*		; ERASE LINE
+	RTS
+
+ORD_BL	EQU	*		; BELL
+	TST	BEEP
+	RTS
+
+ORD_BS	EQU	*		; BACK SPACE
+	PSHS	A
+	JSR	CSRDEC		; カーソル位置を戻す
+	LDA	#$20
+	JSR	PUTCRAW		; 空白を表示して文字を消す
+	PULS	A,PC
+
+ORD_HT	EQU	* 		; HORIZONTAL TAB
+	PSHS	A,B
+	LDA	#$20
+	LDB	CSRX
+	ANDB	#$F8		; 下位３ビットマスク
+	NEGB			; 符号反転
+	ADDB	#$08		; ８から引く(8-(CSRX & 0xF8))
+ORDHT1	TSTB
+	BEQ	ORDHT2
+	JSR	PUTCRAW		; 空白を表示
+	JSR	CSRINC		; カーソルを進める
+	DECB
+	BRA	ORDHT1
+ORDHT2	PULS	A,B,PC
+
+ORD_LF	EQU	*		; LINE FEED
+	PSHS	A
+	INC	CSRY
+	LDA	CSRY
+	CMPA	#24
+	BLS	ORDLF_E
+	LDA	#24
+	STA	CSRY
+	JSR	SCRL8		; 8ラインスクロール
+ORDLF_E	PULS	A,PC
+
+ORD_HM	EQU	*		; HOME
+	CLR	CSRX
+	CLR	CSRY
+	RTS
+
+ORD_EA	EQU	*		; ERASE ALL
+	BSR	ORD_HM
+	JSR	CLS0
+;	JSR	CLS1
+	RTS
+
+ORD_CR 	EQU	*		; CARRIAGE RETURN
+	CLR	CSRX
+  IF SUBTYPE=0
+	JSR	ORD_LF		; カーソルを下げる(本来のCRの動作ではない)
+  ENDIF
+	RTS
+
+ORD_SF	EQU	*		; START FIELD
+	LDA	,X+
+	STA	CCOL		; 文字色設定
+	DECB
+	RTS
+
+ORD_SC	EQU	*		; SET CURSOR POSITION
+	PSHS	A
+	LDA	,X+
+	STA	CSRX
+	LDA	,X+
+	STA	CSRY
+	SUBB	#2		; 文字数を２減らす
+	PULS	A,PC
+
+ORD_RPC	EQU	*		; REPEAT CHARACTOR
+	PSHS	A
+	PSHS	B
+	LDB	,X+
+	LDA	,X+
+ORDRPC1	TSTB
+	BEQ	ORDRPC2
+	JSR	PUTCRAW	;	; 文字表示
+	JSR	CSRINC		; カーソル進める
+	DECB
+	BRA	ORDRPC1
+ORDRPC2	PULS	B
+	SUBB	#2		; 文字数を２減らす
+	PULS	A,PC
+
+
+ORD_ESC	EQU	*		; ESC+xx
+	PSHS	A,B
+	LDA	,X+
+	CMPA	#'#		; LOCK KEYBOARD
+	BEQ	ORDESC1
+	CMPA	#'"		; UNLOCK KEYBOARD
+	BEQ	ORDESC2
+	CMPA	#'9		; ERASE KEY BUFFER
+	BEQ	ORDESC3
+	CMPA	#'g		; SET BUFFER MODE
+	BEQ	ORDESC4
+	CMPA	#'h		; SET UNBUFFER MODE
+	BEQ	ORDESC5
+ORDESCE	PULS	A,B
+	RTS
+
+ORDESC1	EQU	*		; LOCK KEYBOARD
+	BRA	ORDESCE
+
+ORDESC2	EQU	*		; UNLOCK KEYBOARD
+	BRA	ORDESCE
+
+ORDESC3	EQU	*		; ERASE KEY BUFFER
+	CLR	KEYN
+	CLR	KEYRP
+	CLR	KEYWP
+	BRA	ORDESCE
+
+ORDESC4	EQU	*		; SET BUFFER MODE
+	LDA	#$FF
+	STA	KEYMD
+	BRA	ORDESCE
+
+ORDESC5	EQU	*		; SET UNBUFFER MODE
+	CLR	KEYMD
+	BRA	ORDESCE
+
+
+ORD_RC	EQU	*
+	JSR	CSRRG		; カーソル右移動
+	RTS
+
+ORD_LC	EQU	*
+	JSR	CSRLF		; カーソル左移動
+	RTS
+
+ORD_UC	EQU	*
+	JSR	CSRUP		; カーソル上移動
+	RTS
+
+ORD_DC	EQU	*
+	JSR	CSRDN		; カーソル下移動
+	RTS
+
+; 画面消去(シンプル：高速)
+CLS0	EQU	*
+	PSHS	A,B,X,Y,U
+	CLR	CRTSW		; CRTC OFF
+
+	LDU	#$C000
+	CLRA
+	CLRB
+	TFR	D,X
+	TFR	D,Y
+CLS0_1	PSHU	A,B,X,Y		; 6
+	PSHU	A,B,X,Y		; 12
+	PSHU	A,B,X,Y		; 18
+	PSHU	A,B,X,Y		; 24
+	PSHU	A,B,X,Y		; 30
+	PSHU	A,B,X,Y		; 36
+	PSHU	A,B,X,Y		; 42
+	PSHU	A,B,X,Y		; 48
+	CMPU	#$0000
+	BNE	CLS0_1
+	TST	CRTSW		; CRTC ON
+	PULS	A,B,X,Y,U,PC
+
+; 画面消去(Xanadu風)
+CLS1	EQU	*
+	PSHS	A,B,X,Y
+	TST	VRAMF
+	LDY	#$0000
+CLS1_1	LDA	#8
+CLS1_2	TFR	Y,X
+CLS1_B1	LSR	,X
+	LSR	<3,X
+	LSR	<6,X
+	LSR	<9,X
+	LSR	<12,X
+	LSR	<15,X
+	LSR	<18,X
+	LSR	<21,X
+	LSR	<24,X
+	LSR	<27,X
+	LEAX	<30,X
+	CMPX	#80*200
+	BLO	CLS1_B1
+	TFR	Y,X
+	LEAX	$4000,X
+CLS1_R1	LSR	,X
+	LSR	<3,X
+	LSR	<6,X
+	LSR	<9,X
+	LSR	<12,X
+	LSR	<15,X
+	LSR	<18,X
+	LSR	<21,X
+	LSR	<24,X
+	LSR	<27,X
+	LEAX	<30,X
+	CMPX	#80*200+$4000
+	BLO	CLS1_R1
+	TFR	Y,X
+	LEAX	$8000,X
+CLS1_G1	LSR	,X
+	LSR	<3,X
+	LSR	<6,X
+	LSR	<9,X
+	LSR	<12,X
+	LSR	<15,X
+	LSR	<18,X
+	LSR	<21,X
+	LSR	<24,X
+	LSR	<27,X
+	LEAX	<30,X
+	CMPX	#80*200+$8000
+	BLO	CLS1_G1
+	DECA
+	BNE	CLS1_2
+	LEAY	<1,Y
+	CMPY	#3
+	BLS	CLS1_1
+	CLR	VRAMF		; VRAMアクセスフラグクリア
+	PULS	A,B,X,Y,PC
+
+; 画面消去(一番シンプル：遅い)
+CLS2	PSHS	X,Y
+	LDX	#$0000
+	LDY	#$C000
+	CLR	CRTSW		; CRT OFF
+	JSR	RAMCLR		; VRAMクリア
+	TST	CRTSW		; CRT ON
+	PULS	X,Y,PC
+
+GET	EQU	*
+	CLR	SH_ERR
+	RTS
+
+GETC	EQU	*
+	CLR	SH_ERR
+	RTS
+
+GETCB1	EQU	*
+	CLR	SH_ERR
+	RTS
+
+PUTCB1	EQU	*
+	CLR	SH_ERR
+	RTS
+
+GETCB2	EQU	*
+	CLR	SH_ERR
+	RTS
+
+PUTCB2	EQU	*
+	CLR	SH_ERR
+	RTS
+
+GETBA	EQU	*
+	CLR	SH_ERR
+	RTS
+
+TABSET	EQU	*
+	CLR	SH_ERR
+	RTS
+
+CONCTL	EQU	*
+	CLR	SH_ERR
+	RTS
+
+ERASE2	EQU	*
+	CLR	SH_ERR
+	RTS
+
+LINE	EQU	*
+	CLR	SH_ERR
+	RTS
+
+CHAIN	EQU	*
+	CLR	SH_ERR
+	RTS
+
+POINT	EQU	*
+	CLR	SH_ERR
+	RTS
+
+PAINT	EQU	*
+	CLR	SH_ERR
+	RTS
+
+SYMBOL	EQU	*
+	CLR	SH_ERR
+	RTS
+
+CHGCOL	EQU	*
+	CLR	SH_ERR
+	RTS
+
+GETBL1	EQU	*
+	CLR	SH_ERR
+	RTS
+
+PUTBL1	EQU	*
+	CLR	SH_ERR
+	RTS
+
+GETBL2	EQU	*
+	CLR	SH_ERR
+	RTS
+
+PUTBL2	EQU	*
+	CLR	SH_ERR
+	RTS
+
+GCURS	EQU	*
+	CLR	SH_ERR
+	RTS
+
+CHLINE	EQU	*
+	CLR	SH_ERR
+	RTS
+
+
+INKEY	EQU	*
+	PSHS	A,B,X
+	LDB	SH_RAM+3	; 制御フラグ(D1=RESET, D0=WAIT)
+	LDA	#1
+	STA	SH_RAM+4	; 入力の有無フラグをセット
+	BITB	#$02		; RESETフラグが立っている？
+	BEQ	INKEY2
+	JSR	INIKEY		; キーバッファ初期化(バッファクリア)
+INKEY2	LDA	KEYN
+	BNE	INKEY3		; バッファされているキーがある場合
+	BITB	#$01		; WAITフラグが立っている？
+	BNE	INKEY2
+	CLR	SH_RAM+4	; 入力の有無フラグをクリア
+	CLR	SH_RAM+3
+	BRA	INKEYE
+INKEY3	JSR	LDKEY		; キーバッファから読み出し
+	STA	SH_RAM+3	; キーコード格納
+INKEYE	CLR	SH_ERR
+	PULS	A,B,X,PC
+
+
+DEFPF	EQU	*		; ザイダー対策に実装
+	LDA	,X+
+	LSLA
+	LSLA
+	LSLA
+	LSLA
+	LDY	#PFTBL
+	LEAY	A,Y
+	LDB	,X+
+	STB	,Y+
+DEFPF1	BEQ	DEFPF9
+	LDA	,X+
+	STA	,Y+
+	DECB
+	BRA	DEFPF1
+DEFPF9	CLR	SH_ERR
+	RTS
+
+GETPF	EQU	*
+	CLR	SH_ERR
+	RTS
+
+INTCTL	EQU	*
+	CLR	SH_ERR
+	RTS
+
+SETTIM	EQU	*
+	PSHS	A,B,X,U
+SETTIMW	TST	TACC
+	BNE	SETTIMW		; タイマアクセスフラグが下がるのを待つ
+	COM	TACC		; タイマアクセスフラグセット
+	LDX	#SH_RAM
+	LDB	<3,X
+	LSRB
+	BCC	SETTIM1
+	LDA	<4,X
+	STA	TC
+SETTIM1	LSRB
+	BCC	SETTIM2
+	LDU	<5,X
+	STU	T1
+	LDU	<7,X
+	STU	T1+2
+SETTIM2	LSRB
+	BCC	SETTIM3
+	LDU	<9,X
+	STU	T1_I
+	LDU	<11,X
+	STU	T1_I+2
+SETTIM3	LSRB
+	BCC	SETTIM4
+	LDU	<13,X
+	STU	T2
+	LDU	<15,X
+	STU	T2+2
+SETTIM4	LSRB
+	BCC	SETTIM5
+	LDU	<17,X
+	STU	T2_D
+	LDU	<19,X
+	STU	T2_D+2
+SETTIM5	CLR	SH_ERR
+	CLR	TACC		; タイマアクセスフラグクリア
+	PULS	A,B,X,U,PC
+
+RDTIM	EQU	*
+RDTIMW	TST	TACC
+	BNE	RDTIMW		; タイマアクセスフラグが下がるのを待つ
+	COM	TACC		; タイマアクセスフラグセット
+	LDX	#SH_RAM
+	LDA	TC
+	STA	<4,X
+	LDU	T1
+	STU	<5,X
+	LDU	T1+2
+	STU	<7,X
+	LDU	T1_I
+	STU	<9,X
+	LDU	T1_I+2
+	STU	<11,X
+	LDU	T2
+	STU	<13,X
+	LDU	T2+2
+	STU	<15,X
+	LDU	T2_D
+	STU	<17,X
+	LDU	T2_D+2
+	STU	<19,X
+	CLR	TACC		; タイマアクセスフラグクリア
+	CLR	SH_ERR
+	RTS
+
+
+
+; MAINTENANCE COMMAND
+TEST	EQU	*
+	PSHS	A,X
+	LDX	#SH_RAM+11		; サブコマンド列の先頭
+TESTLP	LDA	,X+
+	CMPA	#$90
+	BEQ	TCEND
+	CMPA	#$91
+	BEQ	TCMOV
+	CMPA	#$92
+	BEQ	TCJMP
+	CMPA	#$93
+	BEQ	TCJSR
+	LDA	#$70
+	STA	SH_ERR
+	PULS	A,X,PC
+
+; ENDサブコマンド
+TCEND	EQU	*
+	CLR	SH_ERR
+	PULS	A,X,PC
+
+; MOVEサブコマンド
+TCMOV	EQU	*
+;	PSHS	A,B,Y,U
+	PSHS	X
+	LDU	,X
+	LDY	<2,X
+	LDX	<4,X
+TCMOV1	PULU	A
+	STA	,Y+
+	LEAX	<-1,X
+	BNE	TCMOV1
+	PULS	X
+	LEAX	<6,X
+;	PULS	A,B,Y,U
+	BRA	TESTLP
+
+; JMPサブコマンド
+TCJMP	EQU	*
+	LDX	,X
+	BRA	TESTLP
+
+; JSRサブコマンド
+TCJSR	EQU	*
+	PSHS	A,B,CC,DP,X,Y
+	JSR	[,X]
+	PULS	A,B,CC,DP,X,Y
+	LEAX	<2,X
+	BRA	TESTLP
+
+CONT	EQU	*
+	RTS
+
+;---------------------------------------------------------------------------
+; 指定のコマンドが存在しなかった場合の処理
+NOCMD	EQU	*
+	PSHS	A
+	LDA	#ECMD
+	STA	SH_ERR
+	PULS	A,PC
+
+;---------------------------------------------------------------------------
+; カーソル位置を１つ進める
+CSRINC	EQU	*
+	PSHS	A
+	LDA	#40
+	TST	CWID		; 40文字モード?
+	BEQ	CSRI1		; YES
+	LSLA
+CSRI1	PSHS	A
+	INC	CSRX		; Xインクリメント
+	LDA	CSRX
+	CMPA	,S+		; 端まで来た?
+	BLO	CSRI2
+	CLR	CSRX		; X=0
+	JSR	ORD_LF		; LF動作
+CSRI2	PULS	A,PC
+
+; カーソル位置を１つ戻す
+CSRDEC	EQU	*
+	PSHS	A,B
+	LDA	CSRY
+	LDB	CSRX
+	CMPD	#0
+	BEQ	CSRD2		; X=0,Y=0なら動かさない
+	LDA	#40
+	TST	CWID		; 40文字モード?
+	BEQ	CSRD1		; YES
+	LSLA
+CSRD1	DECA
+	DEC	CSRX		; Xデクリメント
+	BCC	CSRD2		; 端まで来た?
+	STA	CSRX		; X=39
+	DEC	CSRY		; Yデクリメント
+	BCC	CSRD2		; 端まで来た?
+	LDA	#24
+	STA	CSRY		; Y=24
+CSRD2	PULS	A,B,PC
+
+; カーソルを上に移動
+CSRUP	EQU	*
+	PSHS	A
+	DEC	CSRY
+	BNE	CSRUPE
+	LDA	#24
+	STA	CSRY
+CSRUPE	PULS	A,PC
+
+; カーソルを下に移動
+CSRDN	EQU	*
+	PSHS	A
+	INC	CSRY
+	LDA	CSRY
+	CMPA	#24
+	BLS	CSRDNE
+	CLR	CSRY
+CSRDNE	PULS	A,PC
+
+; カーソルを左に移動する
+CSRLF	EQU	*
+	PSHS	A
+	DEC	CSRX
+	BNE	CSRLFE
+	JSR	GETXMAX
+	STA	CSRX
+CSRLFE	PULS	A,PC
+
+; カーソルを右に移動する
+CSRRG	EQU	*
+	PSHS	A
+	JSR	GETXMAX
+	INC	CSRX
+	CMPA	CSRX
+	BLS	CSRRGE
+	CLR	CSRX
+CSRRGE	PULS	A,PC
+
+; Ｘカーソル座標の最大値をAccAに入れる(画面モードのチェックをする)
+GETXMAX	EQU	*
+	LDA	#40
+	TST	CWID
+	BEQ	GETXMXE
+	LSLA
+GETXMXE	DECA
+	RTS
+
+; 1行(8ラインスクロール)
+SCRL8	EQU	*
+	PSHS	A,B,X,Y
+	LDX	#80*8*24
+	LDY	#80*8
+	BRA	SCROLL
+
+; 1行(10ラインスクロール)
+SCRL10	EQU	*
+	PSHS	A,B,X,Y
+	LDX	#80*10*19
+	LDY	#80*10
+SCROLL	EQU	*
+	TST	VRAMF		; VRAMアクセスフラグセット
+	LDD	VOFSTW
+	ADDD	#80*8
+	STD	VOFSTW
+	STD	VRAMOH
+SCROLL1	CLR	,X		; スクロールすると現れる部分のVRAMをクリア
+	CLR	$4000,X
+	CLR	$8000,X
+	LEAX	1,X
+	LEAY	<-1,Y
+	BNE	SCROLL1
+	CLR	VRAMF		; VRAMアクセスフラグリセット
+	PULS	A,B,X,Y,PC
+
+;---------------------------------------------------------------------------
+; 1文字描画ルーチン
+; カーソルの移動などは行わない
+; オーダーコードの考慮もしない
+; IN : AccA = 表示文字
+;      CSRX,CSRY = 表示位置
+;      CWID = 表示モード(４０文字/８０文字)
+;      CCOL = 表示色
+PUTCRAW	EQU	*
+	PSHS	A,B,X,Y,U
+PUTCRA1	JSR	GETFON		; フォントアドレスを取得
+	TFR	X,U
+	JSR	GETVRAM		; 現在のカーソル位置のVRAMアドレスを取得
+	LDY	#8		; 文字のラスタ方向数
+	TST	CWID		; 40文字モード?
+	BEQ	PUTC40
+
+PUTC80	EQU	*		; 80文字モード
+	PULU	A		; フォントデータ読み出し
+	BSR	DRAW		; 描画
+	LEAX	80,X
+	LEAY	<-1,Y		; 8ライン表示が終わった?
+	BNE	PUTC80
+	PULS	A,B,X,Y,U,PC
+
+PUTC40	EQU	*
+	PULU	A		; フォント読み出し
+	BSR	ENLARGE		; パターン引き伸ばし
+	EXG	A,B
+	BSR	DRAW
+	EXG	A,B
+	BSR	ENLARGE
+	EXG	A,B
+	LEAX	<1,X
+	BSR	DRAW
+	LEAX	79,X
+	LEAY	<-1,Y		; 8ライン分表示が終わった?
+	BNE	PUTC40
+	PULS	A,B,X,Y,U,PC
+
+
+;---------------------------------------------------------------------------
+; 描画する
+; IN : RegX = 描画アドレス(ブループレーン)
+;      AccA = 描画データ
+;      CCOL = 描画色
+DRAW	EQU	*
+	PSHS	B
+	CLR	,X
+	CLR	$4000,X
+	CLR	$8000,X
+	LDB	CCOL
+	TST	VRAMF		; VRAMアクセス!
+	LSRB
+	BCC	DRAW1
+	STA	,X		; BLUEプレーン
+DRAW1	LSRB
+	BCC	DRAW2
+	STA	$4000,X		; REDプレーン
+DRAW2	LSRB
+	BCC	DRAW3
+	STA	$8000,X		; GREENプレーン
+DRAW3	CLR	VRAMF
+	PULS	B,PC
+
+
+; パターン引き伸ばし
+; AccAの上位ニブルを引き伸ばしてAccBに入れる(40文字モード表示用)
+; IN : AccA(Upper nibble)
+; OUT: AccB
+ENLARGE	EQU	*
+	PSHS	X
+	LDX	#4
+	CLRB
+ENLARG1	LSLB
+	LSLB
+	LSLA
+	BCC	ENLARG2
+	ORB	#$03
+ENLARG2	LEAX	<-1,X
+	BNE	ENLARG1
+	PULS	X,PC
+
+; IN : AccA = キャラクタコード
+; OUT: RegX = フォントアドレス
+GETFON	EQU	*
+	PSHS	A,B
+	LDB	#8
+	MUL
+	ADDD	#FONBASE
+	TFR	D,X
+	PULS	A,B,PC
+
+
+; 現在のカーソル位置に対応するVRAM(BLUEプレーン)での描画アドレスを計算
+; OUT = RegX
+GETVRAM	EQU	*
+	PSHS	A,B
+	LDA	CSRY
+	LSLA
+	LSLA
+	LSLA
+	LDB	#80
+	MUL
+	TFR	D,X
+	LDA	CSRX
+	TST	CWID		; 40文字モード?
+	BNE	GETVRA1
+	LSLA			; 40文字の場合、ｘ方向を２倍にする
+GETVRA1	LEAX	A,X
+	PULS	A,B,PC
+
+
+	org	$ede3
+	rts			; Hydlide2対策
+
+;---------------------------------------------------------------------------
+
+; NMIハンドラ(20msインターバルタイマ割り込み)
+HNMI	EQU	*
+HNMIW	TST	TACC
+	LBNE	INTTM6		; タイマアクセスフラグが立っていたら何もしない
+	LDA	#$FF
+	STA	TACC		; タイマアクセスフラグセット
+	INC	T1+3		; 20msの桁インクリメント
+	LDA	T1+3
+	CMPA	#50		; 20*50=1000msになったか？
+	BLO	INTTM1
+	CLR	T1+3		; 20msの桁クリア
+	INC	T1+2		; 秒の桁インクリメント
+	LDA	T1+2
+	CMPA	#60		; 60秒になったか？
+	BLO	INTTM1
+	CLR	T1+2		; 秒の桁クリア
+	INC	T1+1		; 分の桁インクリメント
+	LDA	T1+1
+	CMPA	#60		; 60分になったか？
+	BLO	INTTM1
+	CLR	T1+1		; 分の桁クリア
+	INC	T1		; 時間の位インクリメント
+	LDA	T1
+	CMPA	#24		; 24時になったか？
+	BLO	INTTM1
+	CLR	T1		; 時の位クリア
+ZEROINT	EQU	*		; ０時割り込み
+	LDA	TC
+	BITA	#$08
+	BEQ	INTTM1		; ０時割り込みイネーブル？
+	LDA	INTF		; ０時割り込み発生
+	ORA	#$40
+	STA	INTF
+INTTM1	EQU	*		; タイマ値(T1_I)と現在時刻(T1)をコンペア
+	LDD	T1
+	CMPD	T1_I		; 時,分の桁のコンペア
+	BNE	INTTM2
+	LDD	T1+2
+	CMPD	T1_I+2		; 秒,20msの桁コンペア
+	BNE	INTTM2
+T1INT	EQU	*		; T1_I割り込み
+	LDA	TC
+	BITA	#$01
+	BEQ	INTTM2		; タイマ割り込みイネーブル？
+	LDA	INTF		; タイマ割り込み発生
+	ORA	#$10
+	STA	INTF
+INTTM2	EQU	*		; T2デクリメント
+	DEC	T2+3
+	BPL	INTTM3
+	LDA	#50-1
+	STA	T2+3
+	DEC	T2+2
+	BPL	INTTM3
+	LDA	#60-1
+	STA	T2+2
+	DEC	T2+1
+	BPL	INTTM3
+	LDA	#60-1
+	STA	T2+1
+	DEC	T2
+INTTM3	EQU	*		; T2が0になったかチェック
+	LDD	T2
+	BNE	INTTM4
+	LDD	T2+2
+	BNE	INTTM4
+	LDD	T2_D
+	STD	T2
+	LDD	T2_D+2
+	STD	T2+2		; タイマー値リロード
+INTINT	EQU	*		; インターバルタイマー割り込み発生
+	LDA	TC
+	BITA	#%00000110
+	BEQ	INTTM4		; インターバル割り込みイネーブル？
+	ANDA	#%11111011
+	STA	TC		; ワンショットフラグを寝かす
+	LDA	INTF
+	ORA	#%00100000	; インターバル割り込み発生
+	STA	INTF
+INTTM4	EQU	*
+	LDA	INTF
+	BEQ	INTTM6
+	ORA	SH_RAM+1
+	STA	SH_RAM+1
+	CLR	INTF		; 割り込みクリア
+	TST	ATTEN		; アテンション割り込み発生
+INTTM6	EQU	*
+	CLR	TACC 		; タイマアクセスフラグクリア
+	RTI
+
+;---------------------------------------------------------------------------
+; FIRQンドラ(キーボード割り込み)
+HFIRQ	EQU	*
+	PSHS	A,B
+	LDD	KYBDH
+	TSTA
+	BMI	PFKEY		; PFキー
+	TFR	B,A
+	JSR	STOKEY
+HFIRQ2	PULS	A,B
+	RTI
+
+PFKEY	EQU	*		; PFキーの処理
+	ANDB	#$7F
+	STB	SH_RAM+1
+	PSHS	X
+	LDX	#PFTBL
+	LSLB
+	LSLB
+	LSLB
+	LSLB
+	ABX
+	LDB	,X+
+PFKEY1	BEQ	PFKEY9
+	LDA	,X+
+	BSR	STOKEY
+	DECB
+	BRA	PFKEY1
+PFKEY9	PULS	X
+	TST	ATTEN		; アテンション割り込み発生
+	BRA	HFIRQ2
+
+; AccAに入っているコードをキーバッファに積む
+; IN : AccA = キーコード
+STOKEY	EQU	*
+	PSHS	B,X
+	LDB	KEYMD
+	BNE	SKEY1
+	BSR	INIKEY		; 非バッファモード時はバッファをクリア
+SKEY1	EQU	*
+	LDB	KEYN
+	CMPB	#32
+	BHS	SKEY3		; 既に32文字分バッファされているときは無視
+	INCB
+	STB	KEYN		; バッファリング文字数をインクリメントする
+	LDX	KEYWP
+	STA	,X		; キーコード格納
+	LEAX	<1,X
+	CMPX	#KEYBUF+32	; キーバッファの終わりに来た?
+	BLO	SKEY2
+	LDX	#KEYBUF
+SKEY2	STX	KEYWP		; ライトポインタ保存
+SKEY3	PULS	B,X,PC
+
+; キーバッファから１文字読み出す
+; OUT : AccA = 読み出した文字
+LDKEY	EQU	*
+	PSHS	X
+	LDA	KEYN
+	BEQ	LDKEY_E		; 1文字も入っていなかった場合
+	DECA
+	STA	KEYN		; バッファリング文字数を１減らす
+	LDX	KEYRP
+	LDA	,X
+	LEAX	<1,X			; リードポインタインクリメント
+	CMPX	#KEYBUF+32
+	BLO	LDKEY1		; キーバッファの終わりに来た?
+	LDX	#KEYBUF
+LDKEY1	STX	KEYRP		; リードポインタを保存
+LDKEY_E	EQU	*
+	PULS	X,PC
+
+;---------------------------------------------------------------------------
+; キーバッファの初期化をする
+INIKEY	EQU	*
+	PSHS	A,X
+	CLR	KEYN
+	LDX	#KEYBUF
+	STX	KEYWP
+	STX	KEYRP
+; キーエンコーダのスキャンモードを変更する
+  IF SUBTYPE=1
+	PSHS	A
+	CLRA
+	BSR	PUTENC
+	LDA	#$02
+	BSR	PUTENC		; SCANコードに変更
+  	PULS	A
+  ENDIF
+	PULS	A,X,PC
+
+
+  IF SUBTYPE=1
+; キーエンコーダにデータを出力する
+PUTENC	EQU	*
+	PSHS	B
+	STA	ENCDAT
+PUTENC1	EQU	*
+	LDB	ENCSTA
+	LSRB
+	BCC	PUTENC1		; 送信完了を待つ
+	PULS	B,PC
+  ENDIF
+
+;---------------------------------------------------------------------------
+; INTハンドラ(CANCEL割り込み)
+HINT	EQU	*
+	TST	IRQACK		; キャンセルIRQのアクノレッジ
+	LDA	#$FF
+	STA	ABORT
+INTTRP	EQU	*
+	RTI
+
+;---------------------------------------------------------------------------
+; INTERRUPT VECTOR TABLE
+
+	ORG	$FFF0
+
+
+  IF SUBTYPE=0
+	FDB	$0000
+SWI3	FDB	BOOT
+SWI2	FDB	BOOT
+FIRQ	FDB	HFIRQ
+IRQ	FDB	HINT
+SWI	FDB	BOOT
+NMI	FDB	HNMI
+RESET	FDB	BOOT
+  ENDIF
+  IF SUBTYPE>0
+  	FDB	$0000
+SWI3	FDB	$D2A8
+SWI2	FDB	$D2AB
+FIRQ	FDB	$D2AE
+IRQ	FDB	$D2B1
+SWI	FDB	$D2B4
+NMI	FDB	$D2B7
+RESET	FDB	BOOT
+  ENDIF
+
+	END	BOOT

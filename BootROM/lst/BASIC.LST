@@ -1,0 +1,425 @@
+00001                   
+00002 8000                         ORG      $8000
+00003                   
+00004 8000 7E800C                  JMP      BIOS
+00005 8003 7E816A                  JMP      MSGOUT1
+00006 8006 7E8174                  JMP      MSGOUT2
+00007 8009 7E817E                  JMP      MSGOUT3
+00008                   
+00009                   ;       JMP     DISPALL
+00010                   
+00011                   ;-----------------------------------------------------------------------
+00012                   
+00013 800C              BIOS       EQU      *
+00014 800C 347E                    PSHS     A,B,DP,X,Y,U
+00015 800E 1A50                    ORCC     #$50
+00016 8010 86FD                    LDA      #$FD
+00017 8012 1F8B                    TFR      A,DP
+00018 8014 A684                    LDA      ,X
+00019 8016 811B                    CMPA     #27
+00020 8018 2304                    BLS      BIOS1
+00021 801A 8601                    LDA      #$01
+00022 801C 2007                    BRA      BIOS2
+00023 801E 48           BIOS1      LSLA
+00024 801F 108E8032                LDY      #JPTBL
+00025 8023 ADB6                    JSR      [A,Y]
+00026 8025 A701         BIOS2      STA      <1,X
+00027 8027 4D                      TSTA
+00028 8028 2704                    BEQ      BIOS_3
+00029 802A 1A01                    ORCC     #$01
+00030 802C 2002                    BRA      BIOS_E
+00031 802E 1CFE         BIOS_3     ANDCC    #$FE
+00032 8030 35FE         BIOS_E     PULS     A,B,DP,X,Y,U,PC
+00033                   
+00034 8032 806A806C806E JPTBL      FDB      ANALGP,MOTOR,CTBWRT,CTBRED
+           8070         
+00035 803A 807280748076            FDB      INTBBL,SCREEN,WRTBBL,REDBBL
+           8078         
+00036 8042 807A807F8084            FDB      RESTOR,DWRITE,DREAD,RESV
+           8089         
+00037 804A 808B808D808F            FDB      BEEPON,BEEPOF,LPOUT,HDCOPY
+           8091         
+00038 8052 8093809880D4            FDB      SUBOUT,SUBIN,INPUT,INPUTC
+           80D6         
+00039 805A 80D880DA8108            FDB      OUTPUT,KEYIN,KANJIR,LPCHK
+           815C         
+00040 8062 815E80898089            FDB      BIINIT,RESV,RESV,RESV
+           8089         
+00041                   
+00042 806A              ANALGP     EQU      *
+00043 806A 4F                      CLRA
+00044 806B 39                      RTS
+00045                   
+00046 806C              MOTOR      EQU      *
+00047 806C 4F                      CLRA
+00048 806D 39                      RTS
+00049                   
+00050 806E              CTBWRT     EQU      *
+00051 806E 4F                      CLRA
+00052 806F 39                      RTS
+00053                   
+00054 8070              CTBRED     EQU      *
+00055 8070 4F                      CLRA
+00056 8071 39                      RTS
+00057                   
+00058 8072              INTBBL     EQU      *
+00059 8072 4F                      CLRA
+00060 8073 39                      RTS
+00061                   
+00062 8074              SCREEN     EQU      *
+00063 8074 4F                      CLRA
+00064 8075 39                      RTS
+00065                   
+00066 8076              WRTBBL     EQU      *
+00067 8076 4F                      CLRA
+00068 8077 39                      RTS
+00069                   
+00070 8078              REDBBL     EQU      *
+00071 8078 4F                      CLRA
+00072 8079 39                      RTS
+00073                   
+00074 807A              RESTOR     EQU      *
+00075 807A BDFE02                  JSR      $FE02
+00076 807D 4F                      CLRA
+00077 807E 39                      RTS
+00078                   
+00079 807F              DWRITE     EQU      *
+00080 807F BDFE05                  JSR      $FE05
+00081 8082 4F                      CLRA
+00082 8083 39                      RTS
+00083                   
+00084 8084              DREAD      EQU      *
+00085 8084 BDFE08                  JSR      $FE08
+00086 8087 4F                      CLRA
+00087 8088 39                      RTS
+00088                   
+00089 8089              RESV       EQU      *
+00090 8089 4F                      CLRA
+00091 808A 39                      RTS
+00092                   
+00093 808B              BEEPON     EQU      *
+00094 808B 4F                      CLRA
+00095 808C 39                      RTS
+00096                   
+00097 808D              BEEPOF     EQU      *
+00098 808D 4F                      CLRA
+00099 808E 39                      RTS
+00100                   
+00101 808F              LPOUT      EQU      *
+00102 808F 4F                      CLRA
+00103 8090 39                      RTS
+00104                   
+00105 8091              HDCOPY     EQU      *
+00106 8091 4F                      CLRA
+00107 8092 39                      RTS
+00108                   
+00109 8093              SUBOUT     EQU      *
+00110 8093 BD80BC                  JSR      SUBSUB      ; RCBで示すバッファの中身をサブシステムに転送
+00111 8096 4F                      CLRA
+00112 8097 39                      RTS
+00113                   
+00114 8098              SUBIN      EQU      *
+00115 8098 BD80BC                  JSR      SUBSUB      ; RCBで示すバッファの中身をサブシステムに転送
+00116 809B BD8218                  JSR      HALT
+00117 809E 10AE02                  LDY      <2,X        ; データバッファ先頭
+00118 80A1 CEFC80                  LDU      #$FC80
+00119 80A4 EC06                    LDD      <6,X        ; 入力バイト数
+00120 80A6 ED04                    STD      <4,X        ; データバイト数更新
+00121 80A8 5D                      TSTB
+00122 80A9 2707         SUBIN1     BEQ      SUBIN2
+00123 80AB 3702                    PULU     A
+00124 80AD A7A0                    STA      ,Y+
+00125 80AF 5A                      DECB
+00126 80B0 20F7                    BRA      SUBIN1
+00127 80B2 8680         SUBIN2     LDA      #$80
+00128 80B4 B7FC80                  STA      $FC80
+00129 80B7 BD822E                  JSR      RESTART     ; サブCPUリスタート
+00130 80BA 4F                      CLRA
+00131 80BB 39                      RTS
+00132                   
+00133                   ; SUBOUT/SUBINで共通に利用する出力部分
+00134 80BC              SUBSUB     EQU      *
+00135 80BC BD8218                  JSR      HALT
+00136 80BF EE02                    LDU      <2,X        ; データバッファ先頭
+00137 80C1 108EFC80                LDY      #$FC80      ; 共有RAM先頭
+00138 80C5 E605                    LDB      <5,X        ; データサイズ
+00139 80C7 2707         SUBSUB1    BEQ      SUBSUB2
+00140 80C9 3702                    PULU     A
+00141 80CB A7A0                    STA      ,Y+
+00142 80CD 5A                      DECB
+00143 80CE 20F7                    BRA      SUBSUB1
+00144 80D0 BD822E       SUBSUB2    JSR      RESTART     ; サブCPUリスタート
+00145 80D3 39                      RTS
+00146                   
+00147                   
+00148                   
+00149 80D4              INPUT      EQU      *
+00150 80D4 4F                      CLRA
+00151 80D5 39                      RTS
+00152                   
+00153 80D6              INPUTC     EQU      *
+00154 80D6 4F                      CLRA
+00155 80D7 39                      RTS
+00156                   
+00157 80D8              OUTPUT     EQU      *
+00158 80D8 4F                      CLRA
+00159 80D9 39                      RTS
+00160                   
+00161 80DA              KEYIN      EQU      *
+00162 80DA BD8218                  JSR      HALT
+00163 80DD 8629                    LDA      #$29        ; INKEY
+00164 80DF B7FD32                  STA      $FD32
+00165 80E2 8600                    LDA      #%00000000  ; BIT1=RESET, BIT0=WAIT
+00166 80E4 B7FD33                  STA      $FD33
+00167 80E7 BD822E                  JSR      RESTART     ; サブCPUリスタート
+00168 80EA BD8218                  JSR      HALT
+00169 80ED 4F                      CLRA
+00170 80EE F6FC84                  LDB      $FC84       ; キーが押されていたか？
+00171 80F1 2703                    BEQ      INKEY1
+00172 80F3 B6FC83                  LDA      $FC83       ; キーコード読み出し
+00173 80F6 ED9802       INKEY1     STD      [2,X]       ; キーコード、押下フラグ書き込み
+00174 80F9 CC0002                  LDD      #$0002
+00175 80FC ED04                    STD      <4,X        ; バッファサイズ(常に2)
+00176 80FE 8680                    LDA      #$80
+00177 8100 B7FC80                  STA      $FC80       ; READY REQUEST
+00178 8103 BD822E                  JSR      RESTART     ; サブCPUリスタート
+00179 8106 4F                      CLRA
+00180 8107 39                      RTS
+00181                   
+00182 8108              KANJIR     EQU      *
+00183 8108 3424                    PSHS     B,Y
+00184 810A 10AE02                  LDY      <2,X
+00185 810D EC04                    LDD      <4,X
+00186 810F 8D04                    BSR      GETFNT
+00187 8111 3524                    PULS     B,Y
+00188 8113 4F                      CLRA
+00189 8114 39                      RTS
+00190                   ;
+00191                   ;; IN : AccD = JIS CODE
+00192                   ;;    : IY   = FONT BUFFER ADDRESS
+00193 8115              GETFNT     EQU      *
+00194 8115 3436                    PSHS     D,X,Y
+00195 8117 3406                    PSHS     D
+00196 8119 840F                    ANDA     #$0F
+00197 811B C41F                    ANDB     #$1F
+00198 811D 58                      LSLB
+00199 811E 58                      LSLB
+00200 811F 58                      LSLB
+00201 8120 58                      LSLB
+00202 8121 49                      ROLA
+00203 8122 3406                    PSHS     D
+00204 8124 A662                    LDA      <2,S
+00205 8126 8470                    ANDA     #$70
+00206 8128 8020                    SUBA     #$20
+00207 812A 3402                    PSHS     A
+00208 812C 48                      LSLA
+00209 812D ABE4                    ADDA     ,S
+00210 812F 48                      LSLA
+00211 8130 A7E4                    STA      ,S
+00212 8132 A664                    LDA      <4,S
+00213 8134 8460                    ANDA     #$60
+00214 8136 8020                    SUBA     #$20
+00215 8138 ABE4                    ADDA     ,S
+00216 813A 2509                    BCS      CNVJHI
+00217 813C 8140                    CMPA     #$40
+00218 813E 2507                    BLO      CNVJLO
+00219 8140 2203                    BHI      CNVJHI
+00220 8142 8610                    LDA      #$10
+00221 8144 8C                      FCB      $8C
+00222 8145 8020         CNVJHI     SUBA     #$20
+00223 8147 AA61         CNVJLO     ORA      <1,S
+00224 8149 E662                    LDB      <2,S
+00225 814B 3265                    LEAS     <5,S
+00226 814D FDFD20       KRRDLP     STD      $FD20
+00227 8150 BEFD22                  LDX      $FD22
+00228 8153 AFA1                    STX      ,Y++
+00229 8155 5C                      INCB
+00230 8156 C50F                    BITB     #$0F
+00231 8158 26F3                    BNE      KRRDLP
+00232 815A 35B6                    PULS     D,X,Y,PC
+00233                   
+00234 815C              LPCHK      EQU      *
+00235 815C 4F                      CLRA
+00236 815D 39                      RTS
+00237                   
+00238 815E              BIINIT     EQU      *
+00239 815E 4F                      CLRA
+00240 815F 39                      RTS
+00241                   
+00242                   ;-----------------------------------------------------------------------
+00243                   
+00244 8160              ROMINI     EQU      *
+00245                   ;       LDX     #$0000
+00246                   ;       LDY     #$8000
+00247                   ;ROMINI1        CLR     ,X+             ; $0000-$7FFFを0クリア
+00248                   ;       LEAY    <-1,Y
+00249                   ;       BNE     ROMINI1
+00250 8160 867E                    LDA      #$7E        ; BIOSへのフックを設定
+00251 8162 97DE                    STA      $00DE
+00252 8164 8E800C                  LDX      #BIOS
+00253 8167 9FDF                    STX      $00DF
+00254 8169 39                      RTS
+00255                   
+00256                   
+00257                   ;-----------------------------------------------------------------------
+00258                   
+00259                   ;BOOTSW EQU     $FD0B
+00260                   
+00261 816A              MSGOUT1    EQU      *           ; 起動時のメッセージ表示ルーチン
+00262 816A 3440                    PSHS     U
+00263 816C CE81AC                  LDU      #MSG1
+00264 816F BD8188                  JSR      DISPMSG
+00265                   ;       LDU     #MSGBAS
+00266                   ;       LDA     BOOTSW          ; CHECK BOOT MODE
+00267                   ;       LSRA
+00268                   ;       BCC     MSGO11
+00269                   ;       LDU     #MSGDOS         ; DOS MODE
+00270                   ;MSGO11 EQU     *
+00271                   ;       JSR     DISPMSG
+00272 8172 35C0                    PULS     U,PC
+00273                   
+00274 8174              MSGOUT2    EQU      *           ; 起動時メッセージ消去用
+00275 8174 3440                    PSHS     U
+00276 8176 CE81FB                  LDU      #MSG2
+00277 8179 BD8188                  JSR      DISPMSG
+00278 817C 35C0                    PULS     U,PC
+00279                   
+00280 817E              MSGOUT3    EQU      *           ; PLEASE INSERT DISKETTE!!
+00281 817E 3440                    PSHS     U
+00282 8180 CE81FD                  LDU      #MSG3
+00283 8183 BD8188                  JSR      DISPMSG
+00284 8186 35C0                    PULS     U,PC
+00285                   
+00286                   
+00287                   ; すべてのアスキー文字を表示
+00288                   ;DISPALL        EQU     *
+00289                   ;       PSHS    A
+00290                   ;       LDA     #$20
+00291                   ;DISPA1 JSR     DISPL
+00292                   ;       ADDA    #$10
+00293                   ;       BNE     DISPA1
+00294                   ;       PULS    A,PC
+00295                   
+00296                   ; AccAのアスキーコードから$10バイト分表示
+00297                   ;DISPL  EQU     *
+00298                   ;       PSHS    A,B,X,U
+00299                   ;       LDB     #$10
+00300                   ;       LDX     #$1000                  ; ASCII BUFER
+00301                   ;DISPL1 STA     ,X+
+00302                   ;       INCA
+00303                   ;       DECB
+00304                   ;       BNE     DISPL1
+00305                   ;       LDA     #$0D
+00306                   ;       STA     ,X+
+00307                   ;       CLR     ,X+
+00308                   ;       LDU     #$1000
+00309                   ;       JSR     DISPMSG
+00310                   ;       PULS    A,B,X,U,PC
+00311                   
+00312                   ; Uレジスタの指すバッファから文字列を転送する
+00313                   ; '\0'が出てくるまでを表示する
+00314 8188              DISPMSG    EQU      *
+00315 8188 3453                    PSHS     A,CC,X,U
+00316 818A 1A50                    ORCC     #$50
+00317 818C 8603                    LDA      #$03
+00318 818E BD8218       DISP_L1    JSR      HALT
+00319 8191 8EFC80                  LDX      #$FC80
+00320 8194 6F80                    CLR      ,X+
+00321 8196 6F80                    CLR      ,X+
+00322 8198 A780                    STA      ,X+
+00323 819A 6F80                    CLR      ,X+
+00324 819C A6C0         DISP_L2    LDA      ,U+
+00325 819E 2707                    BEQ      DISP_E
+00326 81A0 A780                    STA      ,X+
+00327 81A2 7CFC83                  INC      $FC83
+00328 81A5 20F5                    BRA      DISP_L2
+00329                   
+00330 81A7              DISP_E     EQU      *
+00331 81A7 BD822E                  JSR      RESTART
+00332 81AA 35D3                    PULS     A,CC,X,U,PC
+00333                   
+00334 81AC 1107         MSG1       FCB      $11,$07
+00335 81AE 584D3720424F            FCC      /XM7 BOOT LOADER /
+           4F54204C4F41 
+           44455220     
+00336 81BE 56312E3330              FCC      /V1.30/
+00337 81C3 20414C504841            FCC      / ALPHA/
+00338                   ;       FCC     / Release Candidate 2/
+00339 81C9 0D                      FCB      $0D
+00340 81CA 436F70797269            FCC      /Copyright MMI (C) Apollo. All rights reserved./
+           676874204D4D 
+           492028432920 
+           41706F6C6C6F 
+           2E20416C6C20 
+           726967687473 
+           207265736572 
+           7665642E     
+00341 81F8 0D0D00                  FCB      $0D,$0D,$00
+00342                   
+00343 81FB 0C00         MSG2       FCB      $0C,$00
+00344                   
+00345 81FD 1104         MSG3       FCB      $11,$04
+00346 81FF 504C45415345            FCC      /PLEASE INSERT DISKETTE!!/
+           20494E534552 
+           54204449534B 
+           455454452121 
+00347 8217 00                      FCC      $00
+00348                   
+00349                   ;MSGBAS FCC     /BASIC MODE/
+00350                   ;       FCB     $0D,$0D,$00
+00351                   
+00352                   ;MSGDOS FCC     /DOS MODE/
+00353                   ;       FCB     $0D,$0D,$00
+00354                   
+00355                   ; サブシステム停止
+00356 8218              HALT       EQU      *
+00357 8218 3402                    PSHS     A
+00358 821A B6FD05       HALT1      LDA      $FD05
+00359 821D 2BFB                    BMI      HALT1
+00360 821F 8680                    LDA      #$80
+00361 8221 B7FD05                  STA      $FD05
+00362 8224 12                      NOP
+00363 8225 12                      NOP
+00364 8226 12                      NOP
+00365 8227 B6FD05       HALT2      LDA      $FD05
+00366 822A 2AFB                    BPL      HALT2
+00367 822C 3582                    PULS     A,PC
+00368                   
+00369                   ; サブシステムリスタート
+00370 822E              RESTART    EQU      *
+00371 822E 7FFD05                  CLR      $FD05
+00372 8231 39                      RTS
+00373                   
+00374                   ;-----------------------------------------------------------------------
+00375                   
+00376 F17D                         ORG      $F17D
+00377                   
+00378 F17D 7E800C                  JMP      BIOS
+00379                   
+00380                   
+00381 F21F                         ORG      $F21F
+00382 F21F 7E8108                  JMP      KANJIR      ; KOEI対策?
+00383                   
+00384                   ;-----------------------------------------------------------------------
+00385                   
+00386 FBFA                         ORG      $FBFA
+00387                   
+00388 FBFA 800C                    FDB      BIOS
+00389                   
+00390                   
+00391                   ;-----------------------------------------------------------------------
+00392                   
+00393 FBFE                         ORG      $FBFE
+00394                   
+00395 FBFE 8160                    FDB      ROMINI
+00396                   
+00397                   
+00398                   ;-----------------------------------------------------------------------
+00399                   
+00400 FFFE                         ORG      $FFFE
+00401                   
+00402 FFFE FE00                    FDB      $FE00
+00403                   
+00404                   ;-----------------------------------------------------------------------
+00405                   
+00406 0000                         END

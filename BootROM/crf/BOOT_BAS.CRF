@@ -1,0 +1,98 @@
+
+CROSS REFERENCE TABLE:
+
+ALLRES     FE1D      81    84 
+BOOT       FE00      55 
+CHKE1_N    FEED     214   228   232 
+CHKE1_O    FEE9     217   223   226   229 
+CHKE2_N    FF12     241   259 
+CHKE2_O    FF0E     244   247   250   253   256 
+CHKERR1    FECE     126   210 
+CHKERR2    FEF1     162   186   237 
+DREAD      FE8D     137   169 
+DREAD_2    FEA0     178   182   184 
+DREAD_3    FEAA     179   183 
+DRSTR      FE42      58   117 
+DRSTR_E    FE56     122   127 
+DRVSEL     FF7F      81   124   195   345 
+DRVSEL1    FF88     350 
+DRVSEL2    FF97     356   358 
+DSKRW      FE58      59    60   104   132 
+DWRIT      FE66     135   145 
+DWRIT_2    FE79     154   158   160 
+DWRIT_3    FE83     155   159 
+EXIT       FE30      97    99 
+FCFIRQ     00D0      27 
+FCRDID     00C0      24 
+FCRDSC     0080      22   176 
+FCRDTR     00E0      25 
+FCRSTR     000E      20   289 
+FCSEEK     001E      21   270 
+FCWRSC     00A0      23   152 
+FCWRTR     00F0      26 
+FDCCMD     FD18      30   153   177   271   290 
+FDCDAT     FD1B      33   157   180   267 
+FDCDRQ     FD1F      37   154   178   307 
+FDCDRV     FD1D      35   325   328   337   339   348   358 
+FDCLDR     FD1E      36 
+FDCSCT     FD1A      32   203 
+FDCSID     FD1C      34   201 
+FDCSTA     FD18      29    92   213   240   275   299 
+FDCTRK     FD19      31   197   317   353 
+FDDHEAD    FFE1     315   347   420 
+FIRQ       FFF6     431 
+FSBSY      0001      18 
+FSCRC      0008      15 
+FSHLD      0020      13 
+FSIDX      0002      17 
+FSNRDY     0080      11 
+FSSKER     0010      14 
+FSTRK0     0004      16 
+FSWPRT     0040      12 
+INT_DMY    FFDD     411 
+IPLENT     0100     106   111   404 
+IPLRCB     FFC5     103   403 
+IRQ        FFF8     432 
+LASTDRV    FFE0     316   354   419 
+MOTON_E    FF73     331 
+MOTOROF    FF75     335 
+MOTORON    FF6B     150   174   268   287   323 
+MSG        0001       5    75    86    95 
+NMI        FFFC     434 
+PRESCT     FEB4     149   173   193 
+PRESC_1    FEC1     198   200 
+RCBBUF     0002      46   204 
+RCBCMD     0000      44   120   133 
+RCBDRV     0007      50   123   194   205 
+RCBRSC     000A      41   136 
+RCBRST     0008      39   121 
+RCBSCT     0005      48   202 
+RCBSID     0006      49   200 
+RCBSTA     0001      45 
+RCBTRK     0004      47   196 
+RCBWSC     0009      40   134 
+READIPL    FE34     102 
+RESET      FFFE     435 
+RESTORE    FF37      82   125   285 
+SAVTRK     FF5D     274   293   313 
+SEEK       FF16     199   265 
+SEEK_1     FF33     277   280 
+STACK      FC7F       7    67 
+START      FE0B      56    62 
+SWI        FFFA     433 
+SWI2       FFF4     430 
+SWI3       FFF2     429 
+T1MS       FFB1     376   385 
+T1S        FF9B     363 
+T1S1       FF9F     366   368 
+T20MS      FFA6     366   373 
+T20MS1     FFAA     376   378 
+T50US      FFBC     272   291   395 
+T50US1     FFC0     398   399 
+TIM1MS1    FFB6     388   389 
+WAITDSK    FE29      91    93 
+WIRQ       FF54     273   292   305 
+WIRQ_1     FF56     307   309 
+WRDY       FF4B     151   175   269   288   297 
+WRDY_1     FF4D     299   301 
+

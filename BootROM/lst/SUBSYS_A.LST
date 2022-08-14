@@ -1,0 +1,1335 @@
+00001 D000              STACK      EQU      $D000
+00002                   
+00003                   ; サブシステムが返すエラーの定義
+00004 003C              EPARAM     EQU      $3C         ; INITコマンドのパラメータに誤りがあります
+00005 003D              ECCOORD    EQU      $3D         ; コンソール座標値に誤りがあります
+00006 003E              EORDSQ     EQU      $3E         ; オーダシーケンスに誤りがあります
+00007 003F              EGCOORD    EQU      $3F         ; グラフィック座標値に誤りがあります
+00008 0040              EFUNCC     EQU      $40         ; ファンクションコードに誤りがあります
+00009 0041              ECOORDN    EQU      $41         ; 座標数に誤りがあります
+00010 0042              ECHARN     EQU      $42         ; 文字数に誤りがあります
+00011 0043              ECOLORN    EQU      $43         ; 色数に誤りがあります
+00012 0044              EPFNUM     EQU      $44         ; PFキー番号に誤りがあります
+00013 0045              ECMDPRM    EQU      $45         ; コマンド、パラメータに誤りがあります
+00014 0046              ECMD       EQU      $46         ; コマンドコードに誤りがあります
+00015                   
+00016                   ; アトリビュート定義
+00017 0080              ATTR_F     EQU      $80         ; フィールドスタートフラグ
+00018 0040              ATTR_M     EQU      $40         ; モディファイフラグ
+00019 0010              ATTR_P     EQU      $10         ; フィールド保護フラグ
+00020 0008              ATTR_R     EQU      $08         ; 反転文字指定
+00021 0000              ATTR_BK    EQU      $00
+00022 0001              ATTR_BL    EQU      $01
+00023 0002              ATTR_RD    EQU      $02
+00024 0003              ATTR_MG    EQU      $03
+00025 0004              ATTR_GR    EQU      $04
+00026 0005              ATTR_CY    EQU      $05
+00027 0006              ATTR_YE    EQU      $06
+00028 0007              ATTR_WH    EQU      $07
+00029                   
+00030 0000              FC_PSET    EQU      $00         ; PSET
+00031 0001              FC_PRES    EQU      $01         ; PRESET
+00032 0002              FC_OR      EQU      $02         ; OR
+00033 0003              FC_AND     EQU      $03         ; AND
+00034 0004              FC_XOR     EQU      $04         ; XOR
+00035 0005              FC_NOT     EQU      $05         ; NOT
+00036                   
+00037 D400              KYBDH      EQU      $D400       ; Key data D8
+00038 D401              KYBDL      EQU      $D401       ; Key data D7-D0
+00039 D402              IRQACK     EQU      $D402       ; キャンセルIRQのアクノレッジ
+00040 D403              BEEP       EQU      $D403
+00041 D404              ATTEN      EQU      $D404       ; メインCPUへのアテンションIRQ
+00042 D408              CRTSW      EQU      $D408       ; CRTのON/OFF(R=ON/W=*OFF)
+00043 D409              VRAMF      EQU      $D409       ; VRAMアクセスフラグ(R=SET/W=*RESET)
+00044 D40A              BUSYF      EQU      $D40A       ; BUSYフラグ(R=READY/W=*BUSY)
+00045 D40D              INSLED     EQU      $D40D       ; INS LEDのON/OFF(R=ON/W=*OFF)
+00046 D40E              VRAMOH     EQU      $D40E       ; VRAMオフセットレジスタH (D13-D8)
+00047 D40F              VRAMOL     EQU      $D40F       ; VRAMオフセットレジスタL (D7-D0)
+00048                   
+00049 D430              NMIMSK     EQU      $D430
+00050 D431              ENCDAT     EQU      $D431       ; キーエンコーダデータ
+00051 D432              ENCSTA     EQU      $D432       ; キーエンコーダステータス D7=LATCH(0:受信可), D0=ACK(1:送信完了)
+00052                   
+00053                   ; 共有RAM定義
+00054 D380              SH_RAM     EQU      $D380
+00055 D380              SH_ERR     EQU      $D380
+00056 D381              SH_CNT     EQU      $D381
+00057 D382              SH_CMD     EQU      $D382
+00058                   
+00059 D800              FONBASE    EQU      $D800       ; フォントテーブルのベースアドレス
+00060                   
+00061                   
+00062 D000                         ORG      $D000
+00063 D000 00           ABORT      FCB      0           ; アボートフラグ
+00064                   
+00065 D003                         ORG      $D003
+00066 D003 00           KEYMD      FCB      0           ; KEY BUFFERING MODE (0=NOT BUFFERD, NOT0=BUFFERD)
+00067 D004 00           KEYN       FCB      0
+00068 D005 0000         KEYRP      FDB      0           ; KEY READ POINTER
+00069 D007 0000         KEYWP      FDB      0           ; KEY WRITE POINTER
+00070                   
+00071                   
+00072 D009                         ORG      $D009
+00073 D009 00           INTF       FCB      0           ; メインに通知する割り込みを保持
+00074                   ;                               ; D3-D0 PFキー割り込み
+00075                   ;                               ; D4    タイマー割り込み
+00076                   ;                               ; D5    インターバルタイマー割り込み
+00077                   ;                               ; D6    0時割り込み
+00078                   
+00079 D00A                         ORG      $D00A       ; ワークエリアの位置を合わせる
+00080 D00A 00           TACC       FCB      0           ; タイマアクセスフラグ(0=Not Access)
+00081 D00B 00           TC         FCB      0           ; D3=0時割り込み
+00082                   ;                               ; D2=INTERVAL ONE SHOT INTERRUPT
+00083                   ;                               ; D1=INTERVAL INTERRUPT
+00084                   ;                               ; D0=TIMER INTERRUPT
+00085 D00C 00000000     T1         FCB      0,0,0,0     ; H,M,S,20ms
+00086 D010 00000000     T1_I       FCB      0,0,0,0     ; H,M,S,20ms (割り込み時刻)
+00087 D014 00000000     T2         FCB      0,0,0,0     ; 20msデクリメントタイマ
+00088 D018 00000000     T2_D       FCB      0,0,0,0     ; 20msデクリメントタイマリロード値
+00089                   
+00090 D01F                         ORG      $D01F       ; VRAMオフセット
+00091 D01F 0000         VOFSTW     FDB      0           ; VRAMオフセット値
+00092                   
+00093 D021 00           CSRX       FCB      0           ; 現在のカーソル座標(X)
+00094 D022 00           CSRY       FCB      0           ; 現在のカーソル座標(Y)
+00095 D023 00           CCOL       FCB      0           ; 現在の文字色
+00096 D024 00           CWID       FCB      0           ; 文字サイズ(0=40文字 NOT0=80文字)
+00097                   
+00098 D0A0                         ORG      $D0A0       ; 補助ワークエリア
+00099                   
+00100 D2C0                         ORG      $D2C0       ; PFキーテーブル
+00101 D2C0              PFTBL      RMB      16*10
+00102                   
+00103 D360                         ORG      $D360       ; キーバッファ
+00104                   
+00105 D360              KEYBUF     RMB      32          ; KEY BUFFER
+00106                   
+00107                   
+00108                   ;---------------------------------------------------------------------------
+00109                   
+00110 E000                         ORG      $E000
+00111                   
+00112 E000              BOOT       EQU      *
+00113 E000 1A50                    ORCC     #$50
+00114 E002 10CED000                LDS      #STACK
+00115                   
+00116 E006 86D0                    LDA      #$D0
+00117 E008 1F8B                    TFR      A,DP
+00118 00D0                         SETDP    $D0
+00119                   
+00120 E00A                         IF       SUBTYPE>0
+00121 E00A 8684                    LDA      #$84
+00122 E00C B7D430                  STA      NMIMSK      ; NMIマスク、オフセットレジスタ下位イネーブル
+00123 FFFF                         ENDIF
+00124                   
+00125 E00F 8ED000                  LDX      #$D000
+00126 E012 108E03F4                LDY      #$0400-12   ; 途中でNMIが入ってしまったりするとスタックを使うので、その分はあけておく
+00127 E016 6F80         CLRAM      CLR      ,X+
+00128 E018 313F                    LEAY     <-1,Y
+00129 E01A 26FA                    BNE      CLRAM       ; ワークRAM & 共有RAMクリア
+00130                   
+00131 E01C                         IF       SUBTYPE>0
+00132                   ; SubSystem Type-A,B用のフック用ワークエリア設定
+00133 E01C 867E                    LDA      #$7E        ; JMP命令
+00134 E01E 8ED2A8                  LDX      #$D2A8
+00135                   ;        SWI3
+00136 E021 A780                    STA      ,X+
+00137 E023 CEEF0B                  LDU      #INTTRP
+00138 E026 EF81                    STU      ,X++
+00139                   ;        SWI2
+00140 E028 A780                    STA      ,X+
+00141 E02A EF81                    STU      ,X++
+00142                   ;        FIRQ
+00143 E02C CEEE88                  LDU      #HFIRQ
+00144 E02F A780                    STA      ,X+
+00145 E031 EF81                    STU      ,X++
+00146                   ;        IRQ
+00147 E033 CEEF04                  LDU      #HINT
+00148 E036 A780                    STA      ,X+
+00149 E038 EF81                    STU      ,X++
+00150                   ;        SWI
+00151 E03A CEEF0B                  LDU      #INTTRP
+00152 E03D A780                    STA      ,X+
+00153 E03F EF81                    STU      ,X++
+00154                   ;        NMI
+00155 E041 CEEDE4                  LDU      #HNMI
+00156 E044 A780                    STA      ,X+
+00157 E046 EF81                    STU      ,X++
+00158 FFFF                         ENDIF
+00159                   
+00160 E048 0F0B                    CLR      TC          ; タイマコンディションクリア
+00161                   
+00162 E04A BDE1AA                  JSR      INITIMR     ; タイマクリア
+00163 E04D BDEEF7                  JSR      INIKEY      ; キーボードバッファクリア
+00164 E050 BDE1BC                  JSR      INICON      ; 文字関係初期化
+00165                   
+00166 E053 0F00                    CLR      ABORT       ; アボートフラグクリア
+00167 E055 0F09                    CLR      INTF        ; メインに通知する割り込みクリア
+00168 E057 0F0A                    CLR      TACC        ; タイマアクセスフラグ消去
+00169                   
+00170 E059 BDE564                  JSR      CLS0        ; VRAMクリア
+00171                   
+00172 E05C 1CAF                    ANDCC    #$AF
+00173                   
+00174 E05E 7EE153                  JMP      MAINLP
+00175                   
+00176                   
+00177                   ; RELICS対策のコマンドテーブル
+00178 E077                         ORG      $E077
+00179                   
+00180 E077 0020                    FCB      $00,$20
+00181 E079 E3DD                    FDB      JPTBL01
+00182 E07B 292C                    FCB      $29,$2C
+00183 E07D E41F                    FDB      JPTBL29
+00184 E07F 3D3F                    FCB      $3D,$3F
+00185 E081 E427                    FDB      JPTBL3D
+00186 E083 407F                    FCB      $40,$7F
+00187 E085 E087                    FDB      TBLDMY
+00188                   
+00189 E087              TBLDMY     EQU      *
+00190 E087 39                      RTS
+00191                   
+00192                   
+00193                   ;---------------------------------------------------------------------------
+00194                   ; コマンドを待つ
+00195                   ; OUT: AccA = コマンド
+00196 E133                         ORG      $E133
+00197                   
+00198 E133              CMDWAIT    EQU      *
+00199 E133 0F00                    CLR      ABORT       ; アボートフラグクリア
+00200 E135 7FD382                  CLR      SH_CMD      ; コマンドクリア
+00201 E138 B6D380                  LDA      SH_ERR
+00202 E13B 847F         CMDLP1     ANDA     #$7F
+00203 E13D B7D380                  STA      SH_ERR      ;
+00204 E140 B6D40A                  LDA      BUSYF       ; READY
+00205 E143              CMDLP2     EQU      *
+00206 E143 B6D382                  LDA      SH_CMD
+00207 E146 2607                    BNE      CMDLP_E
+00208 E148 B6D380                  LDA      SH_ERR
+00209 E14B 2BEE                    BMI      CMDLP1
+00210 E14D 20F4                    BRA      CMDLP2
+00211                   
+00212 E14F B7D40A       CMDLP_E    STA      BUSYF       ; BUSY
+00213 E152 39                      RTS
+00214                   
+00215                   
+00216                   ; コマンド待ちの無限ループ
+00217 E153              MAINLP     EQU      *
+00218 E153 10CED000                LDS      #STACK
+00219 E157 BDE133       MAINLP1    JSR      CMDWAIT     ; コマンド待ち
+00220 E15A BDE15F                  JSR      CMDPRC
+00221 E15D 20F4                    BRA      MAINLP
+00222                   
+00223 E15F              CMDPRC     EQU      *
+00224 E15F 8120                    CMPA     #$20
+00225 E161 231C                    BLS      CMD0120
+00226                   
+00227 E163 8129                    CMPA     #$29
+00228 E165 2514                    BLO      ILGCMD
+00229 E167 812C                    CMPA     #$2C
+00230 E169 231B                    BLS      CMD292C
+00231                   
+00232 E16B 813D                    CMPA     #$3D
+00233 E16D 250C                    BLO      ILGCMD
+00234 E16F 813F                    CMPA     #$3F
+00235 E171 231C                    BLS      CMD3D3F
+00236                   
+00237 E173 8164                    CMPA     #$64
+00238 E175 2721                    BEQ      CMD64
+00239                   
+00240 E177 817F                    CMPA     #$7F
+00241 E179 2721                    BEQ      CMD7F
+00242                   
+00243 E17B BDE79A       ILGCMD     JSR      NOCMD
+00244 E17E 39                      RTS
+00245                   
+00246 E17F              CMD0120    EQU      *
+00247 E17F 48                      LSLA
+00248 E180 8EE3DD                  LDX      #JPTBL01
+00249 E183 AD96                    JSR      [A,X]
+00250 E185 39                      RTS
+00251                   
+00252 E186              CMD292C    EQU      *
+00253 E186 8029                    SUBA     #$29
+00254 E188 48                      LSLA
+00255 E189 8EE41F                  LDX      #JPTBL29
+00256 E18C AD96                    JSR      [A,X]
+00257 E18E 39                      RTS
+00258                   
+00259 E18F              CMD3D3F    EQU      *
+00260 E18F 803D                    SUBA     #$3D
+00261 E191 48                      LSLA
+00262 E192 8EE427                  LDX      #JPTBL3D
+00263 E195 AD96                    JSR      [A,X]
+00264 E197 39                      RTS
+00265                   
+00266 E198 BDE799       CMD64      JSR      CONT
+00267 E19B 39                      RTS
+00268                   
+00269 E19C BDD383       CMD7F      JSR      SH_CMD+1    ; 共有ＲＡＭ上の機械語を実行
+00270 E19F 39                      RTS
+00271                   
+00272                   
+00273                   ;---------------------------------------------------------------------------
+00274                   ; メモリクリア
+00275                   ; IN : RegX = クリア開始アドレス
+00276                   ;      RegY = クリアバイト数
+00277 E1A0              RAMCLR     EQU      *
+00278 E1A0 3430                    PSHS     X,Y
+00279 E1A2 6F80         RAMCLR1    CLR      ,X+
+00280 E1A4 313F                    LEAY     <-1,Y
+00281 E1A6 26FA                    BNE      RAMCLR1
+00282 E1A8 35B0                    PULS     X,Y,PC
+00283                   
+00284                   
+00285                   
+00286                   ;---------------------------------------------------------------------------
+00287                   ; タイマー初期化
+00288 E1AA              INITIMR    EQU      *
+00289 E1AA 3414                    PSHS     B,X
+00290 E1AC 030A                    COM      TACC
+00291 E1AE 8ED00C                  LDX      #T1
+00292 E1B1 C610                    LDB      #16
+00293 E1B3 6F80         INITIM1    CLR      ,X+
+00294 E1B5 5A                      DECB
+00295 E1B6 26FB                    BNE      INITIM1
+00296 E1B8 0F0A                    CLR      TACC
+00297 E1BA 3594                    PULS     B,X,PC
+00298                   
+00299                   ;---------------------------------------------------------------------------
+00300                   ; コンソールイニシャライズ
+00301                   ; 文字色とか文字幅を元に戻すだけ
+00302 E1BC              INICON     EQU      *
+00303 E1BC 3402                    PSHS     A
+00304 E1BE 0F21                    CLR      CSRX
+00305 E1C0 0F22                    CLR      CSRY
+00306 E1C2 0F24                    CLR      CWID
+00307 E1C4 0324                    COM      CWID
+00308 E1C6 8607                    LDA      #7
+00309 E1C8 9723                    STA      CCOL
+00310 E1CA CC0000                  LDD      #$0000
+00311 E1CD 7DD409                  TST      VRAMF       ; VRAMアクセスフラグセット
+00312 E1D0 DD1F                    STD      VOFSTW      ; VRAMオフセット値を戻す
+00313 E1D2 FDD40E                  STD      VRAMOH
+00314 E1D5 7FD409                  CLR      VRAMF       ; VRAMアクセスフラグリセット
+00315 E1D8 3582                    PULS     A,PC
+00316                   
+00317                   
+00318 E3DC                         ORG      $E3DC       ; RELICS対策
+00319 E3DC 39                      RTS
+00320                   
+00321                   
+00322                   ;---------------------------------------------------------------------------
+00323                   ; JUMP TABLE OF CMD $00 TO $20
+00324 E3DD E79A         JPTBL01    FDB      NOCMD       ($00)
+00325 E3DF E42DE43FE443            FDB      INIT,ERASE,PUT,GET,GETC,GETCB1,PUTCB1,GETCB2
+           E62AE62EE632 
+           E636E63A     
+00326 E3EF E63EE642E646            FDB      PUTCB2,GETBA,TABSET,CONCTL,ERASE2,NOCMD,NOCMD,NOCMD
+           E64AE64EE79A 
+           E79AE79A     
+00327 E3FF E79AE79AE79A            FDB      NOCMD,NOCMD,NOCMD,NOCMD,LINE,CHAIN,POINT,PAINT
+           E79AE652E656 
+           E65AE65E     
+00328 E40F E662E666E66A            FDB      SYMBOL,CHGCOL,GETBL1,PUTBL1,GETBL2,PUTBL2,GCURS,CHLINE
+           E66EE672E676 
+           E67AE67E     
+00329                   ; JUMP TABLE FOR CMD $29 TO $2C
+00330 E41F E682E6AEE6CB JPTBL29    FDB      INKEY,DEFPF,GETPF,INTCTL
+           E6CF         
+00331                   ; JUMP TABLE FOR CMD $3D TO $3F
+00332 E427 E6D3E71CE751 JPTBL3D    FDB      SETTIM,RDTIM,TEST
+00333                   
+00334 E42D              INIT       EQU      *
+00335 E42D 3406                    PSHS     A,B
+00336 E42F 5F                      CLRB
+00337 E430 B6D384                  LDA      SH_RAM+4    ; 画面桁数
+00338 E433 8128                    CMPA     #40
+00339 E435 2701                    BEQ      INIT1
+00340 E437 53                      COMB
+00341 E438 D724         INIT1      STB      CWID
+00342 E43A 7FD380                  CLR      SH_ERR
+00343 E43D 3586                    PULS     A,B,PC
+00344                   
+00345 E43F              ERASE      EQU      *
+00346 E43F 7FD380                  CLR      SH_ERR
+00347 E442 39                      RTS
+00348                   
+00349 E443              PUT        EQU      *
+00350 E443 8ED383                  LDX      #SH_RAM+3
+00351 E446 E680                    LDB      ,X+         ; 文字数
+00352 E448 270F         PUT1       BEQ      PUT_E
+00353 E44A A680                    LDA      ,X+
+00354 E44C 8120                    CMPA     #$20
+00355 E44E 250D                    BLO      PUTORD      ; オーダーコード処理
+00356 E450 BDE856                  JSR      PUTCRAW     ; １文字表示
+00357 E453 BDE7A3                  JSR      CSRINC      ; カーソルを進める
+00358 E456 5A           PUT2       DECB
+00359 E457 20EF                    BRA      PUT1
+00360 E459 7FD380       PUT_E      CLR      SH_ERR
+00361 E45C 39                      RTS
+00362                   
+00363 E45D              PUTORD     EQU      *           ; PUTコマンドのオーダーコード処理
+00364 E45D 3440                    PSHS     U
+00365 E45F CEE469                  LDU      #ORDTBL
+00366 E462 48                      LSLA
+00367 E463 ADD6                    JSR      [A,U]
+00368 E465 3540                    PULS     U
+00369 E467 20ED                    BRA      PUT2
+00370                   
+00371                   
+00372                   
+00373                   
+00374                   ; オーダーコード処理ルーチンジャンプテーブル
+00375 E469 E4A9E4A9E4A9 ORDTBL     FDB      ORD_NOP,ORD_NOP,ORD_NOP,ORD_NOP,ORD_NOP,ORD_EL,ORD_NOP,ORD_BL
+           E4A9E4A9E4AA 
+           E4A9E4AB     
+00376 E479 E4AFE4BBE4D4            FDB      ORD_BS,ORD_HT,ORD_LF,ORD_HM,ORD_EA,ORD_CR,ORD_NOP,ORD_NOP
+           E4E7E4ECE4F2 
+           E4A9E4A9     
+00377 E489 E4A9E4F5E4FB            FDB      ORD_NOP,ORD_SF,ORD_SC,ORD_RPC,ORD_NOP,ORD_NOP,ORD_NOP,ORD_NOP
+           E509E4A9E4A9 
+           E4A9E4A9     
+00378 E499 E4A9E4A9E4A9            FDB      ORD_NOP,ORD_NOP,ORD_NOP,ORD_ESC,ORD_RC,ORD_LC,ORD_UC,ORD_DC
+           E523E554E558 
+           E55CE560     
+00379                   
+00380 E4A9              ORD_NOP    EQU      *           ; NO OPERATION
+00381 E4A9 39                      RTS
+00382                   
+00383 E4AA              ORD_EL     EQU      *           ; ERASE LINE
+00384 E4AA 39                      RTS
+00385                   
+00386 E4AB              ORD_BL     EQU      *           ; BELL
+00387 E4AB 7DD403                  TST      BEEP
+00388 E4AE 39                      RTS
+00389                   
+00390 E4AF              ORD_BS     EQU      *           ; BACK SPACE
+00391 E4AF 3402                    PSHS     A
+00392 E4B1 BDE7BD                  JSR      CSRDEC      ; カーソル位置を戻す
+00393 E4B4 8620                    LDA      #$20
+00394 E4B6 BDE856                  JSR      PUTCRAW     ; 空白を表示して文字を消す
+00395 E4B9 3582                    PULS     A,PC
+00396                   
+00397 E4BB              ORD_HT     EQU      *           ; HORIZONTAL TAB
+00398 E4BB 3406                    PSHS     A,B
+00399 E4BD 8620                    LDA      #$20
+00400 E4BF D621                    LDB      CSRX
+00401 E4C1 C4F8                    ANDB     #$F8        ; 下位３ビットマスク
+00402 E4C3 50                      NEGB                 ; 符号反転
+00403 E4C4 CB08                    ADDB     #$08        ; ８から引く(8-(CSRX & 0xF8))
+00404 E4C6 5D           ORDHT1     TSTB
+00405 E4C7 2709                    BEQ      ORDHT2
+00406 E4C9 BDE856                  JSR      PUTCRAW     ; 空白を表示
+00407 E4CC BDE7A3                  JSR      CSRINC      ; カーソルを進める
+00408 E4CF 5A                      DECB
+00409 E4D0 20F4                    BRA      ORDHT1
+00410 E4D2 3586         ORDHT2     PULS     A,B,PC
+00411                   
+00412 E4D4              ORD_LF     EQU      *           ; LINE FEED
+00413 E4D4 3402                    PSHS     A
+00414 E4D6 0C22                    INC      CSRY
+00415 E4D8 9622                    LDA      CSRY
+00416 E4DA 8118                    CMPA     #24
+00417 E4DC 2307                    BLS      ORDLF_E
+00418 E4DE 8618                    LDA      #24
+00419 E4E0 9722                    STA      CSRY
+00420 E4E2 BDE820                  JSR      SCRL8       ; 8ラインスクロール
+00421 E4E5 3582         ORDLF_E    PULS     A,PC
+00422                   
+00423 E4E7              ORD_HM     EQU      *           ; HOME
+00424 E4E7 0F21                    CLR      CSRX
+00425 E4E9 0F22                    CLR      CSRY
+00426 E4EB 39                      RTS
+00427                   
+00428 E4EC              ORD_EA     EQU      *           ; ERASE ALL
+00429 E4EC 8DF9                    BSR      ORD_HM
+00430 E4EE BDE564                  JSR      CLS0
+00431                   ;       JSR     CLS1
+00432 E4F1 39                      RTS
+00433                   
+00434 E4F2              ORD_CR     EQU      *           ; CARRIAGE RETURN
+00435 E4F2 0F21                    CLR      CSRX
+00436 E4F4                         IF       SUBTYPE=0
+00438 FFFF                         ENDIF
+00439 E4F4 39                      RTS
+00440                   
+00441 E4F5              ORD_SF     EQU      *           ; START FIELD
+00442 E4F5 A680                    LDA      ,X+
+00443 E4F7 9723                    STA      CCOL        ; 文字色設定
+00444 E4F9 5A                      DECB
+00445 E4FA 39                      RTS
+00446                   
+00447 E4FB              ORD_SC     EQU      *           ; SET CURSOR POSITION
+00448 E4FB 3402                    PSHS     A
+00449 E4FD A680                    LDA      ,X+
+00450 E4FF 9721                    STA      CSRX
+00451 E501 A680                    LDA      ,X+
+00452 E503 9722                    STA      CSRY
+00453 E505 C002                    SUBB     #2          ; 文字数を２減らす
+00454 E507 3582                    PULS     A,PC
+00455                   
+00456 E509              ORD_RPC    EQU      *           ; REPEAT CHARACTOR
+00457 E509 3402                    PSHS     A
+00458 E50B 3404                    PSHS     B
+00459 E50D E680                    LDB      ,X+
+00460 E50F A680                    LDA      ,X+
+00461 E511 5D           ORDRPC1    TSTB
+00462 E512 2709                    BEQ      ORDRPC2
+00463 E514 BDE856                  JSR      PUTCRAW     ;       ; 文字表示
+00464 E517 BDE7A3                  JSR      CSRINC      ; カーソル進める
+00465 E51A 5A                      DECB
+00466 E51B 20F4                    BRA      ORDRPC1
+00467 E51D 3504         ORDRPC2    PULS     B
+00468 E51F C002                    SUBB     #2          ; 文字数を２減らす
+00469 E521 3582                    PULS     A,PC
+00470                   
+00471                   
+00472 E523              ORD_ESC    EQU      *           ; ESC+xx
+00473 E523 3406                    PSHS     A,B
+00474 E525 A680                    LDA      ,X+
+00475 E527 8123                    CMPA     #'#         ; LOCK KEYBOARD
+00476 E529 2713                    BEQ      ORDESC1
+00477 E52B 8122                    CMPA     #'"         ; UNLOCK KEYBOARD
+00478 E52D 2711                    BEQ      ORDESC2
+00479 E52F 8139                    CMPA     #'9         ; ERASE KEY BUFFER
+00480 E531 270F                    BEQ      ORDESC3
+00481 E533 8167                    CMPA     #'g         ; SET BUFFER MODE
+00482 E535 2713                    BEQ      ORDESC4
+00483 E537 8168                    CMPA     #'h         ; SET UNBUFFER MODE
+00484 E539 2715                    BEQ      ORDESC5
+00485 E53B 3506         ORDESCE    PULS     A,B
+00486 E53D 39                      RTS
+00487                   
+00488 E53E              ORDESC1    EQU      *           ; LOCK KEYBOARD
+00489 E53E 20FB                    BRA      ORDESCE
+00490                   
+00491 E540              ORDESC2    EQU      *           ; UNLOCK KEYBOARD
+00492 E540 20F9                    BRA      ORDESCE
+00493                   
+00494 E542              ORDESC3    EQU      *           ; ERASE KEY BUFFER
+00495 E542 0F04                    CLR      KEYN
+00496 E544 0F05                    CLR      KEYRP
+00497 E546 0F07                    CLR      KEYWP
+00498 E548 20F1                    BRA      ORDESCE
+00499                   
+00500 E54A              ORDESC4    EQU      *           ; SET BUFFER MODE
+00501 E54A 86FF                    LDA      #$FF
+00502 E54C 9703                    STA      KEYMD
+00503 E54E 20EB                    BRA      ORDESCE
+00504                   
+00505 E550              ORDESC5    EQU      *           ; SET UNBUFFER MODE
+00506 E550 0F03                    CLR      KEYMD
+00507 E552 20E7                    BRA      ORDESCE
+00508                   
+00509                   
+00510 E554              ORD_RC     EQU      *
+00511 E554 BDE808                  JSR      CSRRG       ; カーソル右移動
+00512 E557 39                      RTS
+00513                   
+00514 E558              ORD_LC     EQU      *
+00515 E558 BDE7FB                  JSR      CSRLF       ; カーソル左移動
+00516 E55B 39                      RTS
+00517                   
+00518 E55C              ORD_UC     EQU      *
+00519 E55C BDE7E1                  JSR      CSRUP       ; カーソル上移動
+00520 E55F 39                      RTS
+00521                   
+00522 E560              ORD_DC     EQU      *
+00523 E560 BDE7ED                  JSR      CSRDN       ; カーソル下移動
+00524 E563 39                      RTS
+00525                   
+00526                   ; 画面消去(シンプル：高速)
+00527 E564              CLS0       EQU      *
+00528 E564 3476                    PSHS     A,B,X,Y,U
+00529 E566 7FD408                  CLR      CRTSW       ; CRTC OFF
+00530                   
+00531 E569 CEC000                  LDU      #$C000
+00532 E56C 4F                      CLRA
+00533 E56D 5F                      CLRB
+00534 E56E 1F01                    TFR      D,X
+00535 E570 1F02                    TFR      D,Y
+00536 E572 3636         CLS0_1     PSHU     A,B,X,Y     ; 6
+00537 E574 3636                    PSHU     A,B,X,Y     ; 12
+00538 E576 3636                    PSHU     A,B,X,Y     ; 18
+00539 E578 3636                    PSHU     A,B,X,Y     ; 24
+00540 E57A 3636                    PSHU     A,B,X,Y     ; 30
+00541 E57C 3636                    PSHU     A,B,X,Y     ; 36
+00542 E57E 3636                    PSHU     A,B,X,Y     ; 42
+00543 E580 3636                    PSHU     A,B,X,Y     ; 48
+00544 E582 11830000                CMPU     #$0000
+00545 E586 26EA                    BNE      CLS0_1
+00546 E588 7DD408                  TST      CRTSW       ; CRTC ON
+00547 E58B 35F6                    PULS     A,B,X,Y,U,PC
+00548                   
+00549                   ; 画面消去(Xanadu風)
+00550 E58D              CLS1       EQU      *
+00551 E58D 3436                    PSHS     A,B,X,Y
+00552 E58F 7DD409                  TST      VRAMF
+00553 E592 108E0000                LDY      #$0000
+00554 E596 8608         CLS1_1     LDA      #8
+00555 E598 1F21         CLS1_2     TFR      Y,X
+00556 E59A 6484         CLS1_B1    LSR      ,X
+00557 E59C 6403                    LSR      <3,X
+00558 E59E 6406                    LSR      <6,X
+00559 E5A0 6409                    LSR      <9,X
+00560 E5A2 640C                    LSR      <12,X
+00561 E5A4 640F                    LSR      <15,X
+00562 E5A6 648812                  LSR      <18,X
+00563 E5A9 648815                  LSR      <21,X
+00564 E5AC 648818                  LSR      <24,X
+00565 E5AF 64881B                  LSR      <27,X
+00566 E5B2 30881E                  LEAX     <30,X
+00567 E5B5 8C3E80                  CMPX     #80*200
+00568 E5B8 25E0                    BLO      CLS1_B1
+00569 E5BA 1F21                    TFR      Y,X
+00570 E5BC 30894000                LEAX     $4000,X
+00571 E5C0 6484         CLS1_R1    LSR      ,X
+00572 E5C2 6403                    LSR      <3,X
+00573 E5C4 6406                    LSR      <6,X
+00574 E5C6 6409                    LSR      <9,X
+00575 E5C8 640C                    LSR      <12,X
+00576 E5CA 640F                    LSR      <15,X
+00577 E5CC 648812                  LSR      <18,X
+00578 E5CF 648815                  LSR      <21,X
+00579 E5D2 648818                  LSR      <24,X
+00580 E5D5 64881B                  LSR      <27,X
+00581 E5D8 30881E                  LEAX     <30,X
+00582 E5DB 8C7E80                  CMPX     #80*200+$4000
+00583 E5DE 25E0                    BLO      CLS1_R1
+00584 E5E0 1F21                    TFR      Y,X
+00585 E5E2 30898000                LEAX     $8000,X
+00586 E5E6 6484         CLS1_G1    LSR      ,X
+00587 E5E8 6403                    LSR      <3,X
+00588 E5EA 6406                    LSR      <6,X
+00589 E5EC 6409                    LSR      <9,X
+00590 E5EE 640C                    LSR      <12,X
+00591 E5F0 640F                    LSR      <15,X
+00592 E5F2 648812                  LSR      <18,X
+00593 E5F5 648815                  LSR      <21,X
+00594 E5F8 648818                  LSR      <24,X
+00595 E5FB 64881B                  LSR      <27,X
+00596 E5FE 30881E                  LEAX     <30,X
+00597 E601 8CBE80                  CMPX     #80*200+$8000
+00598 E604 25E0                    BLO      CLS1_G1
+00599 E606 4A                      DECA
+00600 E607 268F                    BNE      CLS1_2
+00601 E609 3121                    LEAY     <1,Y
+00602 E60B 108C0003                CMPY     #3
+00603 E60F 2385                    BLS      CLS1_1
+00604 E611 7FD409                  CLR      VRAMF       ; VRAMアクセスフラグクリア
+00605 E614 35B6                    PULS     A,B,X,Y,PC
+00606                   
+00607                   ; 画面消去(一番シンプル：遅い)
+00608 E616 3430         CLS2       PSHS     X,Y
+00609 E618 8E0000                  LDX      #$0000
+00610 E61B 108EC000                LDY      #$C000
+00611 E61F 7FD408                  CLR      CRTSW       ; CRT OFF
+00612 E622 BDE1A0                  JSR      RAMCLR      ; VRAMクリア
+00613 E625 7DD408                  TST      CRTSW       ; CRT ON
+00614 E628 35B0                    PULS     X,Y,PC
+00615                   
+00616 E62A              GET        EQU      *
+00617 E62A 7FD380                  CLR      SH_ERR
+00618 E62D 39                      RTS
+00619                   
+00620 E62E              GETC       EQU      *
+00621 E62E 7FD380                  CLR      SH_ERR
+00622 E631 39                      RTS
+00623                   
+00624 E632              GETCB1     EQU      *
+00625 E632 7FD380                  CLR      SH_ERR
+00626 E635 39                      RTS
+00627                   
+00628 E636              PUTCB1     EQU      *
+00629 E636 7FD380                  CLR      SH_ERR
+00630 E639 39                      RTS
+00631                   
+00632 E63A              GETCB2     EQU      *
+00633 E63A 7FD380                  CLR      SH_ERR
+00634 E63D 39                      RTS
+00635                   
+00636 E63E              PUTCB2     EQU      *
+00637 E63E 7FD380                  CLR      SH_ERR
+00638 E641 39                      RTS
+00639                   
+00640 E642              GETBA      EQU      *
+00641 E642 7FD380                  CLR      SH_ERR
+00642 E645 39                      RTS
+00643                   
+00644 E646              TABSET     EQU      *
+00645 E646 7FD380                  CLR      SH_ERR
+00646 E649 39                      RTS
+00647                   
+00648 E64A              CONCTL     EQU      *
+00649 E64A 7FD380                  CLR      SH_ERR
+00650 E64D 39                      RTS
+00651                   
+00652 E64E              ERASE2     EQU      *
+00653 E64E 7FD380                  CLR      SH_ERR
+00654 E651 39                      RTS
+00655                   
+00656 E652              LINE       EQU      *
+00657 E652 7FD380                  CLR      SH_ERR
+00658 E655 39                      RTS
+00659                   
+00660 E656              CHAIN      EQU      *
+00661 E656 7FD380                  CLR      SH_ERR
+00662 E659 39                      RTS
+00663                   
+00664 E65A              POINT      EQU      *
+00665 E65A 7FD380                  CLR      SH_ERR
+00666 E65D 39                      RTS
+00667                   
+00668 E65E              PAINT      EQU      *
+00669 E65E 7FD380                  CLR      SH_ERR
+00670 E661 39                      RTS
+00671                   
+00672 E662              SYMBOL     EQU      *
+00673 E662 7FD380                  CLR      SH_ERR
+00674 E665 39                      RTS
+00675                   
+00676 E666              CHGCOL     EQU      *
+00677 E666 7FD380                  CLR      SH_ERR
+00678 E669 39                      RTS
+00679                   
+00680 E66A              GETBL1     EQU      *
+00681 E66A 7FD380                  CLR      SH_ERR
+00682 E66D 39                      RTS
+00683                   
+00684 E66E              PUTBL1     EQU      *
+00685 E66E 7FD380                  CLR      SH_ERR
+00686 E671 39                      RTS
+00687                   
+00688 E672              GETBL2     EQU      *
+00689 E672 7FD380                  CLR      SH_ERR
+00690 E675 39                      RTS
+00691                   
+00692 E676              PUTBL2     EQU      *
+00693 E676 7FD380                  CLR      SH_ERR
+00694 E679 39                      RTS
+00695                   
+00696 E67A              GCURS      EQU      *
+00697 E67A 7FD380                  CLR      SH_ERR
+00698 E67D 39                      RTS
+00699                   
+00700 E67E              CHLINE     EQU      *
+00701 E67E 7FD380                  CLR      SH_ERR
+00702 E681 39                      RTS
+00703                   
+00704                   
+00705 E682              INKEY      EQU      *
+00706 E682 3416                    PSHS     A,B,X
+00707 E684 F6D383                  LDB      SH_RAM+3    ; 制御フラグ(D1=RESET, D0=WAIT)
+00708 E687 8601                    LDA      #1
+00709 E689 B7D384                  STA      SH_RAM+4    ; 入力の有無フラグをセット
+00710 E68C C502                    BITB     #$02        ; RESETフラグが立っている？
+00711 E68E 2703                    BEQ      INKEY2
+00712 E690 BDEEF7                  JSR      INIKEY      ; キーバッファ初期化(バッファクリア)
+00713 E693 9604         INKEY2     LDA      KEYN
+00714 E695 260C                    BNE      INKEY3      ; バッファされているキーがある場合
+00715 E697 C501                    BITB     #$01        ; WAITフラグが立っている？
+00716 E699 26F8                    BNE      INKEY2
+00717 E69B 7FD384                  CLR      SH_RAM+4    ; 入力の有無フラグをクリア
+00718 E69E 7FD383                  CLR      SH_RAM+3
+00719 E6A1 2006                    BRA      INKEYE
+00720 E6A3 BDEEDC       INKEY3     JSR      LDKEY       ; キーバッファから読み出し
+00721 E6A6 B7D383                  STA      SH_RAM+3    ; キーコード格納
+00722 E6A9 7FD380       INKEYE     CLR      SH_ERR
+00723 E6AC 3596                    PULS     A,B,X,PC
+00724                   
+00725                   
+00726 E6AE              DEFPF      EQU      *           ; ザイダー対策に実装
+00727 E6AE A680                    LDA      ,X+
+00728 E6B0 48                      LSLA
+00729 E6B1 48                      LSLA
+00730 E6B2 48                      LSLA
+00731 E6B3 48                      LSLA
+00732 E6B4 108ED2C0                LDY      #PFTBL
+00733 E6B8 31A6                    LEAY     A,Y
+00734 E6BA E680                    LDB      ,X+
+00735 E6BC E7A0                    STB      ,Y+
+00736 E6BE 2707         DEFPF1     BEQ      DEFPF9
+00737 E6C0 A680                    LDA      ,X+
+00738 E6C2 A7A0                    STA      ,Y+
+00739 E6C4 5A                      DECB
+00740 E6C5 20F7                    BRA      DEFPF1
+00741 E6C7 7FD380       DEFPF9     CLR      SH_ERR
+00742 E6CA 39                      RTS
+00743                   
+00744 E6CB              GETPF      EQU      *
+00745 E6CB 7FD380                  CLR      SH_ERR
+00746 E6CE 39                      RTS
+00747                   
+00748 E6CF              INTCTL     EQU      *
+00749 E6CF 7FD380                  CLR      SH_ERR
+00750 E6D2 39                      RTS
+00751                   
+00752 E6D3              SETTIM     EQU      *
+00753 E6D3 3456                    PSHS     A,B,X,U
+00754 E6D5 0D0A         SETTIMW    TST      TACC
+00755 E6D7 26FC                    BNE      SETTIMW     ; タイマアクセスフラグが下がるのを待つ
+00756 E6D9 030A                    COM      TACC        ; タイマアクセスフラグセット
+00757 E6DB 8ED380                  LDX      #SH_RAM
+00758 E6DE E603                    LDB      <3,X
+00759 E6E0 54                      LSRB
+00760 E6E1 2404                    BCC      SETTIM1
+00761 E6E3 A604                    LDA      <4,X
+00762 E6E5 970B                    STA      TC
+00763 E6E7 54           SETTIM1    LSRB
+00764 E6E8 2408                    BCC      SETTIM2
+00765 E6EA EE05                    LDU      <5,X
+00766 E6EC DF0C                    STU      T1
+00767 E6EE EE07                    LDU      <7,X
+00768 E6F0 DF0E                    STU      T1+2
+00769 E6F2 54           SETTIM2    LSRB
+00770 E6F3 2408                    BCC      SETTIM3
+00771 E6F5 EE09                    LDU      <9,X
+00772 E6F7 DF10                    STU      T1_I
+00773 E6F9 EE0B                    LDU      <11,X
+00774 E6FB DF12                    STU      T1_I+2
+00775 E6FD 54           SETTIM3    LSRB
+00776 E6FE 2408                    BCC      SETTIM4
+00777 E700 EE0D                    LDU      <13,X
+00778 E702 DF14                    STU      T2
+00779 E704 EE0F                    LDU      <15,X
+00780 E706 DF16                    STU      T2+2
+00781 E708 54           SETTIM4    LSRB
+00782 E709 240A                    BCC      SETTIM5
+00783 E70B EE8811                  LDU      <17,X
+00784 E70E DF18                    STU      T2_D
+00785 E710 EE8813                  LDU      <19,X
+00786 E713 DF1A                    STU      T2_D+2
+00787 E715 7FD380       SETTIM5    CLR      SH_ERR
+00788 E718 0F0A                    CLR      TACC        ; タイマアクセスフラグクリア
+00789 E71A 35D6                    PULS     A,B,X,U,PC
+00790                   
+00791 E71C              RDTIM      EQU      *
+00792 E71C 0D0A         RDTIMW     TST      TACC
+00793 E71E 26FC                    BNE      RDTIMW      ; タイマアクセスフラグが下がるのを待つ
+00794 E720 030A                    COM      TACC        ; タイマアクセスフラグセット
+00795 E722 8ED380                  LDX      #SH_RAM
+00796 E725 960B                    LDA      TC
+00797 E727 A704                    STA      <4,X
+00798 E729 DE0C                    LDU      T1
+00799 E72B EF05                    STU      <5,X
+00800 E72D DE0E                    LDU      T1+2
+00801 E72F EF07                    STU      <7,X
+00802 E731 DE10                    LDU      T1_I
+00803 E733 EF09                    STU      <9,X
+00804 E735 DE12                    LDU      T1_I+2
+00805 E737 EF0B                    STU      <11,X
+00806 E739 DE14                    LDU      T2
+00807 E73B EF0D                    STU      <13,X
+00808 E73D DE16                    LDU      T2+2
+00809 E73F EF0F                    STU      <15,X
+00810 E741 DE18                    LDU      T2_D
+00811 E743 EF8811                  STU      <17,X
+00812 E746 DE1A                    LDU      T2_D+2
+00813 E748 EF8813                  STU      <19,X
+00814 E74B 0F0A                    CLR      TACC        ; タイマアクセスフラグクリア
+00815 E74D 7FD380                  CLR      SH_ERR
+00816 E750 39                      RTS
+00817                   
+00818                   
+00819                   
+00820                   ; MAINTENANCE COMMAND
+00821 E751              TEST       EQU      *
+00822 E751 3412                    PSHS     A,X
+00823 E753 8ED38B                  LDX      #SH_RAM+11  ; サブコマンド列の先頭
+00824 E756 A680         TESTLP     LDA      ,X+
+00825 E758 8190                    CMPA     #$90
+00826 E75A 2713                    BEQ      TCEND
+00827 E75C 8191                    CMPA     #$91
+00828 E75E 2714                    BEQ      TCMOV
+00829 E760 8192                    CMPA     #$92
+00830 E762 2727                    BEQ      TCJMP
+00831 E764 8193                    CMPA     #$93
+00832 E766 2727                    BEQ      TCJSR
+00833 E768 8670                    LDA      #$70
+00834 E76A B7D380                  STA      SH_ERR
+00835 E76D 3592                    PULS     A,X,PC
+00836                   
+00837                   ; ENDサブコマンド
+00838 E76F              TCEND      EQU      *
+00839 E76F 7FD380                  CLR      SH_ERR
+00840 E772 3592                    PULS     A,X,PC
+00841                   
+00842                   ; MOVEサブコマンド
+00843 E774              TCMOV      EQU      *
+00844                   ;       PSHS    A,B,Y,U
+00845 E774 3410                    PSHS     X
+00846 E776 EE84                    LDU      ,X
+00847 E778 10AE02                  LDY      <2,X
+00848 E77B AE04                    LDX      <4,X
+00849 E77D 3702         TCMOV1     PULU     A
+00850 E77F A7A0                    STA      ,Y+
+00851 E781 301F                    LEAX     <-1,X
+00852 E783 26F8                    BNE      TCMOV1
+00853 E785 3510                    PULS     X
+00854 E787 3006                    LEAX     <6,X
+00855                   ;       PULS    A,B,Y,U
+00856 E789 20CB                    BRA      TESTLP
+00857                   
+00858                   ; JMPサブコマンド
+00859 E78B              TCJMP      EQU      *
+00860 E78B AE84                    LDX      ,X
+00861 E78D 20C7                    BRA      TESTLP
+00862                   
+00863                   ; JSRサブコマンド
+00864 E78F              TCJSR      EQU      *
+00865 E78F 343F                    PSHS     A,B,CC,DP,X,Y
+00866 E791 AD94                    JSR      [,X]
+00867 E793 353F                    PULS     A,B,CC,DP,X,Y
+00868 E795 3002                    LEAX     <2,X
+00869 E797 20BD                    BRA      TESTLP
+00870                   
+00871 E799              CONT       EQU      *
+00872 E799 39                      RTS
+00873                   
+00874                   ;---------------------------------------------------------------------------
+00875                   ; 指定のコマンドが存在しなかった場合の処理
+00876 E79A              NOCMD      EQU      *
+00877 E79A 3402                    PSHS     A
+00878 E79C 8646                    LDA      #ECMD
+00879 E79E B7D380                  STA      SH_ERR
+00880 E7A1 3582                    PULS     A,PC
+00881                   
+00882                   ;---------------------------------------------------------------------------
+00883                   ; カーソル位置を１つ進める
+00884 E7A3              CSRINC     EQU      *
+00885 E7A3 3402                    PSHS     A
+00886 E7A5 8628                    LDA      #40
+00887 E7A7 0D24                    TST      CWID        ; 40文字モード?
+00888 E7A9 2701                    BEQ      CSRI1       ; YES
+00889 E7AB 48                      LSLA
+00890 E7AC 3402         CSRI1      PSHS     A
+00891 E7AE 0C21                    INC      CSRX        ; Xインクリメント
+00892 E7B0 9621                    LDA      CSRX
+00893 E7B2 A1E0                    CMPA     ,S+         ; 端まで来た?
+00894 E7B4 2505                    BLO      CSRI2
+00895 E7B6 0F21                    CLR      CSRX        ; X=0
+00896 E7B8 BDE4D4                  JSR      ORD_LF      ; LF動作
+00897 E7BB 3582         CSRI2      PULS     A,PC
+00898                   
+00899                   ; カーソル位置を１つ戻す
+00900 E7BD              CSRDEC     EQU      *
+00901 E7BD 3406                    PSHS     A,B
+00902 E7BF 9622                    LDA      CSRY
+00903 E7C1 D621                    LDB      CSRX
+00904 E7C3 10830000                CMPD     #0
+00905 E7C7 2716                    BEQ      CSRD2       ; X=0,Y=0なら動かさない
+00906 E7C9 8628                    LDA      #40
+00907 E7CB 0D24                    TST      CWID        ; 40文字モード?
+00908 E7CD 2701                    BEQ      CSRD1       ; YES
+00909 E7CF 48                      LSLA
+00910 E7D0 4A           CSRD1      DECA
+00911 E7D1 0A21                    DEC      CSRX        ; Xデクリメント
+00912 E7D3 240A                    BCC      CSRD2       ; 端まで来た?
+00913 E7D5 9721                    STA      CSRX        ; X=39
+00914 E7D7 0A22                    DEC      CSRY        ; Yデクリメント
+00915 E7D9 2404                    BCC      CSRD2       ; 端まで来た?
+00916 E7DB 8618                    LDA      #24
+00917 E7DD 9722                    STA      CSRY        ; Y=24
+00918 E7DF 3586         CSRD2      PULS     A,B,PC
+00919                   
+00920                   ; カーソルを上に移動
+00921 E7E1              CSRUP      EQU      *
+00922 E7E1 3402                    PSHS     A
+00923 E7E3 0A22                    DEC      CSRY
+00924 E7E5 2604                    BNE      CSRUPE
+00925 E7E7 8618                    LDA      #24
+00926 E7E9 9722                    STA      CSRY
+00927 E7EB 3582         CSRUPE     PULS     A,PC
+00928                   
+00929                   ; カーソルを下に移動
+00930 E7ED              CSRDN      EQU      *
+00931 E7ED 3402                    PSHS     A
+00932 E7EF 0C22                    INC      CSRY
+00933 E7F1 9622                    LDA      CSRY
+00934 E7F3 8118                    CMPA     #24
+00935 E7F5 2302                    BLS      CSRDNE
+00936 E7F7 0F22                    CLR      CSRY
+00937 E7F9 3582         CSRDNE     PULS     A,PC
+00938                   
+00939                   ; カーソルを左に移動する
+00940 E7FB              CSRLF      EQU      *
+00941 E7FB 3402                    PSHS     A
+00942 E7FD 0A21                    DEC      CSRX
+00943 E7FF 2605                    BNE      CSRLFE
+00944 E801 BDE817                  JSR      GETXMAX
+00945 E804 9721                    STA      CSRX
+00946 E806 3582         CSRLFE     PULS     A,PC
+00947                   
+00948                   ; カーソルを右に移動する
+00949 E808              CSRRG      EQU      *
+00950 E808 3402                    PSHS     A
+00951 E80A BDE817                  JSR      GETXMAX
+00952 E80D 0C21                    INC      CSRX
+00953 E80F 9121                    CMPA     CSRX
+00954 E811 2302                    BLS      CSRRGE
+00955 E813 0F21                    CLR      CSRX
+00956 E815 3582         CSRRGE     PULS     A,PC
+00957                   
+00958                   ; Ｘカーソル座標の最大値をAccAに入れる(画面モードのチェックをする)
+00959 E817              GETXMAX    EQU      *
+00960 E817 8628                    LDA      #40
+00961 E819 0D24                    TST      CWID
+00962 E81B 2701                    BEQ      GETXMXE
+00963 E81D 48                      LSLA
+00964 E81E 4A           GETXMXE    DECA
+00965 E81F 39                      RTS
+00966                   
+00967                   ; 1行(8ラインスクロール)
+00968 E820              SCRL8      EQU      *
+00969 E820 3436                    PSHS     A,B,X,Y
+00970 E822 8E3C00                  LDX      #80*8*24
+00971 E825 108E0280                LDY      #80*8
+00972 E829 2009                    BRA      SCROLL
+00973                   
+00974                   ; 1行(10ラインスクロール)
+00975 E82B              SCRL10     EQU      *
+00976 E82B 3436                    PSHS     A,B,X,Y
+00977 E82D 8E3B60                  LDX      #80*10*19
+00978 E830 108E0320                LDY      #80*10
+00979 E834              SCROLL     EQU      *
+00980 E834 7DD409                  TST      VRAMF       ; VRAMアクセスフラグセット
+00981 E837 DC1F                    LDD      VOFSTW
+00982 E839 C30280                  ADDD     #80*8
+00983 E83C DD1F                    STD      VOFSTW
+00984 E83E FDD40E                  STD      VRAMOH
+00985 E841 6F84         SCROLL1    CLR      ,X          ; スクロールすると現れる部分のVRAMをクリア
+00986 E843 6F894000                CLR      $4000,X
+00987 E847 6F898000                CLR      $8000,X
+00988 E84B 3001                    LEAX     1,X
+00989 E84D 313F                    LEAY     <-1,Y
+00990 E84F 26F0                    BNE      SCROLL1
+00991 E851 7FD409                  CLR      VRAMF       ; VRAMアクセスフラグリセット
+00992 E854 35B6                    PULS     A,B,X,Y,PC
+00993                   
+00994                   ;---------------------------------------------------------------------------
+00995                   ; 1文字描画ルーチン
+00996                   ; カーソルの移動などは行わない
+00997                   ; オーダーコードの考慮もしない
+00998                   ; IN : AccA = 表示文字
+00999                   ;      CSRX,CSRY = 表示位置
+01000                   ;      CWID = 表示モード(４０文字/８０文字)
+01001                   ;      CCOL = 表示色
+01002 E856              PUTCRAW    EQU      *
+01003 E856 3476                    PSHS     A,B,X,Y,U
+01004 E858 BDE8CC       PUTCRA1    JSR      GETFON      ; フォントアドレスを取得
+01005 E85B 1F13                    TFR      X,U
+01006 E85D BDE8D8                  JSR      GETVRAM     ; 現在のカーソル位置のVRAMアドレスを取得
+01007 E860 108E0008                LDY      #8          ; 文字のラスタ方向数
+01008 E864 0D24                    TST      CWID        ; 40文字モード?
+01009 E866 270D                    BEQ      PUTC40
+01010                   
+01011 E868              PUTC80     EQU      *           ; 80文字モード
+01012 E868 3702                    PULU     A           ; フォントデータ読み出し
+01013 E86A 8D24                    BSR      DRAW        ; 描画
+01014 E86C 308850                  LEAX     80,X
+01015 E86F 313F                    LEAY     <-1,Y       ; 8ライン表示が終わった?
+01016 E871 26F5                    BNE      PUTC80
+01017 E873 35F6                    PULS     A,B,X,Y,U,PC
+01018                   
+01019 E875              PUTC40     EQU      *
+01020 E875 3702                    PULU     A           ; フォント読み出し
+01021 E877 8D40                    BSR      ENLARGE     ; パターン引き伸ばし
+01022 E879 1E89                    EXG      A,B
+01023 E87B 8D13                    BSR      DRAW
+01024 E87D 1E89                    EXG      A,B
+01025 E87F 8D38                    BSR      ENLARGE
+01026 E881 1E89                    EXG      A,B
+01027 E883 3001                    LEAX     <1,X
+01028 E885 8D09                    BSR      DRAW
+01029 E887 30884F                  LEAX     79,X
+01030 E88A 313F                    LEAY     <-1,Y       ; 8ライン分表示が終わった?
+01031 E88C 26E7                    BNE      PUTC40
+01032 E88E 35F6                    PULS     A,B,X,Y,U,PC
+01033                   
+01034                   
+01035                   ;---------------------------------------------------------------------------
+01036                   ; 描画する
+01037                   ; IN : RegX = 描画アドレス(ブループレーン)
+01038                   ;      AccA = 描画データ
+01039                   ;      CCOL = 描画色
+01040 E890              DRAW       EQU      *
+01041 E890 3404                    PSHS     B
+01042 E892 6F84                    CLR      ,X
+01043 E894 6F894000                CLR      $4000,X
+01044 E898 6F898000                CLR      $8000,X
+01045 E89C D623                    LDB      CCOL
+01046 E89E 7DD409                  TST      VRAMF       ; VRAMアクセス!
+01047 E8A1 54                      LSRB
+01048 E8A2 2402                    BCC      DRAW1
+01049 E8A4 A784                    STA      ,X          ; BLUEプレーン
+01050 E8A6 54           DRAW1      LSRB
+01051 E8A7 2404                    BCC      DRAW2
+01052 E8A9 A7894000                STA      $4000,X     ; REDプレーン
+01053 E8AD 54           DRAW2      LSRB
+01054 E8AE 2404                    BCC      DRAW3
+01055 E8B0 A7898000                STA      $8000,X     ; GREENプレーン
+01056 E8B4 7FD409       DRAW3      CLR      VRAMF
+01057 E8B7 3584                    PULS     B,PC
+01058                   
+01059                   
+01060                   ; パターン引き伸ばし
+01061                   ; AccAの上位ニブルを引き伸ばしてAccBに入れる(40文字モード表示用)
+01062                   ; IN : AccA(Upper nibble)
+01063                   ; OUT: AccB
+01064 E8B9              ENLARGE    EQU      *
+01065 E8B9 3410                    PSHS     X
+01066 E8BB 8E0004                  LDX      #4
+01067 E8BE 5F                      CLRB
+01068 E8BF 58           ENLARG1    LSLB
+01069 E8C0 58                      LSLB
+01070 E8C1 48                      LSLA
+01071 E8C2 2402                    BCC      ENLARG2
+01072 E8C4 CA03                    ORB      #$03
+01073 E8C6 301F         ENLARG2    LEAX     <-1,X
+01074 E8C8 26F5                    BNE      ENLARG1
+01075 E8CA 3590                    PULS     X,PC
+01076                   
+01077                   ; IN : AccA = キャラクタコード
+01078                   ; OUT: RegX = フォントアドレス
+01079 E8CC              GETFON     EQU      *
+01080 E8CC 3406                    PSHS     A,B
+01081 E8CE C608                    LDB      #8
+01082 E8D0 3D                      MUL
+01083 E8D1 C3D800                  ADDD     #FONBASE
+01084 E8D4 1F01                    TFR      D,X
+01085 E8D6 3586                    PULS     A,B,PC
+01086                   
+01087                   
+01088                   ; 現在のカーソル位置に対応するVRAM(BLUEプレーン)での描画アドレスを計算
+01089                   ; OUT = RegX
+01090 E8D8              GETVRAM    EQU      *
+01091 E8D8 3406                    PSHS     A,B
+01092 E8DA 9622                    LDA      CSRY
+01093 E8DC 48                      LSLA
+01094 E8DD 48                      LSLA
+01095 E8DE 48                      LSLA
+01096 E8DF C650                    LDB      #80
+01097 E8E1 3D                      MUL
+01098 E8E2 1F01                    TFR      D,X
+01099 E8E4 9621                    LDA      CSRX
+01100 E8E6 0D24                    TST      CWID        ; 40文字モード?
+01101 E8E8 2601                    BNE      GETVRA1
+01102 E8EA 48                      LSLA                 ; 40文字の場合、ｘ方向を２倍にする
+01103 E8EB 3086         GETVRA1    LEAX     A,X
+01104 E8ED 3586                    PULS     A,B,PC
+01105                   
+01106                   
+01107 EDE3                         org      $ede3
+01108 EDE3 39                      rts                  ; Hydlide2対策
+01109                   
+01110                   ;---------------------------------------------------------------------------
+01111                   
+01112                   ; NMIハンドラ(20msインターバルタイマ割り込み)
+01113 EDE4              HNMI       EQU      *
+01114 EDE4 0D0A         HNMIW      TST      TACC
+01115 EDE6 1026009B                LBNE     INTTM6      ; タイマアクセスフラグが立っていたら何もしない
+01116 EDEA 86FF                    LDA      #$FF
+01117 EDEC 970A                    STA      TACC        ; タイマアクセスフラグセット
+01118 EDEE 0C0F                    INC      T1+3        ; 20msの桁インクリメント
+01119 EDF0 960F                    LDA      T1+3
+01120 EDF2 8132                    CMPA     #50         ; 20*50=1000msになったか？
+01121 EDF4 252C                    BLO      INTTM1
+01122 EDF6 0F0F                    CLR      T1+3        ; 20msの桁クリア
+01123 EDF8 0C0E                    INC      T1+2        ; 秒の桁インクリメント
+01124 EDFA 960E                    LDA      T1+2
+01125 EDFC 813C                    CMPA     #60         ; 60秒になったか？
+01126 EDFE 2522                    BLO      INTTM1
+01127 EE00 0F0E                    CLR      T1+2        ; 秒の桁クリア
+01128 EE02 0C0D                    INC      T1+1        ; 分の桁インクリメント
+01129 EE04 960D                    LDA      T1+1
+01130 EE06 813C                    CMPA     #60         ; 60分になったか？
+01131 EE08 2518                    BLO      INTTM1
+01132 EE0A 0F0D                    CLR      T1+1        ; 分の桁クリア
+01133 EE0C 0C0C                    INC      T1          ; 時間の位インクリメント
+01134 EE0E 960C                    LDA      T1
+01135 EE10 8118                    CMPA     #24         ; 24時になったか？
+01136 EE12 250E                    BLO      INTTM1
+01137 EE14 0F0C                    CLR      T1          ; 時の位クリア
+01138 EE16              ZEROINT    EQU      *           ; ０時割り込み
+01139 EE16 960B                    LDA      TC
+01140 EE18 8508                    BITA     #$08
+01141 EE1A 2706                    BEQ      INTTM1      ; ０時割り込みイネーブル？
+01142 EE1C 9609                    LDA      INTF        ; ０時割り込み発生
+01143 EE1E 8A40                    ORA      #$40
+01144 EE20 9709                    STA      INTF
+01145 EE22              INTTM1     EQU      *           ; タイマ値(T1_I)と現在時刻(T1)をコンペア
+01146 EE22 DC0C                    LDD      T1
+01147 EE24 109310                  CMPD     T1_I        ; 時,分の桁のコンペア
+01148 EE27 2613                    BNE      INTTM2
+01149 EE29 DC0E                    LDD      T1+2
+01150 EE2B 109312                  CMPD     T1_I+2      ; 秒,20msの桁コンペア
+01151 EE2E 260C                    BNE      INTTM2
+01152 EE30              T1INT      EQU      *           ; T1_I割り込み
+01153 EE30 960B                    LDA      TC
+01154 EE32 8501                    BITA     #$01
+01155 EE34 2706                    BEQ      INTTM2      ; タイマ割り込みイネーブル？
+01156 EE36 9609                    LDA      INTF        ; タイマ割り込み発生
+01157 EE38 8A10                    ORA      #$10
+01158 EE3A 9709                    STA      INTF
+01159 EE3C              INTTM2     EQU      *           ; T2デクリメント
+01160 EE3C 0A17                    DEC      T2+3
+01161 EE3E 2A16                    BPL      INTTM3
+01162 EE40 8631                    LDA      #50-1
+01163 EE42 9717                    STA      T2+3
+01164 EE44 0A16                    DEC      T2+2
+01165 EE46 2A0E                    BPL      INTTM3
+01166 EE48 863B                    LDA      #60-1
+01167 EE4A 9716                    STA      T2+2
+01168 EE4C 0A15                    DEC      T2+1
+01169 EE4E 2A06                    BPL      INTTM3
+01170 EE50 863B                    LDA      #60-1
+01171 EE52 9715                    STA      T2+1
+01172 EE54 0A14                    DEC      T2
+01173 EE56              INTTM3     EQU      *           ; T2が0になったかチェック
+01174 EE56 DC14                    LDD      T2
+01175 EE58 261C                    BNE      INTTM4
+01176 EE5A DC16                    LDD      T2+2
+01177 EE5C 2618                    BNE      INTTM4
+01178 EE5E DC18                    LDD      T2_D
+01179 EE60 DD14                    STD      T2
+01180 EE62 DC1A                    LDD      T2_D+2
+01181 EE64 DD16                    STD      T2+2        ; タイマー値リロード
+01182 EE66              INTINT     EQU      *           ; インターバルタイマー割り込み発生
+01183 EE66 960B                    LDA      TC
+01184 EE68 8506                    BITA     #%00000110
+01185 EE6A 270A                    BEQ      INTTM4      ; インターバル割り込みイネーブル？
+01186 EE6C 84FB                    ANDA     #%11111011
+01187 EE6E 970B                    STA      TC          ; ワンショットフラグを寝かす
+01188 EE70 9609                    LDA      INTF
+01189 EE72 8A20                    ORA      #%00100000  ; インターバル割り込み発生
+01190 EE74 9709                    STA      INTF
+01191 EE76              INTTM4     EQU      *
+01192 EE76 9609                    LDA      INTF
+01193 EE78 270B                    BEQ      INTTM6
+01194 EE7A BAD381                  ORA      SH_RAM+1
+01195 EE7D B7D381                  STA      SH_RAM+1
+01196 EE80 0F09                    CLR      INTF        ; 割り込みクリア
+01197 EE82 7DD404                  TST      ATTEN       ; アテンション割り込み発生
+01198 EE85              INTTM6     EQU      *
+01199 EE85 0F0A                    CLR      TACC        ; タイマアクセスフラグクリア
+01200 EE87 3B                      RTI
+01201                   
+01202                   ;---------------------------------------------------------------------------
+01203                   ; FIRQンドラ(キーボード割り込み)
+01204 EE88              HFIRQ      EQU      *
+01205 EE88 3406                    PSHS     A,B
+01206 EE8A FCD400                  LDD      KYBDH
+01207 EE8D 4D                      TSTA
+01208 EE8E 2B08                    BMI      PFKEY       ; PFキー
+01209 EE90 1F98                    TFR      B,A
+01210 EE92 BDEEB9                  JSR      STOKEY
+01211 EE95 3506         HFIRQ2     PULS     A,B
+01212 EE97 3B                      RTI
+01213                   
+01214 EE98              PFKEY      EQU      *           ; PFキーの処理
+01215 EE98 C47F                    ANDB     #$7F
+01216 EE9A F7D381                  STB      SH_RAM+1
+01217 EE9D 3410                    PSHS     X
+01218 EE9F 8ED2C0                  LDX      #PFTBL
+01219 EEA2 58                      LSLB
+01220 EEA3 58                      LSLB
+01221 EEA4 58                      LSLB
+01222 EEA5 58                      LSLB
+01223 EEA6 3A                      ABX
+01224 EEA7 E680                    LDB      ,X+
+01225 EEA9 2707         PFKEY1     BEQ      PFKEY9
+01226 EEAB A680                    LDA      ,X+
+01227 EEAD 8D0A                    BSR      STOKEY
+01228 EEAF 5A                      DECB
+01229 EEB0 20F7                    BRA      PFKEY1
+01230 EEB2 3510         PFKEY9     PULS     X
+01231 EEB4 7DD404                  TST      ATTEN       ; アテンション割り込み発生
+01232 EEB7 20DC                    BRA      HFIRQ2
+01233                   
+01234                   ; AccAに入っているコードをキーバッファに積む
+01235                   ; IN : AccA = キーコード
+01236 EEB9              STOKEY     EQU      *
+01237 EEB9 3414                    PSHS     B,X
+01238 EEBB D603                    LDB      KEYMD
+01239 EEBD 2602                    BNE      SKEY1
+01240 EEBF 8D36                    BSR      INIKEY      ; 非バッファモード時はバッファをクリア
+01241 EEC1              SKEY1      EQU      *
+01242 EEC1 D604                    LDB      KEYN
+01243 EEC3 C120                    CMPB     #32
+01244 EEC5 2413                    BHS      SKEY3       ; 既に32文字分バッファされているときは無視
+01245 EEC7 5C                      INCB
+01246 EEC8 D704                    STB      KEYN        ; バッファリング文字数をインクリメントする
+01247 EECA 9E07                    LDX      KEYWP
+01248 EECC A784                    STA      ,X          ; キーコード格納
+01249 EECE 3001                    LEAX     <1,X
+01250 EED0 8CD380                  CMPX     #KEYBUF+32  ; キーバッファの終わりに来た?
+01251 EED3 2503                    BLO      SKEY2
+01252 EED5 8ED360                  LDX      #KEYBUF
+01253 EED8 9F07         SKEY2      STX      KEYWP       ; ライトポインタ保存
+01254 EEDA 3594         SKEY3      PULS     B,X,PC
+01255                   
+01256                   ; キーバッファから１文字読み出す
+01257                   ; OUT : AccA = 読み出した文字
+01258 EEDC              LDKEY      EQU      *
+01259 EEDC 3410                    PSHS     X
+01260 EEDE 9604                    LDA      KEYN
+01261 EEE0 2713                    BEQ      LDKEY_E     ; 1文字も入っていなかった場合
+01262 EEE2 4A                      DECA
+01263 EEE3 9704                    STA      KEYN        ; バッファリング文字数を１減らす
+01264 EEE5 9E05                    LDX      KEYRP
+01265 EEE7 A684                    LDA      ,X
+01266 EEE9 3001                    LEAX     <1,X        ; リードポインタインクリメント
+01267 EEEB 8CD380                  CMPX     #KEYBUF+32
+01268 EEEE 2503                    BLO      LDKEY1      ; キーバッファの終わりに来た?
+01269 EEF0 8ED360                  LDX      #KEYBUF
+01270 EEF3 9F05         LDKEY1     STX      KEYRP       ; リードポインタを保存
+01271 EEF5              LDKEY_E    EQU      *
+01272 EEF5 3590                    PULS     X,PC
+01273                   
+01274                   ;---------------------------------------------------------------------------
+01275                   ; キーバッファの初期化をする
+01276 EEF7              INIKEY     EQU      *
+01277 EEF7 3412                    PSHS     A,X
+01278 EEF9 0F04                    CLR      KEYN
+01279 EEFB 8ED360                  LDX      #KEYBUF
+01280 EEFE 9F07                    STX      KEYWP
+01281 EF00 9F05                    STX      KEYRP
+01282                   ; キーエンコーダのスキャンモードを変更する
+01283 EF02                         IF       SUBTYPE=1
+01290 FFFF                         ENDIF
+01291 EF02 3592                    PULS     A,X,PC
+01292                   
+01293                   
+01294 EF04                         IF       SUBTYPE=1
+01304 FFFF                         ENDIF
+01305                   
+01306                   ;---------------------------------------------------------------------------
+01307                   ; INTハンドラ(CANCEL割り込み)
+01308 EF04              HINT       EQU      *
+01309 EF04 7DD402                  TST      IRQACK      ; キャンセルIRQのアクノレッジ
+01310 EF07 86FF                    LDA      #$FF
+01311 EF09 9700                    STA      ABORT
+01312 EF0B              INTTRP     EQU      *
+01313 EF0B 3B                      RTI
+01314                   
+01315                   ;---------------------------------------------------------------------------
+01316                   ; INTERRUPT VECTOR TABLE
+01317                   
+01318 FFF0                         ORG      $FFF0
+01319                   
+01320                   
+01321 FFF0                         IF       SUBTYPE=0
+01330 FFFF                         ENDIF
+01331 FFF0                         IF       SUBTYPE>0
+01332 FFF0 0000                    FDB      $0000
+01333 FFF2 D2A8         SWI3       FDB      $D2A8
+01334 FFF4 D2AB         SWI2       FDB      $D2AB
+01335 FFF6 D2AE         FIRQ       FDB      $D2AE
+01336 FFF8 D2B1         IRQ        FDB      $D2B1
+01337 FFFA D2B4         SWI        FDB      $D2B4
+01338 FFFC D2B7         NMI        FDB      $D2B7
+01339 FFFE E000         RESET      FDB      BOOT
+01340 FFFF                         ENDIF
+01341                   
+01342 E000                         END      BOOT
