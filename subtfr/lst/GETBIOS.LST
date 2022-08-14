@@ -1,0 +1,31 @@
+    1                   
+    2 2000                         org      $2000
+    3                   
+    4 2000              main       equ      *
+    5 2000 1A50                    orcc     #$50
+    6 2002 8D17                    bsr      prsbrk
+    7 2004 CEFE00                  ldu      #$fe00
+    8 2007 8E3000                  ldx      #$3000
+    9 200A 108E0200                ldy      #$0200
+   10 200E 3702         tfr        pulu     a
+   11 2010 A780                    sta      ,x+
+   12 2012 313F                    leay     -1,y
+   13 2014 26F8                    bne      tfr
+   14 2016 8D03                    bsr      prsbrk
+   15 2018 1CAF                    andcc    #$af
+   16 201A 39                      rts
+   17                   
+   18                   ; beepを鳴らし、ブレークキーが１度押されるのを待つ
+   19 201B              prsbrk     equ      *
+   20 201B 3402                    pshs     a
+   21 201D 8641                    lda      #$41
+   22 201F B7FD03                  sta      $fd03
+   23 2022 B6FD04       prsbrk1    lda      $fd04
+   24 2025 8502                    bita     #$02
+   25 2027 26F9                    bne      prsbrk1
+   26 2029 B6FD04       prsbrk2    lda      $fd04
+   27 202C 8502                    bita     #$02
+   28 202E 27F9                    beq      prsbrk2
+   29 2030 3582                    puls     a,pc
+   30                   
+   31 2000                         end      main

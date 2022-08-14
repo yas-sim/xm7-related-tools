@@ -1,0 +1,98 @@
+    1                   
+    2 2000                         ORG      $2000
+    3                   
+    4 2000              ENTRY      EQU      *
+    5 2000 CC3800                  LDD      #$3800
+    6 2003 ED8D00A8                STD      MAIN,PCR
+    7 2007 CCD800                  LDD      #$D800
+    8 200A ED8D00A3                STD      SUB,PCR
+    9 200E CC2800                  LDD      #$2800
+   10 2011 ED8D009E                STD      BYTE,PCR
+   11 2015 8D01                    BSR      TFRS2M
+   12 2017 39                      RTS
+   13                   
+   14 2018              TFRS2M     EQU      *
+   15 2018 EC8D0095     TFRS2M1    LDD      SUB,PCR
+   16 201C ED8D009F                STD      SUBADR,PCR  SUBADR=SUB
+   17 2020 C30040                  ADDD     #$40
+   18 2023 ED8D008A                STD      SUB,PCR     SUB=SUB+$40
+   19 2027 EC8D0088                LDD      BYTE,PCR
+   20 202B 10830040                CMPD     #$40        BYTE<$40?
+   21 202F 2303                    BLS      TFRS2M2     YES->TFRCOUNT=BYTE
+   22 2031 CC0040                  LDD      #$40        NO->TFRCOUNT=$40
+   23 2034 ED8D008B     TFRS2M2    STD      SUBBYT,PCR  SUBBYT=TFRCOUNT
+   24 2038 3406                    PSHS     D
+   25 203A EC8D0075                LDD      BYTE,PCR
+   26 203E A3E1                    SUBD     ,S++
+   27 2040 ED8D006F                STD      BYTE,PCR    BYTE=BYTE-TFRCOUNT
+   28 2044 8D42                    BSR      HALT
+   29 2046 338D006B                LEAU     DATA,PCR
+   30 204A 8EFC82                  LDX      #$FC82
+   31 204D C611                    LDB      #DATA_E-DATA
+   32 204F 8D2C                    BSR      CPYMEM
+   33 2051 8D4A                    BSR      RESTART
+   34 2053 8D52                    BSR      WAIT
+   35 2055 8D31                    BSR      HALT
+   36 2057 CEFCC0                  LDU      #$FCC0
+   37 205A AE8D0051                LDX      MAIN,PCR
+   38 205E E68D0062                LDB      SUBBYT+1,PCR
+   39 2062 8D19                    BSR      CPYMEM
+   40 2064 B6FC80                  LDA      $FC80
+   41 2067 8A80                    ORA      #$80        READY REQUEST
+   42 2069 B7FC80                  STA      $FC80
+   43 206C 8D2F                    BSR      RESTART
+   44 206E 8D37                    BSR      WAIT
+   45 2070 3085                    LEAX     B,X
+   46 2072 AF8D0039                STX      MAIN,PCR
+   47 2076 EC8D0039                LDD      BYTE,PCR
+   48 207A 269C                    BNE      TFRS2M1
+   49 207C 39                      RTS
+   50                   
+   51 207D              CPYMEM     EQU      *
+   52 207D 3456                    PSHS     A,B,X,U
+   53 207F 3702         CPYMEM1    PULU     A
+   54 2081 A780                    STA      ,X+
+   55 2083 5A                      DECB
+   56 2084 26F9                    BNE      CPYMEM1
+   57 2086 35D6                    PULS     A,B,X,U,PC
+   58                   
+   59 2088              HALT       EQU      *
+   60 2088 3402                    PSHS     A
+   61 208A B6FD05       HALT1      LDA      $FD05
+   62 208D 2BFB                    BMI      HALT1
+   63 208F 1A50                    ORCC     #$50
+   64 2091 8680                    LDA      #$80
+   65 2093 B7FD05                  STA      $FD05
+   66 2096 B6FD05       HALT2      LDA      $FD05
+   67 2099 2AFB                    BPL      HALT2
+   68 209B 3582                    PULS     A,PC
+   69                   
+   70 209D              RESTART    EQU      *
+   71 209D 3402                    PSHS     A
+   72 209F 4F                      CLRA
+   73 20A0 B7FD05                  STA      $FD05
+   74 20A3 1CAF                    ANDCC    #$AF
+   75 20A5 3582                    PULS     A,PC
+   76                   
+   77 20A7              WAIT       EQU      *
+   78 20A7 3402                    PSHS     A
+   79 20A9 4F                      CLRA
+   80 20AA 4A           WAIT1      DECA
+   81 20AB 26FD                    BNE      WAIT1
+   82 20AD 3582                    PULS     A,PC
+   83                   
+   84 20AF 0000         MAIN       FDB      $0000
+   85 20B1 0000         SUB        FDB      $0000
+   86 20B3 0000         BYTE       FDB      $0000
+   87                   
+   88 20B5 3F           DATA       FCB      $3F
+   89 20B6 59414D415543            FCC      /YAMAUCHI/
+           4849         
+   90 20BE 91                      FCB      $91
+   91 20BF 0000         SUBADR     FDB      $0000
+   92 20C1 D3C0                    FDB      $D3C0
+   93 20C3 0040         SUBBYT     FDB      $0040
+   94 20C5 90                      FCB      $90
+   95 20C6              DATA_E     EQU      *
+   96                   
+   97 20C6                         END

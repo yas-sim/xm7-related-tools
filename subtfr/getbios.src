@@ -1,0 +1,31 @@
+
+	org	$2000
+
+main	equ	*
+	orcc	#$50
+	bsr	prsbrk
+	ldu	#$fe00
+	ldx	#$3000
+	ldy	#$0200
+tfr	pulu	a
+	sta	,x+
+	leay	-1,y
+	bne	tfr
+	bsr	prsbrk
+	andcc	#$af
+	rts
+
+; beepを鳴らし、ブレークキーが１度押されるのを待つ
+prsbrk	equ	*
+	pshs	a
+	lda	#$41
+	sta	$fd03
+prsbrk1	lda	$fd04
+	bita	#$02
+	bne	prsbrk1
+prsbrk2	lda	$fd04
+	bita	#$02
+	beq	prsbrk2
+	puls	a,pc
+
+	end	main
