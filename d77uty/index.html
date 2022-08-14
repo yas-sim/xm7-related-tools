@@ -1,0 +1,431 @@
+
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=shift_jis">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>d77uty</title>
+</head>
+
+<body>
+
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><b>★</b></font><font size="2"><b>D77形式ディスクイメージ操作ツール</b></font></p> 
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16">　</p>                    
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><b><img border="0" src="../../../-pict/excla.gif" width="16" height="16">このツールを使用した結果、D77イメージが破壊されてしまう可能性があります(バグがあるかもしれないため)。D77UTYで操作する前に必ずバックアップを取ってから作業するようにしてください。</b></font></p>                    
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><b><img border="0" src="../../../-pict/excla.gif" width="16" height="16">また、D77UTYを使用した結果生じるいかなる損害に対しても補償は致しかねますので予めご了承ください。</b></font></p>                    
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><img border="0" src="../../../-pict/prohibit.gif" width="16" height="16"><font size="2"><b>上記制限、免責事項を了承いただけない場合、D77UTYの使用はできません。</b></font></p>                    
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><br>
+</font></p>                        
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">
+<b>== 説明 ==</b></font></p>                         
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">XM7で標準サポートされているディスクイメージファイル(<font face="Courier New">.D77</font>形式ファイル)を操作するためのツールです。もちろん、<font face="Courier New">&quot;.D88&quot;</font>ファイルも操作できますので、PC88エミュ関係者もどうぞ(?)</font></p>                 
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">　<a href="../../../-bin/d77uty_01a.zip">d77uty_01.zip 
+v0.1aダウンロード</a> (20KB)</font></p>                    
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"> <font size="2"> <br>     
+<b>     
+== 使い方 ==</b></font></p>                        
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"> <font size="2">今回はオプション位置固定の仕様になっています。サブコマンド(２つめのパラメータ)ごとにフォーマットがありますので注意してください。</font></p>                    
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><b>書式：</b>　</font></p>                   
+<table border="1" width="100%">
+  <tr>
+    <td width="3%" align="center"><font size="2">番号</font></td>
+    <td width="31%" align="center"><font size="2">書式</font></td>
+    <td width="36%" align="center"><font size="2">説明</font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">1</font></td>
+    <td width="31%"><font size="2"><font face="Courier New">d77uty </font>入力ファイル <font face="Courier New">ADD </font>追加ファイル    
+イメージ番号<br>
+      <font face="Courier New">d77uty </font>入力ファイル <font face="Courier New">+&nbsp;&nbsp;   
+      </font>追加ファイル    
+イメージ番号</font></td>
+    <td width="36%"><font size="2">入力ファイルに、追加ファイルを追加する。追加されるファイルは、先頭から「イメージ番号」番の位置に追加される。<b>入力ファイルの最後に追加する場合は2の書式を使用する。</b></font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">2</font></td>
+    <td width="31%"><font size="2"><font face="Courier New">d77uty </font>入力ファイル <font face="Courier New">ADD    
+</font>追加ファイル<br>
+      <font face="Courier New">d77uty </font>入力ファイル <font face="Courier New">+   
+      </font>追加ファイル</font></td>
+    <td width="36%"><font size="2">入力ファイルの最後に追加ファイルを追加する(イメージの追加)。追加ファイルはD77形式のイメージファイルであることが必要。</font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">3</font></td>
+    <td width="31%"><font size="2"><font face="Courier New"> d77uty </font>入力ファイル <font face="Courier New">L<br>   
+ d77uty </font>入力ファイル&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (サブコマンド省略時)</font></td>  
+    <td width="36%"><font size="2">入力ファイルの中のイメージ名および、ライトプロテクト状態の一覧を表示する。</font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">4</font></td>
+    <td width="31%"><font size="2"><font face="Courier New"> d77uty </font>入力ファイル <font face="Courier New">EXT </font>取り出しファイル    
+イメージ番号<br>
+      <font face="Courier New">
+      d77uty </font>入力ファイル <font face="Courier New">-&nbsp;&nbsp; </font>取り出しファイル    
+イメージ番号</font></td>
+    <td width="36%"><font size="2">入力ファイルの「イメージ番号」番目のイメージをファイルとして抜き取る。入力ファイルからは抜き出された<b>イメージは削除される</b>。</font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">5</font></td>
+    <td width="31%"><font size="2"><font face="Courier New"> d77uty </font>入力ファイル <font face="Courier New">CPY    
+</font>取り出しファイル イメージ番号</font></td>   
+    <td width="36%"><font size="2">入力ファイルの「イメージ番号」番目のイメージをファイルとして抜き取る。入力ファイルからは抜き出された<b>イメージは削除されない</b>。</font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">6</font></td>
+    <td width="31%"><font size="2"><font face="Courier New"> d77uty </font>入力ファイル   
+      <font face="Courier New">P+&nbsp; </font>イメージ番号<br>
+      <font face="Courier New"> d77uty </font>入力ファイル <font face="Courier New">P-&nbsp;   
+      </font>イメージ番号<br>
+      <font face="Courier New"> d77uty </font>入力ファイル <font face="Courier New">P[+|-]&nbsp;ALL</font></font></td>  
+    <td width="36%"><font size="2">入力ファイルの「イメージ番号」番のイメージのライトプロテクトフラグを解除または設定する。イメージ番号に&quot;ALL&quot;を指定すると、入力ファイルに含まれる全てのイメージに対して設定を行う。<br>
+      P+：ライトプロテクトあり(書込み禁止)<br>
+      P-：ライトプロテクトなし(書き込み許可)</font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">7</font></td>
+    <td width="31%"><font size="2"><font face="Courier New"> d77uty </font>入力ファイル <font face="Courier New">NAM    
+</font>イメージ名 イメージ番号</font></td>   
+    <td width="36%"><font size="2">入力ファイルの「イメージ番号」番のイメージのイメージ名を設定する。イメージ名はANK16文字まで。16文字以上が指定されたときは先頭の16文字のみを使用する。</font></td>
+  </tr>
+  <tr>
+    <td width="3%" align="center"><font size="2">8</font></td>
+    <td width="31%"><font size="2"><font face="Courier New"> d77uty </font>入力ファイル <font face="Courier New">ORD    
+</font>オーダー</font></td>
+    <td width="36%"><font size="2">入力ファイル内のイメージを指定の順番に並べ替える。順番(オーダー)は、数字一文字で指定する。したがって、9個以上のイメージを含むファイルは扱えない。同じ番号を複数指定することも可能(実行例参照)。<br>
+      e.g. <font face="Courier New">d77uty test.d77 ord 4123</font>&nbsp;   
+      →イメージを、元々の番号で言う４，１，２，３の順位並び替える</font></td>
+  </tr>
+</table>
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">当然ですが、入力ファイルおよび、追加ファイルは正常なD77形式ファイルである必要があります。</font></p>                 
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">以下に、コマンド例とその実行結果の関係を図で分かりやすく説明してありますのでご参照ください。</font></p>                 
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><b>★ADDコマンド(1)</b></font></p>                 
+<table border="0" width="100%">
+  <tr>
+    <td width="25%" colspan="2">
+      <p align="left"><font size="2" face="Courier New">d77uty original.d77 add   
+      addfile.d77 2</font></td>  
+    <td width="5%" align="center"></td>
+    <td width="25%"></td>
+  </tr>
+  <tr>
+    <td width="25%"><font face="Courier New" size="2">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font size="2" face="Courier New" color="#FFFFFF">IMG1</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font size="2" face="Courier New" color="#FFFFFF">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font size="2" face="Courier New" color="#FFFFFF">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="25%"><font face="Courier New" size="2">addfile.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" bgcolor="#FFFF00">
+            <p align="center"><font size="2" face="Courier New">ADD_IMG</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="5%" align="center"><font size="2">→</font></td>
+    <td width="25%"><font face="Courier New" size="2">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><span style="background-color: #0000FF"><font size="2" face="Courier New" color="#FFFFFF">IMG1</font></span></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#FFFF00"><font size="2" face="Courier New">ADD_IMG</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font size="2" face="Courier New" color="#FFFFFF">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font size="2" face="Courier New" color="#FFFFFF">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p><font size="2"><b>★ADDコマンド(2)</b></font></p>
+<table border="0" width="100%">
+  <tr>
+    <td width="25%" colspan="4">
+      <p align="left"><font face="Courier New" size="2">d77uty original.d77 add   
+      addfile.d77</font></td>
+  </tr>
+  <tr>
+    <td width="25%"><font face="Courier New" size="2">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="25%"><font face="Courier New" size="2">addfile.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" bgcolor="#FFFF00">
+            <p align="center"><font face="Courier New" size="2">ADD_IMG</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="5%" align="center"><font face="Courier New" size="2">→</font></td>
+    <td width="25%"><font face="Courier New" size="2">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><span style="background-color: #0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></span></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#FFFF00"><font color="#000000" size="2" face="Courier New">ADD_IMG</font></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p><font size="2"><b>★EXTコマンド</b></font></p>
+<table border="0" width="100%">
+  <tr>
+    <td width="25%" colspan="4">
+      <p align="left"><font face="Courier New" size="2">d77uty original.d77 ext   
+      extfile.d77    
+      2 
+      </font> </td>
+  </tr>
+  <tr>
+    <td width="25%"><font size="2" face="Courier New">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="5%" align="center"><font size="2" face="Courier New">→</font></td>
+    <td width="25%" align="center"><font size="2" face="Courier New">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><span style="background-color: #0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></span></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="25%"><font face="Courier New" size="2">extfile.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p><font size="2"><b>★CPYコマンド</b></font></p>
+<table border="0" width="100%">
+  <tr>
+    <td width="25%" colspan="4">
+      <p align="left"><font face="Courier New" size="2">d77uty original.d77 cpy    
+      extfile.d77 2</font></td>   
+  </tr>
+  <tr>
+    <td width="25%"><font face="Courier New" size="2">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="5%" align="center"><font face="Courier New" size="2">→</font></td>
+    <td width="25%" align="center"><font face="Courier New" size="2">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><span style="background-color: #0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></span></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="25%"><font face="Courier New" size="2">extfile.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p><font size="2"><b>★ORDコマンド</b></font></p>
+<table border="0" width="100%">
+  <tr>
+    <td width="25%" colspan="3">
+      <p align="left"><font face="Courier New" size="2">d77uty original.d77 ord    
+      231 
+      </font> </td>
+  </tr>
+  <tr>
+    <td width="25%"><font size="2" face="Courier New">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="15%" align="center"><font size="2" face="Courier New">→</font></td>
+    <td width="25%" align="center"><font size="2" face="Courier New">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><span style="background-color: #0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></span></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table border="0" width="100%">
+  <tr>
+    <td width="25%" colspan="3">
+      <p align="left"><font size="2"><font face="Courier New">d77uty original.d77 
+      ord 3313 (IMG2</font>はなくなってしまう。<font face="Courier New">IMG3</font>は３つに増える<font face="Courier New">)</font></font></td> 
+  </tr>
+  <tr>
+    <td width="25%"><font size="2" face="Courier New">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG2</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="15%" align="center"><font size="2" face="Courier New">→</font></td>
+    <td width="25%" align="center"><font size="2" face="Courier New">original.d77</font>
+      <table border="1" width="100%">
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><span style="background-color: #0000FF"><font color="#FFFFFF" size="2">IMG3</font></span></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG1</font></td>
+        </tr>
+        <tr>
+          <td width="100%" align="center" bgcolor="#0000FF"><font color="#FFFFFF" size="2" face="Courier New">IMG3</font></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16">　</p>            
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><br>        
+<b>==        
+実行例 ==</b>　</font></p> 
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font face="Courier New" size="2">C:/&gt;<b>d77uty 
+test.d77</b><br> 
+D77 image manipulation program 0.1<br>   
+Programmed by an XM7 supporter<br>   
+ 1 : 'Program         '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=ON<br>  
+ 2 : 'Data1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' WP=ON<br>   
+ 3 : 'Data2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' WP=ON<br>   
+ 4 : 'User '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=ON</font><font size="2">　<br>
+</font><font face="Courier New" size="2">C:/&gt;<b>d77uty test.d77 p-  
+4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+(</font><font size="2">←</font><font face="Courier New" size="2">4</font><font size="2">番目のイメージのライトプロテクトを解除</font><font face="Courier New" size="2">)</font></b><font face="Courier New" size="2"><br>
+D77 image manipulation program 0.1<br>   
+Programmed by an XM7 supporter<br>   
+C:/&gt;<b>d77uty test.d77</b><br> 
+D77 image manipulation program 0.1<br>   
+Programmed by an XM7 supporter<br>   
+ 1 : 'Program         '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=ON<br>   
+ 2 : 'Data1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ' WP=ON<br>   
+ 3 : 'Data2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ' WP=ON<br>   
+ 4 : 'User           '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=OFF</font><font size="2"><br> 
+</font><font face="Courier New" size="2">C:/&gt;<b>d77uty test.d77 +  
+ProgramData3.d77 3&nbsp;&nbsp; (</font><font size="2">←</font><font face="Courier New" size="2">3</font><font size="2">番目にくるように、</font><font face="Courier New" size="2">&quot;ProgramData3.d77&quot;</font><font size="2">を追加する</font><font face="Courier New" size="2">)</font></b><font face="Courier New" size="2"><br> 
+D77 image manipulation program 0.1<br>   
+Programmed by an XM7 supporter<br>   
+C:/&gt;<b>d77uty test.d77</b><br> 
+D77 image manipulation program 0.1<br>   
+Programmed by an XM7 supporter<br>   
+ 1 : 'Program         '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=ON<br>   
+ 2 : 'Data1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ' WP=ON<br>  
+3 : 'Data3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ' WP=ON<br>   
+4 : 'Data2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' WP=ON<br>  
+5 : 'User           '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=OFF</font><font size="2"><br> 
+</font><font face="Courier New" size="2">C:/&gt;<b>d77uty test.d77 ord  
+12435&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+(</font><font size="2">←現在の番号で</font><font face="Courier New" size="2">1,2,4,3,5</font><font size="2">の順になるように並べ替え</font><font face="Courier New" size="2">)</font></b><font face="Courier New" size="2"><br> 
+D77 image manipulation program 0.1<br>   
+Programmed by an XM7 supporter<br>   
+C:/&gt;<b>d77uty test.d77</b><br> 
+D77 image manipulation program 0.1<br>   
+Programmed by an XM7 supporter<br>   
+ 1 : 'Program         '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=ON<br>   
+ 2 : 'Data1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ' WP=ON<br>  
+3 : 'Data2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ' WP=ON<br>  
+4 : 'Data3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ' WP=ON<br>   
+5 : 'User           '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WP=OFF</font><font size="2"><br> 
+</font></p>        
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">  
+<b>  
+==                     
+その他ノウハウなど　==</b></font></p>  
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">・くれぐれもd77utyでいじる前にイメージのバックアップを取るようにお願いいたします。自分で何度も使用してから公開していますが、作者は構造を知っているので意図的にまずそうなパラメータの与え方をさけているはずです(^^;  
+一般に公開してから発覚するバグが潜んでいる可能性があるので大切なイメージを控えもなしにいじくりまわすことはさけてください。</font></p>   
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">・D88形式のツールでも同じようなものが存在するようですが(しかもそちらはGUI版らしいし)、リンクが切れていてダウンロードできないので作ってしまいました。GUI版が欲しい方はD88のツールをお探しください。きっとすばらしいツールがあるはずです(^^;</font></p>   
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2">・ADDコマンドで追加する時の追加ファイルは必ずD77形式のファイルを指定してください。D77/D88形式は正しいファイルかどうか判別するためのマジックワードを持たないため、無条件に指定されたファイルを挿入する仕様になっています。</font></p>   
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2"><b>==      
+改版履歴 ==</b></font></p>     
+<p style="word-spacing: 0; margin-top: 16; margin-bottom: 16"><font size="2" face="ＭＳ ゴシック">v0.1&nbsp;&nbsp;&nbsp;  
+2001/01/01&nbsp;&nbsp;&nbsp; 初回公開バージョン<br>
+v0.1a&nbsp;&nbsp; 2001/01/01&nbsp;&nbsp;&nbsp; 
+パラメータ省略時のコマンドパラメータ説明を追加</font></p>  
+       
+</body>       
+       
+</html>       
