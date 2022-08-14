@@ -1,9 +1,9 @@
-﻿#include "CFILE.H"
-#include "CWAVE.H"
-#include "CPreCalc.h"
-#include "CLPF.h"
-#include "CAGC.h"
-#include "CComparator.h"
+﻿#include "cfile.h"
+#include "cwave.h"
+#include "cprecalc.h"
+#include "clpf.h"
+#include "cagc.h"
+#include "ccomparator.h"
 
 #include <stdio.h>
 #include <stdlib.h>

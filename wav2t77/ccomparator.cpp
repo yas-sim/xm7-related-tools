@@ -1,4 +1,4 @@
-#include "CComparator.h"
+#include "ccomparator.h"
 
 bool CComparator::Comparate( unsigned long data ) {
 	bool result = true;

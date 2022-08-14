@@ -1,8 +1,8 @@
 ﻿#ifndef _CFLOPPY_H_
 #define _CFLOPPY_H_
 
-#include "SYSDEF.H"
-#include "FMFSLIB.h"
+#include "sysdef.h"
+#include "fmfslib.h"
 
 class FMFSLIB_API CSector {
 public:

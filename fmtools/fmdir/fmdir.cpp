@@ -1,7 +1,7 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
-#include "CFDImg.h"
-#include "CFilesys.h"
+#include "cfdimg.h"
+#include "cfilesys.h"
 
 // v0.0	初回リリース
 // v0.1 -aオプション追加。クラスタチェインがループしてても抜け出せるよう制限値を設定

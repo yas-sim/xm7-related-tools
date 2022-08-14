@@ -1,8 +1,8 @@
 #ifndef _CAGC_H_
 #define _CAGC_H_
 
-#include "CFILTER.H"
-#include "CLPF.H"
+#include "cfilter.h"
+#include "clpf.h"
 
 #define CAGC_AUDIO_CENTER	(0x8000)
 

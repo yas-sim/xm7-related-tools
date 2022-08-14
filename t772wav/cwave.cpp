@@ -1,4 +1,4 @@
-﻿#include "CWave.h"
+﻿#include "cwave.h"
 
 void CWaveFile::WriteHeader( void )
 {

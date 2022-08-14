@@ -1,4 +1,4 @@
-﻿#include "CMotorolaS.h"
+﻿#include "cmotorolas.h"
 
 // メンバーの設定値からチェックサムを計算する
 // ラインバッファの値(m_pLineBuff)は使用しない

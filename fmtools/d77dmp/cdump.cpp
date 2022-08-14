@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "CDUMP.H"
+#include "cdump.h"
 
 void CDump::dispadrs( void )
 {

@@ -1,8 +1,8 @@
 ﻿#ifndef _CFILESYS_H_
 #define _CFILESYS_H_
 
-#include "CFDImg.h"
-#include "FMERR.H"
+#include "cfdimg.h"
+#include "fmerr.h"
 
 #define FM_OPEN_READ	(1<<0)
 #define FM_OPEN_WRITE	(1<<1)

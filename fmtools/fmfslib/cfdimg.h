@@ -1,8 +1,8 @@
 ﻿#ifndef _CFDIMG_H_
 #define _CFDIMG_H_
 
-#include "SYSDEF.H"
-#include "CFLOPPY.H"
+#include "sysdef.h"
+#include "cfloppy.h"
 #include <windows.h>
 
 #define _CFDIMAGE_MAX_FILE_NAME_LENGTH_	(256)

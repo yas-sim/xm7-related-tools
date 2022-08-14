@@ -1,7 +1,7 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
-#include <CFDImg.h>
-#include <CFilesys.h>
+#include <cfdimg.h>
+#include <cfilesys.h>
 
 #define VERSION  "v0.0"
 

@@ -1,4 +1,4 @@
-﻿#include "CAGC.H"
+﻿#include "cagc.h"
 #include <math.h>
 
 #define SIGN(num)	(num<0?-1:num>0?1:0)

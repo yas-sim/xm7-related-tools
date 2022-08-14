@@ -1,6 +1,6 @@
-﻿#include "CPreCalc.h"
-#include "CFile.h"
-#include "CWave.h"
+﻿#include "cprecalc.h"
+#include "cfile.h"
+#include "cwave.h"
 
 #include <math.h>
 

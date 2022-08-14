@@ -2,18 +2,18 @@
 #include <stdlib.h>
 #include <conio.h>
 
-#include <CFDImg.h>
-#include "CDump.h"
+#include <cfdimg.h>
+#include "cdump.h"
 
 #define VERSION "v0.0"
 
-#define SECT_SIZE			(256)	// 1ƒZƒNƒ^‚ÌƒTƒCƒY
-#define MAX_CLUSTER			(151)	// ƒNƒ‰ƒXƒ^”Ô†‚ÌÅ‘å’l
+#define SECT_SIZE			(256)	// 1ï¿½Zï¿½Nï¿½^ï¿½ÌƒTï¿½Cï¿½Y
+#define MAX_CLUSTER			(151)	// ï¿½Nï¿½ï¿½ï¿½Xï¿½^ï¿½Ôï¿½ï¿½ÌÅ‘ï¿½l
 #define SPC					(8)		// Sector/Cluster
 #define BPE					(32)	// Byte/Entry
 #define SPT					(16)	// Sector/Track(Cylinder)
 #define HPT					(2)		// Head/Track(Cylinder)
-#define CLUSTER_TOP_SECTOR	(64)	// ‘æ‚OƒNƒ‰ƒXƒ^‚Ìæ“ªƒZƒNƒ^”Ô†(LBA)
+#define CLUSTER_TOP_SECTOR	(64)	// ï¿½ï¿½Oï¿½Nï¿½ï¿½ï¿½Xï¿½^ï¿½Ìæ“ªï¿½Zï¿½Nï¿½^ï¿½Ôï¿½(LBA)
 
 inline int	LBA2C( int LBA ) {
 	return (LBA/(SPT*HPT));
@@ -88,7 +88,7 @@ public:
 		sector = -1;
 
 		int cluster, LBA;
-		// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+		// ï¿½Iï¿½vï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		for(int i=2; i<argc; i++) {
 			switch(argv[i][0]) {
 			case '/':
@@ -105,16 +105,16 @@ public:
 					break;
 				case 'C':
 				case 'c':
-					cluster=atoi(argv[i]+2);	// ƒNƒ‰ƒXƒ^”Ô†æ“¾
-					LBA=Cluster2LBA(cluster);	// ƒNƒ‰ƒXƒ^”Ô†‚ğLBA”Ô†‚É•ÏŠ·
-					track=LBA2C(LBA)*2+LBA2H(LBA);	// LBA”Ô†‚ğƒgƒ‰ƒbƒN”Ô†‚É•ÏŠ·
-					sector=LBA2R(LBA);				// LBA”Ô†‚ğƒZƒNƒ^”Ô†‚É•ÏŠ·
+					cluster=atoi(argv[i]+2);	// ï¿½Nï¿½ï¿½ï¿½Xï¿½^ï¿½Ôï¿½ï¿½æ“¾
+					LBA=Cluster2LBA(cluster);	// ï¿½Nï¿½ï¿½ï¿½Xï¿½^ï¿½Ôï¿½ï¿½ï¿½LBAï¿½Ôï¿½ï¿½É•ÏŠï¿½
+					track=LBA2C(LBA)*2+LBA2H(LBA);	// LBAï¿½Ôï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½bï¿½Nï¿½Ôï¿½ï¿½É•ÏŠï¿½
+					sector=LBA2R(LBA);				// LBAï¿½Ôï¿½ï¿½ï¿½ï¿½Zï¿½Nï¿½^ï¿½Ôï¿½ï¿½É•ÏŠï¿½
 					break;
 				case 'L':
 				case 'l':
 					LBA=atoi(argv[i]+2);
-					track=LBA2C(LBA)*2+LBA2H(LBA);	// LBA”Ô†‚ğƒgƒ‰ƒbƒN”Ô†‚É•ÏŠ·
-					sector=LBA2R(LBA);				// LBA”Ô†‚ğƒZƒNƒ^”Ô†‚É•ÏŠ·
+					track=LBA2C(LBA)*2+LBA2H(LBA);	// LBAï¿½Ôï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½bï¿½Nï¿½Ôï¿½ï¿½É•ÏŠï¿½
+					sector=LBA2R(LBA);				// LBAï¿½Ôï¿½ï¿½ï¿½ï¿½Zï¿½Nï¿½^ï¿½Ôï¿½ï¿½É•ÏŠï¿½
 					break;
 				default:
 					Usage();
@@ -123,9 +123,9 @@ public:
 				break;
 			default:
 				if(track==-1) {
-					track=atoi(argv[i]);		// track”Ô†‚ª-1‚Ì‚Æ‚«‚ÍAƒIƒvƒVƒ‡ƒ“‚ğƒgƒ‰ƒbƒN”Ô†‚Æ‚µ‚Ä‰ğß
+					track=atoi(argv[i]);		// trackï¿½Ôï¿½ï¿½ï¿½-1ï¿½Ì‚Æ‚ï¿½ï¿½ÍAï¿½Iï¿½vï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½ï¿½bï¿½Nï¿½Ôï¿½ï¿½Æ‚ï¿½ï¿½Ä‰ï¿½ï¿½ï¿½
 				} else {
-					sector=atoi(argv[i]);		// sector”Ô†‚ª-1‚Ì‚Æ‚«‚ÍAƒIƒvƒVƒ‡ƒ“‚ğƒZƒNƒ^”Ô†‚Æ‚µ‚Ä‰ğß
+					sector=atoi(argv[i]);		// sectorï¿½Ôï¿½ï¿½ï¿½-1ï¿½Ì‚Æ‚ï¿½ï¿½ÍAï¿½Iï¿½vï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Zï¿½Nï¿½^ï¿½Ôï¿½ï¿½Æ‚ï¿½ï¿½Ä‰ï¿½ï¿½ï¿½
 				}
 				break;
 			}

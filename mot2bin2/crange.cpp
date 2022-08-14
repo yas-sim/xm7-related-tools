@@ -1,4 +1,4 @@
-﻿#include "CRange.h"
+﻿#include "crange.h"
 
 // ２つの範囲が重なり合っているかどうかチェックする
 bool CRanges::isOverlap( unsigned long top1, unsigned long bottom1,

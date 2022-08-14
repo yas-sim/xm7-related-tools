@@ -1,5 +1,5 @@
-﻿#include "CFILE.H"
-#include "CWAVE.H"
+﻿#include "cfile.h"
+#include "cwave.h"
 
 #include <stdio.h>
 #include <stdlib.h>

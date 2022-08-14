@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#include "CMotorolaS.h"
+#include "cmotorolas.h"
 
 // v0.1 "iba"拡張子を受け付けるように変更
 

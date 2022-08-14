@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#include "CMotorolaS.h"
+#include "cmotorolas.h"
 
 // v0.1 001009	"iba"拡張子をBASICバイナリプログラムとして扱うように変更
 

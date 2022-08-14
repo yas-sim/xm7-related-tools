@@ -1,6 +1,6 @@
 ﻿#define FMFSLIB_EXPORTS
 
-#include "CFDIMG.H"
+#include "cfdimg.h"
 
 #if VERBOSE==1
 #include <stdio.h>

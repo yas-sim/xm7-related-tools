@@ -1,6 +1,6 @@
 ﻿#define FMFSLIB_EXPORTS
 
-#include "CFILESYS.H"
+#include "cfilesys.h"
 
 bool FDHANDLE::nRefCountUp( void ) {
 	if(nRefCount<1024) {

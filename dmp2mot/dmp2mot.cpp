@@ -6,7 +6,7 @@
 
 #define VERSION	"0.1"
 
-#include "CMotorolaS.h"
+#include "cmotorolas.h"
 
 // 文字が１６進数かどうか調べる
 bool ishex( char ch ) {

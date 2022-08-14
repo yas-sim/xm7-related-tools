@@ -1,4 +1,4 @@
-﻿#include "CLPF.H"
+﻿#include "clpf.h"
 
 #define LPFTYPE	(1)
 

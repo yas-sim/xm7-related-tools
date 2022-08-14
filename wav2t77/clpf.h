@@ -1,7 +1,7 @@
 ﻿#ifndef _CLPF_H_
 #define _CLPF_H_
 
-#include "CFILTER.H"
+#include "cfilter.h"
 
 #define CLPF_DEPTH	(10)
 #define CLPF_AUDIO_CENTER	(0x8000)
