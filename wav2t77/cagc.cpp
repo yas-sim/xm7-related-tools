@@ -11,7 +11,7 @@
 void CAGC::DataInput( unsigned long data ) {
 	int delta;
 	m_latestdata = (long)data;						// 最新データを保存
-	data = abs(data-CAGC_AUDIO_CENTER);				// データの絶対値を取る
+	data = abs((int)(data-CAGC_AUDIO_CENTER));				// データの絶対値を取る
 	delta = m_olddata - data;
 	if(SIGN(delta)==-1 && SIGN(m_olddelta)==1) {	// データのピークを検出
 		m_lpf.DataInput(data);

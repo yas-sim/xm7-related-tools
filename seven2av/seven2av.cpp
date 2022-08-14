@@ -99,11 +99,11 @@ void Title( void ) {
 	puts("BOOT_BAS.ROM, BOOT_DOS.ROM, SUBSYS_C.ROM");
 }
 
-void main( int argc, char *argv[] )
+int main( int argc, char *argv[] )
 {
 	bool fCompatibleROM = false;
 	if(argc==2) {
-		if(stricmp(argv[1], "-compatiblerom")==0) {
+		if(strcmp(argv[1], "-compatiblerom")==0) {
 			fCompatibleROM = true;
 			puts("Generate compatible ROM mode");
 		}
@@ -112,4 +112,6 @@ void main( int argc, char *argv[] )
 	if(!SUBSYS(fCompatibleROM))	{ puts("Error!"); exit(1); }
 	if(!INITIATE())	{ puts("Error!"); exit(1); }
 	puts("Succeed to generate V2 files!"); 
+	
+	return 0;
 }

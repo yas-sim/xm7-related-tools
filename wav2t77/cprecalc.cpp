@@ -53,7 +53,8 @@ bool CPreCalc::CalcParam( char *filename, unsigned long *noiselevel,
 		CheckData(&center, &delta);
 		// ばらつきが小さいときは、安定している期間と判断
 		if(delta<CPRECALC_TORELANT) {
-			if((unsigned long)abs(center-CPRECALC_AUDIO_CENTER)>m_NoiseLevel) {
+//			if((unsigned long)abs(center-CPRECALC_AUDIO_CENTER)>m_NoiseLevel) {
+			if(abs((int)(center-CPRECALC_AUDIO_CENTER))>m_NoiseLevel) {
 				if(center>CPRECALC_AUDIO_CENTER) {
 					m_High = (m_High+center)/2;
 				} else {

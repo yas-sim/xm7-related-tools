@@ -48,7 +48,7 @@ bool cut( char *src, char *dst, long start, long end ) {
 
 #define ABORT(formula)	if((formula)==false) { puts("Program aborted"); exit(1); }
 
-void main( void ) {
+int main( void ) {
 	puts("XM7 ROM CUTTER " VERSION);
 	puts("Programmed by an XM7 supporter");
 	puts("");
@@ -62,4 +62,6 @@ void main( void ) {
 	ABORT(cut("SUBMON.BIN", "SUBSYS_C.ROM", 0x5800, 0x7fff));
 	ABORT(cut("BOOTROM.BIN", "BOOT_BAS.ROM", 0x0000, 0x01ff));
 	ABORT(cut("BOOTROM.BIN", "BOOT_DOS.ROM", 0x0400, 0x05ff));
+	
+	return 0;
 }

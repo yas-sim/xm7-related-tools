@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <ctype.h>
-#include <process.h>
+//#include <process.h>
 
 #define _ALLOC_UNIT		(0x1000)		// メモリイメージバッファを割り当てるときの割り当て単位
 #define MOTS_ADRMASK	(~0xe0000000)
@@ -195,7 +195,7 @@ int CheckPow2( char *str, int rtn )
 	return rtn;
 }
 
-void main( int argc, char *argv[])
+int main( int argc, char *argv[])
 {
 	FILE *fo;
 	FILE *fi;
@@ -320,4 +320,6 @@ void main( int argc, char *argv[])
 
 	free(pBuff);
 	fcloseall();
+	
+	return 0;
 }

@@ -186,7 +186,7 @@ void Copy( FILE *fp, char *filename2, int pos ) {
 void ProtectFlag( FILE *fp, bool flag, char *pos ) {
 	int nod = GetNumberOfDisks(fp);
 	int p;
-	if(stricmp(pos, "ALL")==0) {
+	if(strcmp(pos, "ALL")==0) {
 		p = -1;
 	} else {
 		p = atoi(pos);
@@ -283,7 +283,7 @@ void Usage( void ) {
 	puts("d77uty test.d77 ord 312        3, 1, 2の順にイメージを並べ替え");
 }
 
-void main( int argc, char *argv[] )
+int main( int argc, char *argv[] )
 {
 	puts("D77 image manipulation program " VERSION);
 	puts("Programmed by an XM7 supporter");
@@ -296,7 +296,7 @@ void main( int argc, char *argv[] )
 	FILE *fp;
 	if((fp=fopen(argv[1], "r+b"))==NULL) {
 		puts("Attempted to open input file, but failed.");
-		return;
+		exit(-1);
 	}
 	int order = 0;
 	switch(argc) {
@@ -304,31 +304,31 @@ void main( int argc, char *argv[] )
 		ListUp(fp);
 		break;
 	case 3:
-		if(stricmp(argv[2], "L")==0) {
+		if(strcmp(argv[2], "L")==0) {
 			ListUp(fp);
 		}
 		break;
 	case 5:
 		order = atoi(argv[4]);
-		if(stricmp(argv[2], "NAM")==0) {
+		if(strcmp(argv[2], "NAM")==0) {
 			NameChange(fp, argv[3], order);
 			break;
-		} else if(stricmp(argv[2], "EXT")==0 || stricmp(argv[2], "-")==0) {
+		} else if(strcmp(argv[2], "EXT")==0 || strcmp(argv[2], "-")==0) {
 			Extract(argv[1], fp, argv[3], order);
 			break;
-		} else if(stricmp(argv[2], "CPY")==0) {
+		} else if(strcmp(argv[2], "CPY")==0) {
 			Copy(fp, argv[3], order);
 			break;
 		}
 		// break;
 	case 4:
-		if(stricmp(argv[2], "ADD")==0 || stricmp(argv[2], "+")==0) {
+		if(strcmp(argv[2], "ADD")==0 || strcmp(argv[2], "+")==0) {
 			Add(argv[1], fp, argv[3], order);
 		} else if(toupper(argv[2][0])=='P' && argc>2) {
 			ProtectFlag(fp, argv[2][1]=='-'?false:true, argv[3]);
-		} else if(stricmp(argv[2], "ORD")==0) {
+		} else if(strcmp(argv[2], "ORD")==0) {
 			OrderChange(argv[1], fp, argv[3]);
-		} else if(stricmp(argv[2], "DEL")==0) {
+		} else if(strcmp(argv[2], "DEL")==0) {
 			Delete(argv[1], fp, argv[3]);
 		}
 		break;
@@ -336,4 +336,6 @@ void main( int argc, char *argv[] )
 		break;
 	}
 	fcloseall();
+
+	return 0;
 }

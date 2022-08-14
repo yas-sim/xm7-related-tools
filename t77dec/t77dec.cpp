@@ -1,6 +1,6 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
-#include <process.h>
+//#include <process.h>
 #include <string.h>
 
 // v0.3 001004  ビット判定方法を、T77→ビットストリーム化→判定に変更。処理時間はかかるが、正確
@@ -121,13 +121,13 @@ void usage( void )
 	puts("ex2. t77dec test.t77 -v -pr -t60");
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	FILE *fpi, *fpo;
 
 	if(argc<2) {
 		usage();
-		exit(0);
+		exit(-1);
 	}
 
 	// オプション解析
@@ -327,4 +327,6 @@ void main(int argc, char *argv[])
 	
 	}
 	fclose(fpi);
+	
+	return 0;
 }

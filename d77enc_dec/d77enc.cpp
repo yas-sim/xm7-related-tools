@@ -36,7 +36,7 @@ void Usage( void )
 }
 
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	char infile[512], outfile[512];
 	infile[0] = '\0';
@@ -55,7 +55,7 @@ void main(int argc, char *argv[])
 			case 'H':
 			case '?':
 				Usage();
-				exit(0);
+				exit(-1);
 				break;
 			default:
 				break;
@@ -104,20 +104,20 @@ void main(int argc, char *argv[])
 		fgets(ope, 255, fpi);
 		if(cmd[0]=='#' || cmd[0]==';') continue;					// '#', ';'からコメントとみなす
 		for(char *ptr=ope; *ptr; ptr++) if(*ptr<' ') *ptr='\0';		// 文字列中の制御コードを'\0'に置き換え
-		if(stricmp("DiskName____=", cmd)==0) {
+		if(strcmp("DiskName____=", cmd)==0) {
 			strncpy(dimg->DiskName, ope, 16);
 			dimg->DiskName[16] = '\0';
 		}
-		if(stricmp("WriteProtect=", cmd)==0) {
-			if(stricmp(ope, "ON")==0) dimg->WriteProtect = 0x10;
-			else if(stricmp(ope, "OFF")==0) dimg->WriteProtect = 0;
+		if(strcmp("WriteProtect=", cmd)==0) {
+			if(strcmp(ope, "ON")==0) dimg->WriteProtect = 0x10;
+			else if(strcmp(ope, "OFF")==0) dimg->WriteProtect = 0;
 		}
-		if(stricmp("MediaType___=", cmd)==0) {
-			if(stricmp(ope, "2D")==0) dimg->MediaType = 0;
-			else if(stricmp(ope, "2DD")==0) dimg->MediaType = 0x10;
-			else if(stricmp(ope, "2HD")==0) dimg->MediaType = 0x20;
+		if(strcmp("MediaType___=", cmd)==0) {
+			if(strcmp(ope, "2D")==0) dimg->MediaType = 0;
+			else if(strcmp(ope, "2DD")==0) dimg->MediaType = 0x10;
+			else if(strcmp(ope, "2HD")==0) dimg->MediaType = 0x20;
 		}
-		if(stricmp("ID=", cmd)==0) {
+		if(strcmp("ID=", cmd)==0) {
 			if(NumberOfSector<512) {
 				if(fVerbose) printf(".");
 				char ddm[4], density[4];
@@ -135,8 +135,8 @@ void main(int argc, char *argv[])
 					sct->N = n;
 					sct->Status = status;
 					sct->SectorSize = size;
-				if(stricmp(density, "SD" )==0) sct->Density	= 0x40;	// 単密
-				if(stricmp(ddm    , "DDM")==0) sct->DDM		= 0x10;	// DDM
+				if(strcmp(density, "SD" )==0) sct->Density	= 0x40;	// 単密
+				if(strcmp(ddm    , "DDM")==0) sct->DDM		= 0x10;	// DDM
 				// データ部読み取り
 				for(int i=0; i<sct->SectorSize; i++) {
 					fscanf(fpi, "%02X", &n);
@@ -145,7 +145,7 @@ void main(int argc, char *argv[])
 			}
 		}
 		// トラックタグ処理
-		if(stricmp("TRACK=", cmd)==0) {
+		if(strcmp("TRACK=", cmd)==0) {
 			int tmp = atoi(ope);
 			if(tmp>CurrentTrack && tmp<164) {
 				if(fVerbose) printf("\nTrack %3d", tmp);
@@ -165,4 +165,6 @@ void main(int argc, char *argv[])
 	fwrite((void*)dimg, 1, dimg->DiskSize, fpo);
 	fcloseall();
 	delete []dimg;
+	
+	return 0;
 }

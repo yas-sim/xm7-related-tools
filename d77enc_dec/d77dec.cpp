@@ -61,7 +61,8 @@ void TrackDecode(FILE *fpi, FILE *fpo, void *img )
 		if(g_fVerbose) printf("Track %d", trk);
 		fprintf(fpo, "Track= %d\n", trk);
 		if(dimg->TrackOffset[trk]==0) { if(g_fVerbose) printf("..SKIP\n"); continue; }
-		SECTORIMAGE *simg = (SECTORIMAGE*)((int)dimg+(dimg->TrackOffset[trk]));
+		//SECTORIMAGE *simg = (SECTORIMAGE*)((int)dimg+(dimg->TrackOffset[trk]));
+		SECTORIMAGE *simg = (SECTORIMAGE*)((char*)dimg+(dimg->TrackOffset[trk]));
 		int SPT = simg->SPT;
 		for(int sct=0; sct<SPT; sct++) {
 			if(g_fVerbose) printf(".");
@@ -109,7 +110,7 @@ void ImageExtract( char *imagename, char *extractname )
 	fclose(fpi);
 }
 
-void main( int argc, char *argv[])
+int main( int argc, char *argv[])
 {
 	g_fVerbose = false;
 	char infile[512], outfile[512];
@@ -145,5 +146,7 @@ void main( int argc, char *argv[])
 		exit(-1);
 	}
 	ImageExtract(infile, outfile);
+	
+	return 0;
 }
 

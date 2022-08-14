@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <ctype.h>
-#include <process.h>
+//#include <process.h>
 
 #define _ALLOC_UNIT		(0x1000)
 

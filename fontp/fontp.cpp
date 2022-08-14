@@ -16,7 +16,7 @@ void GetExtension( char *filename, char *buff ) {
 		filename++;
 	}
 	strcpy(buff, ptr);		// 拡張子部分をコピー
-	_strupr(buff);			// 大文字変換
+	//_strupr(buff);			// 大文字変換
 }
 
 // SUBSYS_C.ROMファイルの中のフォントにパッチを当てる
@@ -83,21 +83,21 @@ void usage( void ) {
 	puts("SUBSYS_C.ROMまたは、SUBSYSCG.ROMファイルは、このファイルと同じディレクトリにおいておく必要があります");
 }
 
-void main( int argc, char *argv[] ) {
+int main( int argc, char *argv[] ) {
 	int nFileType = 0;
 
 	title();
 
 	if(argc!=2) {
 		usage();
-		exit(1);
+		exit(-1);
 	}
 
 	// 拡張子からファイル形式を判断する
 	char extension[10];
 	GetExtension(argv[1], extension);
-	if(stricmp(extension, "txt")==0) nFileType = FONT_PATCH;	// フォントパッチ形式
-	if(stricmp(extension, "bin")==0) nFileType = BIN_FONT;		// バイナリフォント形式
+	if(strcmp(extension, "txt")==0) nFileType = FONT_PATCH;	// フォントパッチ形式
+	if(strcmp(extension, "bin")==0) nFileType = BIN_FONT;		// バイナリフォント形式
 	if(nFileType==0) {		// txt, bin以外のファイル形式を指定した場合
 		puts("Unsupported file specified");
 		usage();
@@ -129,6 +129,8 @@ void main( int argc, char *argv[] ) {
 	
 	puts("Done!");
 	fclose(fpo);
+	
+	return 0;
 }
 
 // v0.0	初回リリース

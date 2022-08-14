@@ -15,14 +15,14 @@ void usage( void )
 	puts("ex. t772wav test.t77 test.wav");
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	CWaveFile wav;
 	FILE *fpi;
 
 	if(argc<3) {
 		usage();
-		exit(0);
+		exit(-1);
 	}
 
 	// オプション解析
@@ -102,7 +102,6 @@ void main(int argc, char *argv[])
 		len+=tmp_len;
 	}
 	wav.Close();
+	
+	return 0;
 }
-		
-
-

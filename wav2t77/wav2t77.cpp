@@ -42,13 +42,13 @@ unsigned long htol( char *str ){
 	return result;
 }
 
-void main( int argc, char *argv[] ) {
+int main( int argc, char *argv[] ) {
 	CWaveFile wav;
 	FILE *fo;
 
 	if(argc<3) {
 		usage();
-		exit(0);
+		exit(-1);
 	}
 
 	// オプション解析
@@ -110,7 +110,7 @@ void main( int argc, char *argv[] ) {
 				break;
 			case 'a':
 			case 'A':			// AGCオプション
-				if(stricmp(argv[i]+1, "AGC")==0) {
+				if(strcmp(argv[i]+1, "AGC")==0) {
 					fAGC = true;
 				}
 				break;

@@ -178,7 +178,7 @@ public:
 	unsigned long getAdrs( void )	{ return isValid() ? m_nAdrs			: 0xfffffffful; }
 	int getCalcSum( void )			{ return isValid() ? calcSum()			: -1;			}
 	bool isFileOpen( void )			{ return (m_fp!=(FILE*)NULL) ? true		: false;		}
-	char *getBuff( void )			{ return isValid() ? m_cpBuff           : "Invalid Line\n\0"; }
+	char *getBuff( void )			{ return isValid() ? m_cpBuff           : (char*)"Invalid Line\n\0"; }
 };
 
 
