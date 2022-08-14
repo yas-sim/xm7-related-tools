@@ -1,2 +1,2 @@
-#define FMFSLIB_EXPORTS
+﻿#define FMFSLIB_EXPORTS
 #include "CFLOPPY.h"

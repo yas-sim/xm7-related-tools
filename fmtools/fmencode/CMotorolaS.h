@@ -1,4 +1,4 @@
-#ifndef _MOTOROLAS_H_
+ï»¿#ifndef _MOTOROLAS_H_
 #define _MOTOROLAS_H_
 
 #include <stdio.h>
@@ -10,15 +10,15 @@
 
 class CMotorolaS {
 private: //-----------------------------------------------------------------
-	bool			m_fAvailable;		// ‰Šú‰»‚É¬Œ÷‚·‚é‚Ætrue
-	int				m_nRecordType;		// ƒŒƒR[ƒhƒ^ƒCƒv
-	int				m_nByteCount;		// ƒoƒCƒgƒJƒEƒ“ƒg
-	unsigned long	m_nLoadAddress;		// ƒ[ƒhƒAƒhƒŒƒX
-	unsigned char	*m_pData;			// ƒf[ƒ^
-	unsigned char	m_nCheckSum;		// ƒ`ƒFƒbƒNƒTƒ€
+	bool			m_fAvailable;		// åˆæœŸåŒ–ã«æˆåŠŸã™ã‚‹ã¨true
+	int				m_nRecordType;		// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—
+	int				m_nByteCount;		// ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆ
+	unsigned long	m_nLoadAddress;		// ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒ‰ãƒ¬ã‚¹
+	unsigned char	*m_pData;			// ãƒ‡ãƒ¼ã‚¿
+	unsigned char	m_nCheckSum;		// ãƒã‚§ãƒƒã‚¯ã‚µãƒ 
 
-	int				m_nDataCount;		// ƒf[ƒ^”
-	char			*m_pLineBuff;		// SƒŒƒR[ƒhƒ‰ƒCƒ“ƒoƒbƒtƒ@
+	int				m_nDataCount;		// ãƒ‡ãƒ¼ã‚¿æ•°
+	char			*m_pLineBuff;		// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ©ã‚¤ãƒ³ãƒãƒƒãƒ•ã‚¡
 
 private: //-----------------------------------------------------------------
 	inline unsigned char Hex2Dec(unsigned char ch)	{
@@ -29,22 +29,22 @@ private: //-----------------------------------------------------------------
 		return (Hex2Dec(pLine[pos])<<4) | (Hex2Dec(pLine[pos+1]));
 	}
 
-	// ƒŒƒR[ƒhƒ^ƒCƒv‚©‚çƒŒƒR[ƒh’·‚ğ•Ô‚·
+	// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‹ã‚‰ãƒ¬ã‚³ãƒ¼ãƒ‰é•·ã‚’è¿”ã™
 	int GetAddressLength( int nRecordType )
 	{
-		static int alen[11] = { 2,2,3,4,2,2,2,2,2,2,2 };	// ŠeƒŒƒR[ƒhƒ^ƒCƒv‚²‚Æ‚ÌƒAƒhƒŒƒX’·
-		if(!CheckRecordType(nRecordType)) return 0;			// •s³‚ÈƒŒƒR[ƒhƒ^ƒCƒv‚Ìê‡
+		static int alen[11] = { 2,2,3,4,2,2,2,2,2,2,2 };	// å„ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã”ã¨ã®ã‚¢ãƒ‰ãƒ¬ã‚¹é•·
+		if(!CheckRecordType(nRecordType)) return 0;			// ä¸æ­£ãªãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã®å ´åˆ
 		return alen[nRecordType];
 	}
 
-	// ƒŒƒR[ƒhƒ^ƒCƒv‚Æ‚µ‚Ä³‚µ‚¢”Ô†‚©‚Ç‚¤‚©’²‚×‚Ätrue/false‚ğ•Ô‚·
+	// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã¨ã—ã¦æ­£ã—ã„ç•ªå·ã‹ã©ã†ã‹èª¿ã¹ã¦true/falseã‚’è¿”ã™
 	bool CheckRecordType( int nRecordType )
 	{
 		if(0<=nRecordType && nRecordType<=9) return true;
 		return false;
 	}
 
-	// pLine‚ÌÅŒã‚É‚P•¶š’Ç‰Á‚·‚é
+	// pLineã®æœ€å¾Œã«ï¼‘æ–‡å­—è¿½åŠ ã™ã‚‹
 	void AddChar( char *pLine, unsigned char ch )
 	{
 		if(strlen(pLine)+1<MAX_MOTOROLAS_LENGTH-1) {
@@ -55,7 +55,7 @@ private: //-----------------------------------------------------------------
 		}
 	}
 
-	// pLine‚ÌÅŒã‚É16i”‚ğ’Ç‰Á‚·‚é
+	// pLineã®æœ€å¾Œã«16é€²æ•°ã‚’è¿½åŠ ã™ã‚‹
 	void AddHex( char *pLine, unsigned char data )
 	{
 		if(strlen(pLine)+2<MAX_MOTOROLAS_LENGTH-1) {
@@ -65,8 +65,8 @@ private: //-----------------------------------------------------------------
 		}
 	}
 
-	// ƒƒ“ƒo[‚Ìİ’è’l‚©‚çƒ`ƒFƒbƒNƒTƒ€‚ğŒvZ‚·‚é
-	// ƒ‰ƒCƒ“ƒoƒbƒtƒ@‚Ì’l(m_pLineBuff)‚Íg—p‚µ‚È‚¢
+	// ãƒ¡ãƒ³ãƒãƒ¼ã®è¨­å®šå€¤ã‹ã‚‰ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã‚’è¨ˆç®—ã™ã‚‹
+	// ãƒ©ã‚¤ãƒ³ãƒãƒƒãƒ•ã‚¡ã®å€¤(m_pLineBuff)ã¯ä½¿ç”¨ã—ãªã„
 	unsigned char CalcCheckSum( void );
 	void GenerateSRecord( char *pLine );
 	bool AnalyzeSRecord( char *pLine );
@@ -76,15 +76,15 @@ public: //-----------------------------------------------------------------
 		m_fAvailable = false;
 		m_nRecordType = 0;
 		m_nByteCount = 0;
-		m_nDataCount = 2 + 0 + 1;	// ƒAƒhƒŒƒX’·{ƒf[ƒ^’·{ƒ`ƒFƒbƒNƒTƒ€’·
+		m_nDataCount = 2 + 0 + 1;	// ã‚¢ãƒ‰ãƒ¬ã‚¹é•·ï¼‹ãƒ‡ãƒ¼ã‚¿é•·ï¼‹ãƒã‚§ãƒƒã‚¯ã‚µãƒ é•·
 		m_nLoadAddress = 0;
 		m_pData = new unsigned char[MAX_MOTOROLAS_LENGTH];
-		if(m_pData==NULL) return;			// ƒf[ƒ^—Ìˆæ‚ğŠm•Û‚Å‚«‚È‚©‚Á‚½‚Ì‚Åg—p•s‰Â
+		if(m_pData==NULL) return;			// ãƒ‡ãƒ¼ã‚¿é ˜åŸŸã‚’ç¢ºä¿ã§ããªã‹ã£ãŸã®ã§ä½¿ç”¨ä¸å¯
 		m_pLineBuff = new char[MAX_MOTOROLAS_LINE_LENGTH+1];
-		if(m_pLineBuff==NULL) return;		// ƒf[ƒ^—Ìˆæ‚ğŠm•Û‚Å‚«‚È‚©‚Á‚½‚Ì‚Åg—p•s‰Â
+		if(m_pLineBuff==NULL) return;		// ãƒ‡ãƒ¼ã‚¿é ˜åŸŸã‚’ç¢ºä¿ã§ããªã‹ã£ãŸã®ã§ä½¿ç”¨ä¸å¯
 		m_fAvailable = true;
-		m_nCheckSum = CalcCheckSum();		// ƒ`ƒFƒbƒNƒTƒ€‚ğŒvZ‚³‚¹‚é
-		GenerateSRecord(m_pLineBuff);		// SƒŒƒR[ƒh‚ğ¶¬‚·‚é
+		m_nCheckSum = CalcCheckSum();		// ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã‚’è¨ˆç®—ã•ã›ã‚‹
+		GenerateSRecord(m_pLineBuff);		// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹
 	}
 
 	virtual ~CMotorolaS() {

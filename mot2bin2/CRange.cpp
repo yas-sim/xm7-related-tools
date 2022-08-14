@@ -1,6 +1,6 @@
-#include "CRange.h"
+﻿#include "CRange.h"
 
-// �Q�͈̔͂��d�Ȃ荇���Ă��邩�ǂ����`�F�b�N����
+// ２つの範囲が重なり合っているかどうかチェックする
 bool CRanges::isOverlap( unsigned long top1, unsigned long bottom1,
 				unsigned long top2, unsigned long bottom2 ) {
 	bool result;
@@ -8,24 +8,24 @@ bool CRanges::isOverlap( unsigned long top1, unsigned long bottom1,
 
 	result = true;
 	
-	// ���E�����̂��߂�+1,-1���Z��32�r�b�g�̐������b�v���E���h���Ă��܂��̂�h��
+	// 境界条件のための+1,-1演算で32ビットの数がラップラウンドしてしまうのを防ぐ
 	atop   =((top1   ==         0ul) ?          0ul :    top1-1);
 	abottom=((bottom1==0xfffffffful) ? 0xfffffffful : bottom1+1);
 
-	// �d�Ȃ��Ă��Ȃ��ꍇ�����o����B����ȊO�̏ꍇ�͏d�Ȃ��Ă���
+	// 重なっていない場合を検出する。それ以外の場合は重なっている
 	if( top2   <atop && bottom2<atop )	 result = false;
 	if( abottom<top2 && abottom<bottom2) result = false;
 	return result;
 }
 
-// �w��̂Q�͈̔̓f�[�^����������
+// 指定の２つの範囲データを結合する
 void CRanges::combine( unsigned long top1, unsigned long bottom1,
 				unsigned long top2, unsigned long bottom2, CRange *range ) {
 	range->top = (top1<top2?top1:top2);
 	range->bottom = (bottom1<bottom2?bottom2:bottom1);
 }
 
-// �͈̓f�[�^��ǉ�����
+// 範囲データを追加する
 void CRanges::add( unsigned long top, unsigned long bottom ) {
 	CRange *ptr, *prevptr;
 	ptr = pTop;
@@ -41,7 +41,7 @@ void CRanges::add( unsigned long top, unsigned long bottom ) {
 	}
 }
 
-// �o�^����Ă���f�[�^�̐���Ԃ�
+// 登録されているデータの数を返す
 int CRanges::getNumberOfItems( void ) {
 	int result = 0;
 	CRange *ptr;
@@ -53,7 +53,7 @@ int CRanges::getNumberOfItems( void ) {
 	return result;
 }
 
-// �o�^����Ă���͈͂ŁA�����ł�����̂�S����������(1�p�X����)
+// 登録されている範囲で、結合できるものを全部結合する(1パスだけ)
 void CRanges::combineAll_1( void ) {
 	CRange *refptr, *ptr, *prevptr, *tmpptr;
 	refptr = pTop;
@@ -63,7 +63,7 @@ void CRanges::combineAll_1( void ) {
 		while(ptr!=NULL) {
 			if(isOverlap(refptr->top, refptr->bottom, ptr->top, ptr->bottom)) {
 				combine(refptr->top, refptr->bottom, ptr->top, ptr->bottom, refptr);
-				// �I�[�o�[���b�v���Ă����Ƃ���prevptr�͓����Ȃ�
+				// オーバーラップしていたときはprevptrは動かない
 				tmpptr = ptr;
 				prevptr->pNext = ptr->pNext;
 				ptr = ptr->pNext;
@@ -77,9 +77,9 @@ void CRanges::combineAll_1( void ) {
 	}
 }
 
-// �o�^����Ă���͈͂ŁA�O��͈̔͂������ł�����̂̂݌�������
-// ���ꂽ�Q�͈̔͂������ł���ꍇ���������Ȃ�
-// ���̂��߁AS���R�[�h���Ɍ����͈͂̏��Ԃ��L�[�v�ł���
+// 登録されている範囲で、前後の範囲が結合できるもののみ結合する
+// 離れた２つの範囲が結合できる場合も結合しない
+// そのため、Sレコード中に現れる範囲の順番をキープできる
 void CRanges::combineKeepOrder( void ) {
 	CRange *refptr, *tmpptr;
 	refptr = pTop;
@@ -95,17 +95,17 @@ void CRanges::combineKeepOrder( void ) {
 	}
 }
 
-// �o�^����Ă���f�[�^�Ō����ł�����̂���������i�}���`�p�X���s�j
+// 登録されているデータで結合できるものを結合する（マルチパス実行）
 void CRanges::combineAll( void )
 {
 	int num;
 	do {
-		num = getNumberOfItems();	// �o�^����Ă���͈̓f�[�^�̐��𒲂ׂ�
+		num = getNumberOfItems();	// 登録されている範囲データの数を調べる
 		combineAll_1();
 	} while (getNumberOfItems()!=num);
 }
 
-// �o�^����Ă���͈̓f�[�^��\������
+// 登録されている範囲データを表示する
 void CRanges::show( void ) {
 	CRange *ptr;
 	ptr = pTop;
@@ -115,7 +115,7 @@ void CRanges::show( void ) {
 	}
 }
 
-// �w��̔ԍ��͈̔̓f�[�^���擾����Bpos��0���擪�f�[�^
+// 指定の番号の範囲データを取得する。posは0が先頭データ
 void CRanges::getRange( int pos, CRange &range )
 {
 	CRange *ptr;

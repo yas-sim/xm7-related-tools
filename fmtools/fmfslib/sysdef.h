@@ -1,4 +1,4 @@
-#ifndef _SYSDEF_H_
+﻿#ifndef _SYSDEF_H_
 #define _SYSDEF_H_
 
 #define VERBOSE	(1)
@@ -8,7 +8,7 @@
 #else
 #define SHOW_ERROR		{ \
 							char pErrString[256]; \
-							FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 0, pErrString, 255, 0); \
+							FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, GetLastError(), 0, pErrString, 255, 0); \
 							puts(pErrString); \
 						}
 #endif

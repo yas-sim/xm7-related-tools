@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <CFDImg.h>
 #include <CFilesys.h>
@@ -13,14 +13,14 @@ protected:
 	CFilesys fs;
 	char tgtfile[10], fdimage[512];
 
-	HANDLE hInFile;				// “ü—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹
-	char infile[512];			// “ü—Íƒtƒ@ƒCƒ‹–¼
+	HANDLE hInFile;				// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«
+	char infile[512];			// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
 
 	CFDImg FD;
 	CEntry ent;
-	FLHANDLE *hFile;			// “ü—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹(F-BASICƒtƒ@ƒCƒ‹ƒVƒXƒeƒ€)
-	FDHANDLE *hFD;				// “ü—ÍFDƒCƒ[ƒWƒtƒ@ƒCƒ‹‚Ìƒnƒ“ƒhƒ‹
-	bool fRaw;					// RAWƒ‚[ƒhƒtƒ‰ƒO
+	FLHANDLE *hFile;			// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«(F-BASICãƒ•ã‚¡ã‚¤ãƒ«ã‚·ã‚¹ãƒ†ãƒ )
+	FDHANDLE *hFD;				// å…¥åŠ›FDã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒãƒ³ãƒ‰ãƒ«
+	bool fRaw;					// RAWãƒ¢ãƒ¼ãƒ‰ãƒ•ãƒ©ã‚°
 
 	unsigned char FileType;
 	bool Ascii;
@@ -41,7 +41,7 @@ protected:
 				0, errstr, 510, NULL);
 		}
 		if(header[13]!='X' || header[14]!='M' || header[15]!='7') return false;
-		// ƒtƒ@ƒCƒ‹–¼”²‚«æ‚è
+		// ãƒ•ã‚¡ã‚¤ãƒ«åæŠœãå–ã‚Š
 		for(int i=0; i<9; i++) {
 			tgtfile[i] = header[i];
 		}
@@ -70,7 +70,7 @@ public:
 	void WriteRawFile( void ) {
 		unsigned char buff[4];
 		DWORD NOR;
-		hFile->fAscii = 0;	// ‹­§“I‚ÉƒoƒCƒiƒŠƒ‚[ƒh‚É‚·‚é
+		hFile->fAscii = 0;	// å¼·åˆ¶çš„ã«ãƒã‚¤ãƒŠãƒªãƒ¢ãƒ¼ãƒ‰ã«ã™ã‚‹
 		while(1) {
 			BOOL status = ReadFile(hInFile, buff, 1, &NOR, NULL);
 			if(NOR>0) {
@@ -85,10 +85,10 @@ public:
 			exit(1);
 		}
 		
-		strncpy(fdimage, argv[1], 510);	// ƒfƒBƒXƒNƒCƒ[ƒWƒtƒ@ƒCƒ‹–¼
-		strncpy(infile , argv[2], 510);	// “ü—Íƒtƒ@ƒCƒ‹–¼
+		strncpy(fdimage, argv[1], 510);	// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«å
+		strncpy(infile , argv[2], 510);	// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
 
-		// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+		// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æ
 		for(int i=3; i<argc; i++) {
 			switch(argv[i][0]) {
 			case '/':
@@ -107,22 +107,22 @@ public:
 			}
 		}
 
-		// “ü—Íƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
+		// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 		hInFile = CreateFile(infile, GENERIC_READ, NULL, NULL, OPEN_EXISTING, NULL, NULL);
 		if(hInFile==INVALID_HANDLE_VALUE) {
 			puts("Failed to open input file");
 			exit(1);
 		}
-		// ƒwƒbƒ_î•ñ“Ç‚İo‚µ
+		// ãƒ˜ãƒƒãƒ€æƒ…å ±èª­ã¿å‡ºã—
 		if(!ReadHeader()) {
 			printf("'%s' is not a XM7 format.\n", infile);
 			exit(1);
 		}
 
-		// FDƒCƒ[ƒWƒtƒ@ƒCƒ‹ƒ}ƒEƒ“ƒg
+		// FDã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ãƒã‚¦ãƒ³ãƒˆ
 		hFD = fs.FMMountFD(fdimage);
 
-		// FMƒfƒBƒXƒN“àƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
+		// FMãƒ‡ã‚£ã‚¹ã‚¯å†…ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 		hFile = fs.FMOpen(hFD, tgtfile, FM_OPEN_WRITE, FileType,
 							Ascii==true?0xff:0, Random==true?1:0);
 		if(hFile==NULL) {
@@ -130,7 +130,7 @@ public:
 			exit(-1);
 		}
 
-		// ƒtƒ@ƒCƒ‹“à—e‚ğ‘‚«‚Ş
+		// ãƒ•ã‚¡ã‚¤ãƒ«å†…å®¹ã‚’æ›¸ãè¾¼ã‚€
 		WriteRawFile();
 
 		CloseHandle(hInFile);

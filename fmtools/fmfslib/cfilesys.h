@@ -42,7 +42,7 @@ public:
 	CFloppy *pFD;
 public:
 	FDHANDLE() {
-		pFD = NULL;
+		pFD = nullptr;
 		nRefCount = 0;
 	}
 	virtual ~FDHANDLE() {
@@ -68,7 +68,7 @@ public:
 	int nClusterDataSize;				// 読み込んだクラスタのサイズ(クラスタを使い切ってない場合にはクラスタサイズより小さくなる)
 public:
 	FLHANDLE() {
-		phFD = NULL;
+		phFD = nullptr;
 		pFilename[8] = '\0';
 		lFilePtr = 0L;
 		fOpenMode = 0;

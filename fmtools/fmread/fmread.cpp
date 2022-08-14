@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <CFDImg.h>
 #include <CFilesys.h>
@@ -10,13 +10,13 @@ protected:
 	CFilesys fs;
 	char tgtfile[10], fdimage[512];
 
-	HANDLE hOutFile;			// o—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹
-	char outfile[20];			// o—Íƒtƒ@ƒCƒ‹–¼
+	HANDLE hOutFile;			// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«
+	char outfile[20];			// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
 
 	CEntry ent;
-	FLHANDLE *hFile;			// “ü—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹(F-BASICƒtƒ@ƒCƒ‹ƒVƒXƒeƒ€)
-	FDHANDLE *hFD;				// “ü—ÍFDƒCƒ[ƒWƒtƒ@ƒCƒ‹‚Ìƒnƒ“ƒhƒ‹
-	bool fRaw;					// RAWƒ‚[ƒhƒtƒ‰ƒO
+	FLHANDLE *hFile;			// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«(F-BASICãƒ•ã‚¡ã‚¤ãƒ«ã‚·ã‚¹ãƒ†ãƒ )
+	FDHANDLE *hFD;				// å…¥åŠ›FDã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒãƒ³ãƒ‰ãƒ«
+	bool fRaw;					// RAWãƒ¢ãƒ¼ãƒ‰ãƒ•ãƒ©ã‚°
 
 	bool fVerbose;
 protected:
@@ -24,7 +24,7 @@ protected:
 	void ReadRawFile( void ) {
 		unsigned char buff[4];
 		DWORD NOW;
-		hFile->fAscii = 0;	// ‹­§“I‚ÉƒoƒCƒiƒŠƒ‚[ƒh‚É‚·‚é
+		hFile->fAscii = 0;	// å¼·åˆ¶çš„ã«ãƒã‚¤ãƒŠãƒªãƒ¢ãƒ¼ãƒ‰ã«ã™ã‚‹
 		while(1) {
 			int nor = fs.FMRead(hFile, (char*)buff, 1);
 			if(nor>0) {
@@ -35,23 +35,23 @@ protected:
 		}
 	}
 
-	// ƒwƒbƒ_î•ñ‚ğ‘‚«‚Ş
+	// ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’æ›¸ãè¾¼ã‚€
 	void WriteHeader( HANDLE hFile, char *filename, unsigned char FileType,
 								unsigned char Ascii, unsigned char Random )  {
 		char header[0x10];
 		DWORD NOW, ptr;
-		// ƒwƒbƒ_‚ğ0ƒNƒŠƒA
+		// ãƒ˜ãƒƒãƒ€ã‚’0ã‚¯ãƒªã‚¢
 		for(int i=0; i<0x10; i++) header[i]=0;
 		ptr=0;
-		// ƒtƒ@ƒCƒ‹–¼•¡Ê
-		for(i=0; i<9; i++) {
+		// ãƒ•ã‚¡ã‚¤ãƒ«åè¤‡å†™
+		for(int i=0; i<9; i++) {
 			header[ptr++] = filename[i];
 			if(filename[i]=='\0') break;
 		}
 		header[10] = FileType;
 		header[11] = Ascii;
 		header[12] = Random;
-		// ¯•Ê—pƒ}ƒWƒbƒNƒiƒ“ƒo[
+		// è­˜åˆ¥ç”¨ãƒã‚¸ãƒƒã‚¯ãƒŠãƒ³ãƒãƒ¼
 		header[13] = 'X';
 		header[14] = 'M';
 		header[15] = '7';
@@ -79,10 +79,10 @@ public:
 			exit(1);
 		}
 		
-		strncpy(fdimage, argv[1], 510);	// ƒfƒBƒXƒNƒCƒ[ƒWƒtƒ@ƒCƒ‹–¼
-		strncpy(tgtfile, argv[2], 9);	// ƒfƒBƒXƒNƒCƒ[ƒW“à‚Ìƒtƒ@ƒCƒ‹–¼
+		strncpy(fdimage, argv[1], 510);	// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«å
+		strncpy(tgtfile, argv[2], 9);	// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸å†…ã®ãƒ•ã‚¡ã‚¤ãƒ«å
 
-		// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+		// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æ
 		for(int i=3; i<argc; i++) {
 			switch(argv[i][0]) {
 			case '/':
@@ -118,10 +118,10 @@ public:
 			exit(-1);
 		}
 
-		// o—Íƒtƒ@ƒCƒ‹–¼‚ğì¬
+		// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ä½œæˆ
 		sprintf(outfile, "%s.%d%c%d", tgtfile,
-			ent.nFileType,					// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv 0,1,2
-			ent.fAscii==0x00?'B':'A',		// ƒAƒXƒL[ƒtƒ‰ƒO
+			ent.nFileType,					// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ— 0,1,2
+			ent.fAscii==0x00?'B':'A',		// ã‚¢ã‚¹ã‚­ãƒ¼ãƒ•ãƒ©ã‚°
 			ent.fRandomAccess==0x00?0:1);
 		if(fVerbose) {
 			printf("Output file='%s'\n", outfile);
@@ -134,7 +134,7 @@ public:
 		}
 
 		WriteHeader(hOutFile, tgtfile, ent.nFileType, ent.fAscii, ent.fRandomAccess);
-		ReadRawFile();		// ƒtƒ@ƒCƒ‹‚Ì’†g‚ğ“Ç‚İo‚·(¬×H‚È‚µ)
+		ReadRawFile();		// ãƒ•ã‚¡ã‚¤ãƒ«ã®ä¸­èº«ã‚’èª­ã¿å‡ºã™(å°ç´°å·¥ãªã—)
 		
 		CloseHandle(hOutFile);
 		fs.FMClose(hFile);

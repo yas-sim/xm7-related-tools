@@ -1,4 +1,4 @@
-#ifndef _CWAVE_H_
+ï»¿#ifndef _CWAVE_H_
 #define _CWAVE_H_
 
 #include "cfile.h"
@@ -6,19 +6,19 @@
 //--------------------------------------------------------------------------------
 class CWaveFile : public CFile {
 protected:
-										// +00 4ƒoƒCƒg 'R' 'I' 'F' 'F' 
-//	unsigned long	m_nTotalSize;		// +04 4ƒoƒCƒg ‚±‚êˆÈ‰º‚ÌƒoƒCƒg” (= ƒtƒ@ƒCƒ‹ƒTƒCƒY - 8) 
-										// +08 8ƒoƒCƒg 'W' 'A' 'V' 'E' 'f' 'm' 't' ' '(©ƒXƒy[ƒX) 
-	unsigned long	m_nNOWavefmt;		// +10 4ƒoƒCƒg WAVEfmt—“‚ÌƒoƒCƒg”C‚Â‚Ë‚É 16 (10 00 00 00) 
-	unsigned short	m_nDataType;		// +14 2ƒoƒCƒg ƒf[ƒ^Œ`® (PCM: 01 00)
-	unsigned short	m_nNOChannel;		// +16 2ƒoƒCƒg ƒ`ƒƒƒlƒ‹” (ƒ‚ƒm: 01 00 ƒXƒeƒŒƒI: 02 00) 
-	unsigned long	m_nSplRate;			// +18 4ƒoƒCƒg ƒTƒ“ƒvƒŠƒ“ƒOƒŒ[ƒg (44100Hz ‚È‚ç 44 AC 00 00) 
-	unsigned long	m_nBytePerSec;		// +1C 4ƒoƒCƒg ƒoƒCƒg^•b (44100Hz ƒXƒeƒŒƒI 16ƒrƒbƒg ‚È‚ç 10 B1 02 00) 
-	unsigned short	m_nUnitSize;		// +20 2ƒoƒCƒg ƒoƒCƒg^ƒTƒ“ƒvƒ‹~ƒ`ƒƒƒlƒ‹” (ƒXƒeƒŒƒI 16ƒrƒbƒg ‚È‚ç 04 00) 
-	unsigned short	m_nBitPerSpl;		// +22 2ƒoƒCƒg ƒrƒbƒg^ƒTƒ“ƒvƒ‹ (16ƒrƒbƒg ‚È‚ç 10 00) 
-										// +24 4ƒoƒCƒg —“‚Ì–¼‘O ('d' 'a' 't' 'a'C'f' 'a' 'c' 't' ‚È‚Ç) 
-	unsigned long m_nNOSndData;			// +28 4ƒoƒCƒg ‚±‚Ì—“‚ÌƒoƒCƒg” n 
-	// +2C` Waveƒf[ƒ^ (L,R,L,R‚Ì‡B8Bit:0`255(–³‰¹=128), 16bit=-32768`+32767(–³‰¹=0))
+										// +00 4ãƒã‚¤ãƒˆ 'R' 'I' 'F' 'F' 
+//	unsigned long	m_nTotalSize;		// +04 4ãƒã‚¤ãƒˆ ã“ã‚Œä»¥ä¸‹ã®ãƒã‚¤ãƒˆæ•° (= ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚º - 8) 
+										// +08 8ãƒã‚¤ãƒˆ 'W' 'A' 'V' 'E' 'f' 'm' 't' ' '(â†ã‚¹ãƒšãƒ¼ã‚¹) 
+	unsigned long	m_nNOWavefmt;		// +10 4ãƒã‚¤ãƒˆ WAVEfmtæ¬„ã®ãƒã‚¤ãƒˆæ•°ï¼Œã¤ã­ã« 16 (10 00 00 00) 
+	unsigned short	m_nDataType;		// +14 2ãƒã‚¤ãƒˆ ãƒ‡ãƒ¼ã‚¿å½¢å¼ (PCM: 01 00)
+	unsigned short	m_nNOChannel;		// +16 2ãƒã‚¤ãƒˆ ãƒãƒ£ãƒãƒ«æ•° (ãƒ¢ãƒ: 01 00 ã‚¹ãƒ†ãƒ¬ã‚ª: 02 00) 
+	unsigned long	m_nSplRate;			// +18 4ãƒã‚¤ãƒˆ ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ãƒ¬ãƒ¼ãƒˆ (44100Hz ãªã‚‰ 44 AC 00 00) 
+	unsigned long	m_nBytePerSec;		// +1C 4ãƒã‚¤ãƒˆ ãƒã‚¤ãƒˆï¼ç§’ (44100Hz ã‚¹ãƒ†ãƒ¬ã‚ª 16ãƒ“ãƒƒãƒˆ ãªã‚‰ 10 B1 02 00) 
+	unsigned short	m_nUnitSize;		// +20 2ãƒã‚¤ãƒˆ ãƒã‚¤ãƒˆï¼ã‚µãƒ³ãƒ—ãƒ«Ã—ãƒãƒ£ãƒãƒ«æ•° (ã‚¹ãƒ†ãƒ¬ã‚ª 16ãƒ“ãƒƒãƒˆ ãªã‚‰ 04 00) 
+	unsigned short	m_nBitPerSpl;		// +22 2ãƒã‚¤ãƒˆ ãƒ“ãƒƒãƒˆï¼ã‚µãƒ³ãƒ—ãƒ« (16ãƒ“ãƒƒãƒˆ ãªã‚‰ 10 00) 
+										// +24 4ãƒã‚¤ãƒˆ æ¬„ã®åå‰ ('d' 'a' 't' 'a'ï¼Œ'f' 'a' 'c' 't' ãªã©) 
+	unsigned long m_nNOSndData;			// +28 4ãƒã‚¤ãƒˆ ã“ã®æ¬„ã®ãƒã‚¤ãƒˆæ•° n 
+	// +2Cï½ Waveãƒ‡ãƒ¼ã‚¿ (L,R,L,Rã®é †ã€‚8Bit:0ï½255(ç„¡éŸ³=128), 16bit=-32768ï½+32767(ç„¡éŸ³=0))
 
 	char *m_FileName;
 
@@ -39,17 +39,17 @@ public:
 	double GetTotalTime( void ) {
 		return ((double)m_nNOSndData/(double)m_nUnitSize/(double)m_nSplRate);
 	}
-	unsigned long	GetNOWavefmt( void )	{ return m_nNOWavefmt; }	// 4ƒoƒCƒg WAVEfmt—“‚ÌƒoƒCƒg”C‚Â‚Ë‚É 16 (10 00 00 00) 
-	unsigned short	GetDataType( void )		{ return m_nDataType; }		// 2ƒoƒCƒg ƒf[ƒ^Œ`® (PCM: 01 00)
-	unsigned short	GetNOChanell( void )	{ return m_nNOChannel; }	// 2ƒoƒCƒg ƒ`ƒƒƒlƒ‹” (ƒ‚ƒm: 01 00 ƒXƒeƒŒƒI: 02 00) 
-	unsigned long	GetSplRate( void )		{ return m_nSplRate; }		// 4ƒoƒCƒg ƒTƒ“ƒvƒŠƒ“ƒOƒŒ[ƒg (44100Hz ‚È‚ç 44 AC 00 00) 
-	unsigned long	GetBytePerSec( void )	{ return m_nBytePerSec; }	// 4ƒoƒCƒg ƒoƒCƒg^•b (44100Hz ƒXƒeƒŒƒI 16ƒrƒbƒg ‚È‚ç 10 B1 02 00) 
-	unsigned short	GetUnitSize( void )		{ return m_nUnitSize;}		// 2ƒoƒCƒg ƒoƒCƒg^ƒTƒ“ƒvƒ‹~ƒ`ƒƒƒlƒ‹” (ƒXƒeƒŒƒI 16ƒrƒbƒg ‚È‚ç 04 00) 
-	unsigned short	GetBitPerSpl( void )	{ return m_nBitPerSpl; }	// 2ƒoƒCƒg ƒrƒbƒg^ƒTƒ“ƒvƒ‹ (16ƒrƒbƒg ‚È‚ç 10 00) 
-	unsigned long	GetNOSndData( void )	{ return m_nNOSndData; }	// 4ƒoƒCƒg ‚±‚Ì—“‚ÌƒoƒCƒg” n 
+	unsigned long	GetNOWavefmt( void )	{ return m_nNOWavefmt; }	// 4ãƒã‚¤ãƒˆ WAVEfmtæ¬„ã®ãƒã‚¤ãƒˆæ•°ï¼Œã¤ã­ã« 16 (10 00 00 00) 
+	unsigned short	GetDataType( void )		{ return m_nDataType; }		// 2ãƒã‚¤ãƒˆ ãƒ‡ãƒ¼ã‚¿å½¢å¼ (PCM: 01 00)
+	unsigned short	GetNOChanell( void )	{ return m_nNOChannel; }	// 2ãƒã‚¤ãƒˆ ãƒãƒ£ãƒãƒ«æ•° (ãƒ¢ãƒ: 01 00 ã‚¹ãƒ†ãƒ¬ã‚ª: 02 00) 
+	unsigned long	GetSplRate( void )		{ return m_nSplRate; }		// 4ãƒã‚¤ãƒˆ ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ãƒ¬ãƒ¼ãƒˆ (44100Hz ãªã‚‰ 44 AC 00 00) 
+	unsigned long	GetBytePerSec( void )	{ return m_nBytePerSec; }	// 4ãƒã‚¤ãƒˆ ãƒã‚¤ãƒˆï¼ç§’ (44100Hz ã‚¹ãƒ†ãƒ¬ã‚ª 16ãƒ“ãƒƒãƒˆ ãªã‚‰ 10 B1 02 00) 
+	unsigned short	GetUnitSize( void )		{ return m_nUnitSize;}		// 2ãƒã‚¤ãƒˆ ãƒã‚¤ãƒˆï¼ã‚µãƒ³ãƒ—ãƒ«Ã—ãƒãƒ£ãƒãƒ«æ•° (ã‚¹ãƒ†ãƒ¬ã‚ª 16ãƒ“ãƒƒãƒˆ ãªã‚‰ 04 00) 
+	unsigned short	GetBitPerSpl( void )	{ return m_nBitPerSpl; }	// 2ãƒã‚¤ãƒˆ ãƒ“ãƒƒãƒˆï¼ã‚µãƒ³ãƒ—ãƒ« (16ãƒ“ãƒƒãƒˆ ãªã‚‰ 10 00) 
+	unsigned long	GetNOSndData( void )	{ return m_nNOSndData; }	// 4ãƒã‚¤ãƒˆ ã“ã®æ¬„ã®ãƒã‚¤ãƒˆæ•° n 
 
 	unsigned short MixDown( unsigned long left, unsigned long right );
-	unsigned short ReadWavDataMono( void );				// í‚Éƒ‚ƒmƒ‰ƒ‹16ƒrƒbƒg‚É•ÏŠ·‚µ‚Ä‰¹ºƒf[ƒ^‚ğ“Ç‚İo‚·(ƒXƒeƒŒƒI‚Ìê‡‚àƒ‚ƒmƒ‰ƒ‹‚Éƒ~ƒbƒNƒXƒ_ƒEƒ“)
+	unsigned short ReadWavDataMono( void );				// å¸¸ã«ãƒ¢ãƒãƒ©ãƒ«16ãƒ“ãƒƒãƒˆã«å¤‰æ›ã—ã¦éŸ³å£°ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿å‡ºã™(ã‚¹ãƒ†ãƒ¬ã‚ªã®å ´åˆã‚‚ãƒ¢ãƒãƒ©ãƒ«ã«ãƒŸãƒƒã‚¯ã‚¹ãƒ€ã‚¦ãƒ³)
 
 protected:
 	void InitMember( void ) {
@@ -65,7 +65,7 @@ protected:
 	}
 	void WriteHeader( void );
 	void ReadHeader( void );
-	void WriteData( unsigned long data );		// Bit/Spl‚Ì’l‚É‚µ‚½‚ª‚Á‚Äƒf[ƒ^‚ğ‘‚«‚Ş
+	void WriteData( unsigned long data );		// Bit/Splã®å€¤ã«ã—ãŸãŒã£ã¦ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãè¾¼ã‚€
 	unsigned long ReadData( void );
 };
 

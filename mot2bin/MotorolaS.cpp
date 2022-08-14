@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #include "motorolas.h"
@@ -18,12 +18,12 @@ const int MAXSRECORDSIZE=256;
 
 class CMotorolaS {
 private:
-	int				m_nSum;					// Œ»İ‚Ìƒ`ƒFƒbƒNƒTƒ€
-	unsigned long	m_nAdrs;				// Œ»İ‚ÌƒgƒbƒvƒAƒhƒŒƒX‚Æƒ{ƒgƒ€ƒAƒhƒŒƒX
-	int				m_nRecordType;			// ƒŒƒR[ƒhƒ^ƒCƒv
-	int				m_nLengh;				// ƒf[ƒ^•”‚ÌƒoƒCƒg”
-	bool			m_fValid;				// Œ»İA—LŒø‚ÈƒŒƒR[ƒh‚ª“Ç‚İ‚Ü‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©
-	int				m_nLineCount;			// “Ç‚İ‚ñ‚¾s”
+	int				m_nSum;					// ç¾åœ¨ã®ãƒã‚§ãƒƒã‚¯ã‚µãƒ 
+	unsigned long	m_nAdrs;				// ç¾åœ¨ã®ãƒˆãƒƒãƒ—ã‚¢ãƒ‰ãƒ¬ã‚¹ã¨ãƒœãƒˆãƒ ã‚¢ãƒ‰ãƒ¬ã‚¹
+	int				m_nRecordType;			// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—
+	int				m_nLengh;				// ãƒ‡ãƒ¼ã‚¿éƒ¨ã®ãƒã‚¤ãƒˆæ•°
+	bool			m_fValid;				// ç¾åœ¨ã€æœ‰åŠ¹ãªãƒ¬ã‚³ãƒ¼ãƒ‰ãŒèª­ã¿è¾¼ã¾ã‚Œã¦ã„ã‚‹ã‹ã©ã†ã‹
+	int				m_nLineCount;			// èª­ã¿è¾¼ã‚“ã è¡Œæ•°
 	int				m_nAdrLen;
 	char			m_cpBuff[MAXSRECORDSIZE];
 	char			m_cpData[MAXSRECORDSIZE/2];
@@ -31,7 +31,7 @@ private:
 	
 	void _getAdrLen( void )
 	{
-		int alen[11] = { 2,2,3,4,2,2,2,2,2,2,2 };	// ŠeƒŒƒR[ƒhƒ^ƒCƒv‚²‚Æ‚ÌƒAƒhƒŒƒX’·
+		int alen[11] = { 2,2,3,4,2,2,2,2,2,2,2 };	// å„ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã”ã¨ã®ã‚¢ãƒ‰ãƒ¬ã‚¹é•·
 		m_nAdrLen = alen[_getRecordType()];	
 	}
 	
@@ -56,7 +56,7 @@ private:
 		return result;
 	}
 
-	// ƒŒƒR[ƒh‚©‚çƒ`ƒFƒbƒNƒTƒ€‚ğ”²‚«o‚·
+	// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‹ã‚‰ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã‚’æŠœãå‡ºã™
 	int _getSum( void )			{ return GETHEX(m_cpBuff, _getByteCount()*2+2);	}
 	int _getRecordType( void )	{ return m_cpBuff[1] & 0x0f;	}
 	int _getByteCount( void )	{ return GETHEX(m_cpBuff, 2);	}
@@ -85,20 +85,20 @@ public:
 		close();
 	}
 
-	// ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	void open( char *filename , char *mode )
 	{
 		m_fp = fopen(filename, mode);
 	}
 	
-	// ƒtƒ@ƒCƒ‹‚ğ•Â‚¶‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‰ã˜ã‚‹
 	void close( void )
 	{
 		if(m_fp!=(FILE*)NULL) fclose(m_fp);
 		m_fp = (FILE*)NULL;
 	}
 
-	// siƒLƒƒƒ‰ƒNƒ^jƒf[ƒ^‚©‚çƒ`ƒFƒbƒNƒTƒ€‚ğŒvZ‚·‚é
+	// è¡Œï¼ˆã‚­ãƒ£ãƒ©ã‚¯ã‚¿ï¼‰ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã‚’è¨ˆç®—ã™ã‚‹
 	int calcSum( void )
 	{
 		int sum;
@@ -109,29 +109,29 @@ public:
 			}
 			return (~sum) & 0x00ff;
 		}
-		return -2;		// getSum()‚ªƒGƒ‰[‚É-1‚ğ•Ô‚·‚Ì‚ÅAcalsSum()‚àƒGƒ‰[‚É-1‚ğ•Ô‚·‚Æƒ`ƒFƒbƒNƒTƒ€‚ª“™‚µ‚¢‚ÆŠ¨ˆá‚¢‚³‚ê‚é‚Ì‚ğ–h‚®–Ú“I‚Å-2‚ğ•Ô‚·
+		return -2;		// getSum()ãŒã‚¨ãƒ©ãƒ¼æ™‚ã«-1ã‚’è¿”ã™ã®ã§ã€calsSum()ã‚‚ã‚¨ãƒ©ãƒ¼æ™‚ã«-1ã‚’è¿”ã™ã¨ãƒã‚§ãƒƒã‚¯ã‚µãƒ ãŒç­‰ã—ã„ã¨å‹˜é•ã„ã•ã‚Œã‚‹ã®ã‚’é˜²ãç›®çš„ã§-2ã‚’è¿”ã™
 	}
 
-	// Œ»İ‚Ìsƒoƒbƒtƒ@(m_cpBuff)‚ğ‰ğÍ‚µ‚ÄAƒNƒ‰ƒXƒƒ“ƒoŠeíƒpƒ‰ƒ[ƒ^‚ğİ’è‚·‚é
+	// ç¾åœ¨ã®è¡Œãƒãƒƒãƒ•ã‚¡(m_cpBuff)ã‚’è§£æã—ã¦ã€ã‚¯ãƒ©ã‚¹ãƒ¡ãƒ³ãƒå„ç¨®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¨­å®šã™ã‚‹
 	void analyzeRecord( void )
 	{
-		m_nRecordType	= _getRecordType();					// ƒŒƒR[ƒhƒ^ƒCƒv
-		_getAdrLen();										// ƒAƒhƒŒƒX•”‚Ì’·‚³‚ğadrslen‚ÉŠi”[‚·‚é
-		m_nLengh		= _getByteCount()-m_nAdrLen-1;		// ƒf[ƒ^•”‚Ì‚İ‚Ìƒf[ƒ^’·
-		m_nAdrs			= _getAddress();					// ƒŒƒR[ƒh‚ÌƒAƒhƒŒƒX
-		_getData(m_cpData);									// SƒŒƒR[ƒh‚©‚çƒf[ƒ^‚ğ”²‚«o‚·
-		m_nSum			= _getSum();						// SƒŒƒR[ƒh‚É‘‚©‚ê‚Ä‚¢‚éƒ`ƒFƒbƒNƒTƒ€’l
+		m_nRecordType	= _getRecordType();					// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—
+		_getAdrLen();										// ã‚¢ãƒ‰ãƒ¬ã‚¹éƒ¨ã®é•·ã•ã‚’adrslenã«æ ¼ç´ã™ã‚‹
+		m_nLengh		= _getByteCount()-m_nAdrLen-1;		// ãƒ‡ãƒ¼ã‚¿éƒ¨ã®ã¿ã®ãƒ‡ãƒ¼ã‚¿é•·
+		m_nAdrs			= _getAddress();					// ãƒ¬ã‚³ãƒ¼ãƒ‰ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
+		_getData(m_cpData);									// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’æŠœãå‡ºã™
+		m_nSum			= _getSum();						// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã«æ›¸ã‹ã‚Œã¦ã„ã‚‹ãƒã‚§ãƒƒã‚¯ã‚µãƒ å€¤
 	}
 
-	// ƒtƒ@ƒCƒ‹‚©‚ç‚PƒŒƒR[ƒh“Ç‚İ‚İAƒNƒ‰ƒXƒƒ“ƒo‚ÉŠeƒpƒ‰ƒ[ƒ^‚ğİ’è‚·‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ï¼‘ãƒ¬ã‚³ãƒ¼ãƒ‰èª­ã¿è¾¼ã¿ã€ã‚¯ãƒ©ã‚¹ãƒ¡ãƒ³ãƒã«å„ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¨­å®šã™ã‚‹
 	bool getRecord( void )
 	{
 		m_fValid = false;
 		if(m_fp!=NULL) {
 			do {
 				fgets(m_cpBuff, MAXSRECORDSIZE-2, m_fp);
-				m_nLineCount ++;									// “Ç‚İ‚ñ‚¾s”‚ğ‚P‘‚â‚·
-			} while(m_cpBuff[0]!='S' && m_cpBuff[1]!='s' && !feof(m_fp));	// SƒŒƒR[ƒhˆÈŠO‚Ìs‚ğ“Ç‚İ”ò‚Î‚·
+				m_nLineCount ++;									// èª­ã¿è¾¼ã‚“ã è¡Œæ•°ã‚’ï¼‘å¢—ã‚„ã™
+			} while(m_cpBuff[0]!='S' && m_cpBuff[1]!='s' && !feof(m_fp));	// Sãƒ¬ã‚³ãƒ¼ãƒ‰ä»¥å¤–ã®è¡Œã‚’èª­ã¿é£›ã°ã™
 			if(feof(m_fp)) {
 				m_nLineCount = 0;
 				m_fValid = false;
@@ -146,7 +146,7 @@ public:
 		}
 	}
 
-	// ƒoƒCƒgƒJƒEƒ“ƒgAƒ[ƒhƒAƒhƒŒƒXAƒf[ƒ^‚©‚çƒ`ƒFƒbƒNƒTƒ€‚ğ‹‚ß‚é
+	// ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆã€ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒ‰ãƒ¬ã‚¹ã€ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã‚’æ±‚ã‚ã‚‹
 	unsigned char calcTotalSum( void )
 	{
 		
@@ -165,7 +165,7 @@ public:
 
 	}
 
-	// SƒŒƒR[ƒh¶¬‚Ég—p‚·‚éƒf[ƒ^ƒŒƒR[ƒhƒ^ƒCƒv
+	// Sãƒ¬ã‚³ãƒ¼ãƒ‰ç”Ÿæˆæ™‚ã«ä½¿ç”¨ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—
 	void setRecordType( int type ) {
 		m_nRecordType = type;
 	}
@@ -186,7 +186,7 @@ public:
 
 //-----------------------------------------------------------------------------------
 
-/* SFORM‚Ì’†g‚ğ‹ó‚É‚·‚é */
+/* SFORMã®ä¸­èº«ã‚’ç©ºã«ã™ã‚‹ */
 void motInit( void )
 {
 	motDATA.Type=0;
@@ -195,19 +195,19 @@ void motInit( void )
 	motDATA.Sum=0;
 }
 
-/* ƒŒƒR[ƒhƒ^ƒCƒv‚ğƒZƒbƒg‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ */
 void motSetType( unsigned char type )
 {
 	motDATA.Type=type;
 }
 
-/* ƒŒƒR[ƒhŠJnƒAƒhƒŒƒX‚ğƒZƒbƒg‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰é–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ */
 void motSetAddress( unsigned long address  )
 {
 	motDATA.Address=address;
 }
 
-/* ƒŒƒR[ƒh‚ğo—Í‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã™ã‚‹ */
 static void motPut( void )
 {
 	int i;
@@ -248,10 +248,10 @@ static void motPut( void )
 	for(i=0; i<motDATA.Size; i++ ) {
 		fprintf(stdout, "%02X", motDATA.Data[i]);
 	}
-	fprintf(stdout, "%02X\n", (unsigned char)(~(motDATA.Sum)));		/* ƒf[ƒ^‡Œv‚Ì•â”‚ªƒ`ƒFƒbƒNƒTƒ€ */
+	fprintf(stdout, "%02X\n", (unsigned char)(~(motDATA.Sum)));		/* ãƒ‡ãƒ¼ã‚¿åˆè¨ˆã®è£œæ•°ãŒãƒã‚§ãƒƒã‚¯ã‚µãƒ  */
 }
 
-/* —­‚Ü‚Á‚Ä‚¢‚éƒf[ƒ^‚ğo—Í‚µAƒoƒbƒtƒ@‚ğƒtƒ‰ƒbƒVƒ…‚·‚é */
+/* æºœã¾ã£ã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›ã—ã€ãƒãƒƒãƒ•ã‚¡ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã™ã‚‹ */
 void motFlush( void )
 {
 	motPut();
@@ -260,8 +260,8 @@ void motFlush( void )
 	motDATA.Sum=0;
 }
 
-/* ƒŒƒR[ƒh‚Éƒf[ƒ^‚ğƒXƒgƒbƒN‚·‚é */
-/* ƒf[ƒ^‚ªƒŒƒR[ƒh’·‚É‚È‚Á‚½‚çA‚»‚ê‚Ü‚Å‚Ìƒf[ƒ^‚ğo—Í‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã«ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒƒã‚¯ã™ã‚‹ */
+/* ãƒ‡ãƒ¼ã‚¿ãŒãƒ¬ã‚³ãƒ¼ãƒ‰é•·ã«ãªã£ãŸã‚‰ã€ãã‚Œã¾ã§ã®ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›ã™ã‚‹ */
 void motStock( unsigned char stkdata )
 {
 	motDATA.Data[motDATA.Size++]=stkdata;

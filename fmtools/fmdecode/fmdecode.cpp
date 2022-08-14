@@ -1,19 +1,19 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
 
 #include "CMotorolaS.h"
 
-// v0.1 "iba"Šg’£q‚ğó‚¯•t‚¯‚é‚æ‚¤‚É•ÏX
+// v0.1 "iba"æ‹¡å¼µå­ã‚’å—ã‘ä»˜ã‘ã‚‹ã‚ˆã†ã«å¤‰æ›´
 
 #define VERSION		"v0.1"
 
 class CFMDECODE {
 protected:
-	HANDLE hInFile, hOutFile;	// “üo—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹
-	char infile[512], outfile[512];			// o—Íƒtƒ@ƒCƒ‹–¼
+	HANDLE hInFile, hOutFile;	// å…¥å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«
+	char infile[512], outfile[512];			// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
 
-	bool fRaw;					// RAWƒ‚[ƒhƒtƒ‰ƒO
+	bool fRaw;					// RAWãƒ¢ãƒ¼ãƒ‰ãƒ•ãƒ©ã‚°
 
 	char filename[9];
 	unsigned char FileType;
@@ -80,21 +80,21 @@ protected:
 		status = ReadFile(hInFile, buff, 2, &NOR, NULL);
 		nStartAddr = (buff[0]<<8) | buff[1];
 		char *data = new char[nFileSize+1];
-		// ƒf[ƒ^–{‘Ì‚ğ“Ç‚İo‚·
+		// ãƒ‡ãƒ¼ã‚¿æœ¬ä½“ã‚’èª­ã¿å‡ºã™
 		status = ReadFile(hInFile, data, nFileSize, &NOR, NULL);
 		if(status==0 && NOR==0) {
 			puts("Unexpected EOF");
 			delete []data;
 			exit(1);
 		}
-		// Dummy‚ğ“Ç‚İ”ò‚Î‚·(‚±‚Ì‚RƒoƒCƒg‚Í‰½‚Ì‚½‚ß‚É‚ ‚é‚ñ‚¾‚ë‚¤?)
+		// Dummyã‚’èª­ã¿é£›ã°ã™(ã“ã®ï¼“ãƒã‚¤ãƒˆã¯ä½•ã®ãŸã‚ã«ã‚ã‚‹ã‚“ã ã‚ã†?)
 		status = ReadFile(hInFile, buff, 3, &NOR, NULL);
 		if(status==0 && NOR==0) {
 			puts("Unexpected EOF(1)");
 			delete []data;
 			exit(1);
 		}
-		// ƒGƒ“ƒgƒŠ[ƒAƒhƒŒƒX‚ğ“Ç‚İo‚·
+		// ã‚¨ãƒ³ãƒˆãƒªãƒ¼ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’èª­ã¿å‡ºã™
 		status = ReadFile(hInFile, buff, 2, &NOR, NULL);
 		if(status==0 && NOR==0) {
 			puts("Unexpected EOF(1)");
@@ -106,10 +106,10 @@ protected:
 			printf("StartAddr=%04x EndAddr=%04x Entry=%04x\n", 
 				nStartAddr, nStartAddr+nFileSize-1, nEntryAddr);
 
-		// ƒ‚ƒgƒ[ƒ‰SƒtƒH[ƒ}ƒbƒg‚Åƒf[ƒ^‚ğo—Í
+		// ãƒ¢ãƒˆãƒ­ãƒ¼ãƒ©Sãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã§ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›
 		CMotorolaS mot;
 		char outbuff[512];
-		// ƒf[ƒ^ƒŒƒR[ƒh‚ğ¶¬
+		// ãƒ‡ãƒ¼ã‚¿ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆ
 		for(unsigned int adr=0; adr<nFileSize; adr+=0x20) {
 			mot.InitSRecord(nStartAddr+adr);
 			for(unsigned int ofst=0; ofst<0x20; ofst++) {
@@ -121,7 +121,7 @@ protected:
 			WriteFile(hOutFile, outbuff, strlen(outbuff), &NOW, NULL);
 //			puts(outbuff);
 		}
-		// ƒGƒ“ƒhƒŒƒR[ƒh‚ğ¶¬
+		// ã‚¨ãƒ³ãƒ‰ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆ
 		mot.InitSRecord(nEntryAddr);
 		mot.SetRecordType(9);
 		mot.GetSRecordBuff(outbuff);
@@ -136,7 +136,7 @@ protected:
 		unsigned char header[0x10];
 		ReadFile(hInFile, header, 0x10, &NOR, NULL);
 		if(header[13]!='X' || header[14]!='M' || header[15]!='7') return false;
-		// ƒtƒ@ƒCƒ‹–¼”²‚«æ‚è
+		// ãƒ•ã‚¡ã‚¤ãƒ«åæŠœãå–ã‚Š
 		for(int i=0; i<9; i++) {
 			filename[i] = header[i];
 		}
@@ -146,7 +146,7 @@ protected:
 		return true;
 	}
 
-	// ƒwƒbƒ_î•ñ‚ğ•\¦‚·‚é
+	// ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’è¡¨ç¤ºã™ã‚‹
 	void ShowHeader( void ) {
 		if(fVerbose) 
 			printf("FileName=%-8s FileType=%d Ascii=%c Random=%c\n", filename, FileType, Ascii?'A':'B', Random?'R':'S');
@@ -179,9 +179,9 @@ public:
 			exit(1);
 		}
 		
-		strncpy(infile , argv[1], 510);	// “ü—Íƒtƒ@ƒCƒ‹(FMŒ`®)
+		strncpy(infile , argv[1], 510);	// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«(FMå½¢å¼)
 
-		// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+		// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æ
 		for(int i=2; i<argc; i++) {
 			switch(argv[i][0]) {
 			case '/':
@@ -200,7 +200,7 @@ public:
 			}
 		}
 		
-		// “ü—Íƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
+		// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 		hInFile = CreateFile(infile, GENERIC_READ, NULL, NULL, OPEN_EXISTING, NULL, NULL);
 		if(hInFile==INVALID_HANDLE_VALUE) {
 			printf("Failed to open input file '%s'\n", infile);
@@ -211,8 +211,8 @@ public:
 			exit(1);
 		}
 
-		// o—Íƒtƒ@ƒCƒ‹–¼‚ğ¶¬‚·‚é
-		// ƒtƒ@ƒCƒ‹‘®«‚©‚çŠg’£q‚ğ©“®¶¬B
+		// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ç”Ÿæˆã™ã‚‹
+		// ãƒ•ã‚¡ã‚¤ãƒ«å±æ€§ã‹ã‚‰æ‹¡å¼µå­ã‚’è‡ªå‹•ç”Ÿæˆã€‚
 		strcpy(outfile, filename);
 		char ext[10];
 		strcpy(ext, ".img");
@@ -231,7 +231,7 @@ public:
 		strcat(outfile, ext);
 		if(fVerbose) printf("Output file='%s'\n", outfile);
 
-		// o—Íƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
+		// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 		hOutFile = CreateFile(outfile, GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, NULL, NULL);
 		if(hOutFile==INVALID_HANDLE_VALUE) {
 			printf("Failed to open output file '%s'\n", outfile);
@@ -252,7 +252,7 @@ public:
 			DecodeMachineFile();
 			break;
 		case 9:
-			// -rƒIƒvƒVƒ‡ƒ“w’è
+			// -rã‚ªãƒ—ã‚·ãƒ§ãƒ³æŒ‡å®šæ™‚
 //			DecodeRawFile();
 			break;
 		default:

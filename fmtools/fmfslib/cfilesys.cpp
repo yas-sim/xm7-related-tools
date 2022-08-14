@@ -229,26 +229,26 @@ bool CFilesys::CheckDiskID( FDHANDLE *hFD ) {
 // 指定のファイル名のファイルをマウントし、FDハンドル値を返す
 FDHANDLE *CFilesys::FMMountFD( char *fdimage ) {
 	FDHANDLE *ptr = new FDHANDLE();
-	if(ptr==NULL) return NULL;
+	if(ptr==nullptr) return nullptr;
 
 	CFDImg *pFDImg = new CFDImg;
 	if(pFDImg->OpenFDImage((unsigned char*)fdimage)==false) {
 		delete pFDImg;
-		return NULL;
+		return nullptr;
 	}
     ptr->pFD = pFDImg;
 	if(CheckDiskID(ptr)==false) {		// F-BASICディスクかどうかチェックする
 		SetError(FM_NOT_A_FBASIC_DISK);
 		delete ptr;
-		return NULL;
+		return nullptr;
 	}
 	return ptr;
 }
 
 // 指定のFDハンドル値を持つFDイメージをアンマウントする
 bool CFilesys::FMUnmountFD( FDHANDLE *hFD ) {
-    if(hFD==NULL) return false;
-    if(hFD->pFD==NULL) return false;
+    if(hFD==nullptr) return false;
+    if(hFD->pFD==nullptr) return false;
 	delete hFD->pFD;			// FDイメージを削除
     delete hFD;					// FDハンドルを削除
 	return true;
@@ -258,8 +258,8 @@ bool CFilesys::FMUnmountFD( FDHANDLE *hFD ) {
 // リードのみの時はfiletype, ascii, randomの値は使用しない
 FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetype,
 						   int ascii, int random) {
-	if(hFD==NULL) return NULL;
-	if((mode&FM_OPEN_READ)!=0 && (mode&FM_OPEN_WRITE)!=0) return NULL;	// READ/WRITEを同時に指定は出来ない
+	if(hFD==nullptr) return nullptr;
+	if((mode&FM_OPEN_READ)!=0 && (mode&FM_OPEN_WRITE)!=0) return nullptr;	// READ/WRITEを同時に指定は出来ない
 	FLHANDLE *hFile = new FLHANDLE();
 	hFile->fOpenMode = mode;
 	hFile->phFD = hFD;
@@ -271,7 +271,7 @@ FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetyp
 			// リードモード時はエラー
 			m_Error = 1;
 			delete hFile;
-			return NULL;
+			return nullptr;
 		} else {
 			// ライトモード時は新しいエントリーを作成する
 			CEntry ent;
@@ -279,13 +279,13 @@ FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetyp
 			if(entryno==-1) {
 				m_Error = 2;
 				delete hFile;
-				return NULL;
+				return nullptr;
 			}
 			int emptycluster = FindEmptyCluster(hFD);
 			if(emptycluster==-1) {
 				m_Error = 2;
 				delete hFile;
-				return NULL;
+				return nullptr;
 			}
 			SetFATValue(hFD, emptycluster, 0xc0);	// クラスタを使用中にする
 			wsprintf(ent.pFilename, "%-8s", filename);
@@ -321,7 +321,7 @@ FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetyp
 }
 
 bool CFilesys::FMClose( FLHANDLE *hFile ) {
-	if(hFile==NULL) return false;
+	if(hFile==nullptr) return false;
 	if(hFile->nClusterPtr>0 && (hFile->fOpenMode & FM_OPEN_WRITE)!=0) {
 		FMFlush(hFile);
 //		WriteCluster(hFile, hFile->nClusterNo);
@@ -329,22 +329,22 @@ bool CFilesys::FMClose( FLHANDLE *hFile ) {
 
 	}
 	delete hFile;
-	hFile = NULL;
+	hFile = nullptr;
 	return true;
 }
 
 bool CFilesys::FMSeek( FLHANDLE *hFile, long ptr, int origin ) {
-	if(hFile==NULL) return false;
+	if(hFile==nullptr) return false;
 	return true;
 }
 
 long CFilesys::FMTell( FLHANDLE *hFile ) {
-	if(hFile==NULL) return -1;
+	if(hFile==nullptr) return -1;
 	return hFile->lFilePtr;
 }
 
 int CFilesys::Read1( FLHANDLE *hFile ) {
-	if(hFile==NULL) return -1;
+	if(hFile==nullptr) return -1;
 	if(hFile->fEOF==true) return -1;
 	if(hFile->nClusterPtr>=hFile->nClusterDataSize /*SECT_SIZE*SPC*/) {
 		// クラスタポインタがクラスタサイズを超えているときは、次のクラスタを読み込む
@@ -368,7 +368,7 @@ int CFilesys::Read1( FLHANDLE *hFile ) {
 
 int CFilesys::FMRead( FLHANDLE *hFile, char *pBuff, int nNOR ) {
 	int NOR = 0;
-	if(hFile==NULL) return -1;
+	if(hFile==nullptr) return -1;
 	for(int NOR=0; NOR<nNOR; NOR++) {
 		if(hFile->fEOF==true) break;
 		int ch = Read1(hFile);
@@ -385,7 +385,7 @@ int CFilesys::FMRead( FLHANDLE *hFile, char *pBuff, int nNOR ) {
 
 // クラスタバッファの中身をフラッシュする
 bool CFilesys::FMFlush( FLHANDLE *hFile ) {
-	if(hFile==NULL) return false;
+	if(hFile==nullptr) return false;
 	if(hFile->nClusterPtr<0) return false;
 	if(hFile->nClusterPtr>0) {
 		WriteCluster(hFile, hFile->nClusterNo);	// クラスタバッファにデータがあるときは書き込む
@@ -397,7 +397,7 @@ bool CFilesys::FMFlush( FLHANDLE *hFile ) {
 }
 
 bool CFilesys::Write1( FLHANDLE *hFile, char ch ) {
-	if(hFile==NULL) return false;
+	if(hFile==nullptr) return false;
 	if(hFile->nClusterPtr>=SECT_SIZE*SPC) {
 		// クラスタバッファがいっぱいだった場合
 		WriteCluster(hFile, hFile->nClusterNo);
@@ -420,7 +420,7 @@ bool CFilesys::Write1( FLHANDLE *hFile, char ch ) {
 }
 
 int CFilesys::FMWrite( FLHANDLE *hFile, char *pBuff, int nNOW ) {
-	if(hFile==NULL) return -1;
+	if(hFile==nullptr) return -1;
 	int NOW = 0;
 	for(int i=0; i<nNOW; i++) {
 		if(Write1(hFile, *pBuff++)==false) return NOW;
@@ -430,13 +430,13 @@ int CFilesys::FMWrite( FLHANDLE *hFile, char *pBuff, int nNOW ) {
 }
 
 bool CFilesys::FMEof( FLHANDLE *hFile ) {
-	if(hFile==NULL) return false;
+	if(hFile==nullptr) return false;
 	return hFile->fEOF;
 }
 
 // 最初のエントリの内容を返す
 bool CFilesys::FMGetFirstEntry( FDHANDLE *hFD, CEntry *ent ) {
-	if(hFD==NULL) return false;
+	if(hFD==nullptr) return false;
 	m_nEntryCount = 0;
 	ReadEntry(hFD, m_nEntryCount, ent);
 	m_nEntryCount++;
@@ -445,7 +445,7 @@ bool CFilesys::FMGetFirstEntry( FDHANDLE *hFD, CEntry *ent ) {
 
 // エントリの内容を返す
 bool CFilesys::FMGetNextEntry( FDHANDLE *hFD, CEntry *ent ) {
-	if(hFD==NULL) return false;
+	if(hFD==nullptr) return false;
 	ReadEntry(hFD, m_nEntryCount, ent);
 	m_nEntryCount++;
 	return true;
@@ -461,7 +461,7 @@ void CFilesys::SetError( FMERR nError ){
 
 // 指定のクラスタ番号から始まるFATチェーンを削除
 bool CFilesys::DeleteChain( FDHANDLE *hFD, int nCluster ) {
-	if(hFD==NULL) return false;
+	if(hFD==nullptr) return false;
 	if(nCluster<0 || nCluster>MAX_CLUSTER) return false;
 	int nextcluster, cluster = nCluster;
 	do {
@@ -474,7 +474,7 @@ bool CFilesys::DeleteChain( FDHANDLE *hFD, int nCluster ) {
 
 // 指定のファイルを削除
 bool CFilesys::FMDeleteFile( FDHANDLE *hFD, char *filename ) {
-	if(hFD==NULL) return false;
+	if(hFD==nullptr) return false;
 	CEntry ent;
 	int entno;
 	entno = FindEntry(hFD, filename);

@@ -1,10 +1,9 @@
-#ifndef _CFDIMG_H_
+﻿#ifndef _CFDIMG_H_
 #define _CFDIMG_H_
 
 #include "SYSDEF.H"
 #include "CFLOPPY.H"
 #include <windows.h>
-
 
 #define _CFDIMAGE_MAX_FILE_NAME_LENGTH_	(256)
 #define _CFDIMAGE_MAX_TRACK_			(164)
@@ -29,7 +28,7 @@ protected:	/* Member function */
 	bool ReadSectorID( long Offset, CSector *sect );
 public:		/* Memver function */
 	CFDImg() : CFloppy(){
-		m_pFDImageFilename = NULL;
+		m_pFDImageFilename = nullptr;
 		m_hFDImage = INVALID_HANDLE_VALUE;
 	}
 	virtual ~CFDImg() {

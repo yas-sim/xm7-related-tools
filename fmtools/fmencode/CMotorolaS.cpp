@@ -1,21 +1,21 @@
-#include "CMotorolaS.h"
+ï»¿#include "CMotorolaS.h"
 
-// ƒƒ“ƒo[‚Ìİ’è’l‚©‚çƒ`ƒFƒbƒNƒTƒ€‚ğŒvZ‚·‚é
-// ƒ‰ƒCƒ“ƒoƒbƒtƒ@‚Ì’l(m_pLineBuff)‚Íg—p‚µ‚È‚¢
+// ãƒ¡ãƒ³ãƒãƒ¼ã®è¨­å®šå€¤ã‹ã‚‰ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã‚’è¨ˆç®—ã™ã‚‹
+// ãƒ©ã‚¤ãƒ³ãƒãƒƒãƒ•ã‚¡ã®å€¤(m_pLineBuff)ã¯ä½¿ç”¨ã—ãªã„
 unsigned char CMotorolaS::CalcCheckSum( void )
 {
-	if(!m_fAvailable) return 0;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return 0;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	m_nCheckSum = m_nByteCount;
-	// ƒAƒhƒŒƒX‚ğAƒŒƒR[ƒhƒ^ƒCƒv•Ê‚É‘«‚µZ‚·‚é
+	// ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ã€ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—åˆ¥ã«è¶³ã—ç®—ã™ã‚‹
 	switch(m_nRecordType) {
 	case 3:
 	case 7:
 		m_nCheckSum+=(unsigned char)((m_nLoadAddress >>24) & 0x00ffu);
-		// break‚È‚µ
+		// breakãªã—
 	case 2:
 	case 8:
 		m_nCheckSum+=(unsigned char)((m_nLoadAddress >>16) & 0x00ffu);
-		// break‚È‚µ
+		// breakãªã—
 	case 0:
 	case 1:
 	case 9:
@@ -26,33 +26,33 @@ unsigned char CMotorolaS::CalcCheckSum( void )
 		m_nCheckSum = 0;
 		break;
 	}
-	// ƒf[ƒ^‚ğƒ`ƒFƒbƒNƒTƒ€‚É‰ÁZ‚·‚é
+	// ãƒ‡ãƒ¼ã‚¿ã‚’ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã«åŠ ç®—ã™ã‚‹
 	for(int i=0; i<m_nDataCount; i++) {
 		m_nCheckSum += m_pData[i];
 	}
-	m_nCheckSum = (unsigned char)(~m_nCheckSum);	// ƒoƒCƒgƒJƒEƒ“ƒg{ƒAƒhƒŒƒX{ƒf[ƒ^‚Ì‚P‚Ì•â”
+	m_nCheckSum = (unsigned char)(~m_nCheckSum);	// ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆï¼‹ã‚¢ãƒ‰ãƒ¬ã‚¹ï¼‹ãƒ‡ãƒ¼ã‚¿ã®ï¼‘ã®è£œæ•°
 	return m_nCheckSum;
 }
 
-// ƒƒ“ƒo•Ï”‚Ì’l‚ğg‚Á‚ÄpLine‚ÉSƒŒƒR[ƒh‚ğ¶¬‚·‚é
+// ãƒ¡ãƒ³ãƒå¤‰æ•°ã®å€¤ã‚’ä½¿ã£ã¦pLineã«Sãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’ç”Ÿæˆã™ã‚‹
 void CMotorolaS::GenerateSRecord( char *pLine )
 {
-	int nCount = 0;					// SƒŒƒR[ƒh‚Ì•¶š”‚ğƒJƒEƒ“ƒg‚·‚éBMAX_MOTOROLAS_LENGTH‚ğ’´‚¦‚È‚¢‚æ‚¤‚ÉŠÇ—
+	int nCount = 0;					// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã®æ–‡å­—æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆã™ã‚‹ã€‚MAX_MOTOROLAS_LENGTHã‚’è¶…ãˆãªã„ã‚ˆã†ã«ç®¡ç†
 	if(!m_fAvailable) return;
 	pLine[0] = NULL;
-	AddChar(pLine, 'S');					// SƒŒƒR[ƒh‚ÌƒŒƒR[ƒhƒwƒbƒ_
-	AddChar(pLine, m_nRecordType + '0');	// ƒŒƒR[ƒhƒ^ƒCƒv
-	AddHex(pLine, m_nByteCount);			// ƒoƒCƒgƒJƒEƒ“ƒg
-	// ƒAƒhƒŒƒXo—Í
+	AddChar(pLine, 'S');					// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã®ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ˜ãƒƒãƒ€
+	AddChar(pLine, m_nRecordType + '0');	// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—
+	AddHex(pLine, m_nByteCount);			// ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆ
+	// ã‚¢ãƒ‰ãƒ¬ã‚¹å‡ºåŠ›
 	switch(m_nRecordType) {
 	case 3:
 	case 7:
 		AddHex(pLine, (unsigned char)((m_nLoadAddress >> 24) & 0x00ff));
-		// break‚È‚µ
+		// breakãªã—
 	case 2:
 	case 8:
 		AddHex(pLine, (unsigned char)((m_nLoadAddress >> 16) & 0x00ff));
-		// break‚È‚µ
+		// breakãªã—
 	case 0:
 	case 1:
 	case 9:
@@ -62,60 +62,60 @@ void CMotorolaS::GenerateSRecord( char *pLine )
 	default:
 		break;
 	}
-	// ƒf[ƒ^o—Í
+	// ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
 	for(int i=0; i<m_nDataCount; i++) {
 		AddHex(pLine, m_pData[i]);
 	}
-	AddHex(pLine, m_nCheckSum);				// ƒ`ƒFƒbƒNƒTƒ€
+	AddHex(pLine, m_nCheckSum);				// ãƒã‚§ãƒƒã‚¯ã‚µãƒ 
 }
 
-	// pLine‚ğSƒŒƒR[ƒh‚Æ‚µ‚Ä‰ğÍ‚µ‚ÄAƒpƒ‰ƒ[ƒ^‚ğƒƒ“ƒo•Ï”‚ÉŠi”[‚·‚é
+	// pLineã‚’Sãƒ¬ã‚³ãƒ¼ãƒ‰ã¨ã—ã¦è§£æã—ã¦ã€ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ãƒ¡ãƒ³ãƒå¤‰æ•°ã«æ ¼ç´ã™ã‚‹
 bool CMotorolaS::AnalyzeSRecord( char *pLine )
 {
-	int				nRecordType;		// ƒŒƒR[ƒhƒ^ƒCƒv
-	int				nByteCount;			// ƒoƒCƒgƒJƒEƒ“ƒg
-	unsigned long	nLoadAddress;		// ƒ[ƒhƒAƒhƒŒƒX
-	unsigned char	nCheckSum;			// ƒ`ƒFƒbƒNƒTƒ€
-	int				nReadPtr;			// ‰ğÍˆÊ’u
+	int				nRecordType;		// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—
+	int				nByteCount;			// ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆ
+	unsigned long	nLoadAddress;		// ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒ‰ãƒ¬ã‚¹
+	unsigned char	nCheckSum;			// ãƒã‚§ãƒƒã‚¯ã‚µãƒ 
+	int				nReadPtr;			// è§£æä½ç½®
 	int				nDataCount;
 	unsigned char	ch;
 
-	if(!m_fAvailable) return false;						// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
-	if(m_pLineBuff[0]!='S') return false;				// SƒŒƒR[ƒh‚Å‚Í‚È‚¢
+	if(!m_fAvailable) return false;						// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
+	if(m_pLineBuff[0]!='S') return false;				// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã§ã¯ãªã„
 	nRecordType = Hex2Dec(pLine[1]);
-	if(!CheckRecordType(nRecordType)) return false;		// ƒŒƒR[ƒhƒ^ƒCƒv‚ª•s³
+	if(!CheckRecordType(nRecordType)) return false;		// ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ãŒä¸æ­£
 	nByteCount = GetHex(pLine, 2);
-	nDataCount = nByteCount - GetAddressLength(nRecordType) -1;	// ƒf[ƒ^’·‚ğZo
-	if(nDataCount>MAX_MOTOROLAS_LENGTH) return false;	// SƒŒƒR[ƒh‚ª’·‚·‚¬‚é
-	nCheckSum = nByteCount;								// ƒ`ƒFƒbƒNƒTƒ€‚É‘«‚·
-	// ƒ[ƒhƒAƒhƒŒƒXæ“¾
+	nDataCount = nByteCount - GetAddressLength(nRecordType) -1;	// ãƒ‡ãƒ¼ã‚¿é•·ã‚’ç®—å‡º
+	if(nDataCount>MAX_MOTOROLAS_LENGTH) return false;	// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãŒé•·ã™ãã‚‹
+	nCheckSum = nByteCount;								// ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã«è¶³ã™
+	// ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒ‰ãƒ¬ã‚¹å–å¾—
 	nReadPtr = 4;
 	nLoadAddress = 0L;
 	for(int i=0; i<GetAddressLength(nRecordType); i++) {
 		ch = GetHex(pLine, nReadPtr);
 		nLoadAddress = (nLoadAddress<<8) + ch;
-		nCheckSum += ch;								// ƒ`ƒFƒbƒNƒTƒ€‚É‘«‚·
+		nCheckSum += ch;								// ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã«è¶³ã™
 		nReadPtr += 2;
 	}
-	unsigned char *pTmpBuff = new unsigned char[nDataCount];	// ˆê“Iƒf[ƒ^ƒoƒbƒtƒ@‚ğŠm•Û‚·‚é
-	if(pTmpBuff==NULL) return false;					// ƒƒ‚ƒŠ‚ª‘«‚è‚È‚¢c
-	for(i=0; i<nDataCount; i++) {
+	unsigned char *pTmpBuff = new unsigned char[nDataCount];	// ä¸€æ™‚çš„ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã‚’ç¢ºä¿ã™ã‚‹
+	if(pTmpBuff==NULL) return false;					// ãƒ¡ãƒ¢ãƒªãŒè¶³ã‚Šãªã„â€¦
+	for(int i=0; i<nDataCount; i++) {
 		ch = GetHex(pLine, nReadPtr);
 		pTmpBuff[i] = ch;
 		nCheckSum += ch;
 		nReadPtr += 2;
 	}
-	// ƒ`ƒFƒbƒNƒTƒ€‚Ì”äŠr
+	// ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã®æ¯”è¼ƒ
 	nCheckSum = (unsigned char)(~nCheckSum);
 	if(nCheckSum != GetHex(pLine, nReadPtr)) {
-		delete []pTmpBuff;					// ‚«‚¿‚ñ‚Æˆêƒf[ƒ^ƒoƒbƒtƒ@‚ğŠJ•ú‚µ‚Ä‚©‚çƒŠƒ^[ƒ“
+		delete []pTmpBuff;					// ãã¡ã‚“ã¨ä¸€æ™‚ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã‚’é–‹æ”¾ã—ã¦ã‹ã‚‰ãƒªã‚¿ãƒ¼ãƒ³
 		return false;
 	}
-	// ƒ`ƒFƒbƒNƒTƒ€‚ªŠm”F‚Å‚«‚½‚Ì‚ÅAƒƒ“ƒo•Ï”‚É‰ğÍŒ‹‰Ê‚ğƒRƒs[‚·‚é
+	// ãƒã‚§ãƒƒã‚¯ã‚µãƒ ãŒç¢ºèªã§ããŸã®ã§ã€ãƒ¡ãƒ³ãƒå¤‰æ•°ã«è§£æçµæœã‚’ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	m_nRecordType = nRecordType;
-	SetDataCount(nDataCount);	// m_nRecordType‚Ì’l‚Æƒf[ƒ^”‚©‚çm_nByteCount‚à©“®İ’è
+	SetDataCount(nDataCount);	// m_nRecordTypeã®å€¤ã¨ãƒ‡ãƒ¼ã‚¿æ•°ã‹ã‚‰m_nByteCountã‚‚è‡ªå‹•è¨­å®š
 	m_nLoadAddress = nLoadAddress;
-	for(i=0; i<nDataCount; i++) {
+	for(int i=0; i<nDataCount; i++) {
 		m_pData[i] = pTmpBuff[i];
 	}
 	m_nCheckSum = nCheckSum;
@@ -125,26 +125,26 @@ bool CMotorolaS::AnalyzeSRecord( char *pLine )
 
 unsigned char CMotorolaS::GetData( int nPos )
 {
-	if(!m_fAvailable) return 0;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return 0;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	if(nPos>=MAX_MOTOROLAS_LENGTH) return 0;
 	return m_pData[nPos];
 }
 
-// SƒŒƒR[ƒhƒf[ƒ^‚ÌƒŒƒR[ƒhƒ^ƒCƒv‚ğİ’è‚·‚é
+// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‚’è¨­å®šã™ã‚‹
 void CMotorolaS::SetRecordType( int nType )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	if(!CheckRecordType(nType)) return;
 	m_nRecordType = nType;
-	m_nByteCount = m_nDataCount + GetAddressLength(nType) + 1;		// 1‚Íƒ`ƒFƒbƒNƒTƒ€‚Ì•ª
+	m_nByteCount = m_nDataCount + GetAddressLength(nType) + 1;		// 1ã¯ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã®åˆ†
 	m_nCheckSum = CalcCheckSum();
 	GenerateSRecord(m_pLineBuff);
 }
 
-// SƒŒƒR[ƒhƒf[ƒ^‚ÌƒoƒCƒgƒJƒEƒ“ƒg‚ğİ’è‚·‚é
+// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆã‚’è¨­å®šã™ã‚‹
 void CMotorolaS::SetByteCount( int nCount )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	if(nCount - GetAddressLength(m_nRecordType) - 1 >= MAX_MOTOROLAS_LENGTH) return;
 	m_nByteCount = nCount;
 	m_nDataCount = m_nByteCount - GetAddressLength(m_nRecordType) -1;
@@ -152,68 +152,68 @@ void CMotorolaS::SetByteCount( int nCount )
 	GenerateSRecord(m_pLineBuff);
 }
 
-// SƒŒƒR[ƒhƒf[ƒ^‚Ìƒf[ƒ^”‚ğİ’è‚·‚é
+// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®ãƒ‡ãƒ¼ã‚¿æ•°ã‚’è¨­å®šã™ã‚‹
 void CMotorolaS::SetDataCount( int nCount )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	if(nCount>=MAX_MOTOROLAS_LENGTH) return;
-	m_nByteCount = nCount + GetAddressLength(m_nRecordType) + 1;	// 1‚Íƒ`ƒFƒbƒNƒTƒ€‚Ì•ª
+	m_nByteCount = nCount + GetAddressLength(m_nRecordType) + 1;	// 1ã¯ãƒã‚§ãƒƒã‚¯ã‚µãƒ ã®åˆ†
 	m_nDataCount = nCount;
 	m_nCheckSum = CalcCheckSum();
 	GenerateSRecord(m_pLineBuff);
 }
 
-// SƒŒƒR[ƒhƒf[ƒ^‚Ìƒ[ƒhƒAƒhƒŒƒX‚ğİ’è‚·‚é
+// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¨­å®šã™ã‚‹
 void CMotorolaS::SetLoadAddress( unsigned long nAddress )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	m_nLoadAddress = nAddress;
 	m_nCheckSum = CalcCheckSum();
 	GenerateSRecord(m_pLineBuff);
 }
 
-// SƒŒƒR[ƒhƒf[ƒ^‚Ì”CˆÓ‚ÌˆÊ’u‚Éƒf[ƒ^‚ğ‘‚«‚Ş
+// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®ä»»æ„ã®ä½ç½®ã«ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãè¾¼ã‚€
 void CMotorolaS::SetData( int nPos, unsigned char nData )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	if(nPos>=MAX_MOTOROLAS_LENGTH) return;
-	if(nPos>=m_nDataCount) SetDataCount(nPos+1);		// ¡‚Ü‚Å‘‚«‚ñ‚¾Å‘åƒf[ƒ^‚æ‚è‘å‚«‚¢ˆÊ’u‚É‘‚«‚à‚¤‚Æ‚µ‚½‚½‚ßAƒoƒCƒgƒJƒEƒ“ƒg‚ğ‘‚â‚·
+	if(nPos>=m_nDataCount) SetDataCount(nPos+1);		// ä»Šã¾ã§æ›¸ãè¾¼ã‚“ã æœ€å¤§ãƒ‡ãƒ¼ã‚¿ã‚ˆã‚Šå¤§ãã„ä½ç½®ã«æ›¸ãè¾¼ã‚‚ã†ã¨ã—ãŸãŸã‚ã€ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆã‚’å¢—ã‚„ã™
 	m_pData[nPos] = nData;
 	m_nCheckSum = CalcCheckSum();
 	GenerateSRecord(m_pLineBuff);
 }
 
-// w’è‚Ìƒf[ƒ^ƒoƒbƒtƒ@‚ğSƒŒƒR[ƒh‚Ìƒf[ƒ^ƒoƒbƒtƒ@‚ÉƒRƒs[‚·‚éBƒoƒCƒgƒJƒEƒ“ƒg‚à©“®İ’è‚·‚é
-// ‚»‚êˆÈ‘O‚Éƒf[ƒ^ƒoƒbƒtƒ@‚É‘‚©‚ê‚Ä‚¢‚½“à—e‚Í–³Œø
+// æŒ‡å®šã®ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã‚’Sãƒ¬ã‚³ãƒ¼ãƒ‰ã®ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹ã€‚ãƒã‚¤ãƒˆã‚«ã‚¦ãƒ³ãƒˆã‚‚è‡ªå‹•è¨­å®šã™ã‚‹
+// ãã‚Œä»¥å‰ã«ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã«æ›¸ã‹ã‚Œã¦ã„ãŸå†…å®¹ã¯ç„¡åŠ¹
 void CMotorolaS::SetDataBuff( int n, unsigned char *pData )
 {
 	unsigned char *tmp;
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	if(n>=MAX_MOTOROLAS_LENGTH) return;
 	tmp = m_pData;
 	for(int i=0; i<n; i++) {
 		*tmp++ = *pData++;
 	}
 	SetByteCount(n);
-//	GenerateSRecord(m_pLineBuff);		// SetByteCount()‚ªGenerateSRecord()‚ğŠÜ‚ñ‚Å‚¢‚é‚Ì‚Å•s—v
+//	GenerateSRecord(m_pLineBuff);		// SetByteCount()ãŒGenerateSRecord()ã‚’å«ã‚“ã§ã„ã‚‹ã®ã§ä¸è¦
 }
 
-// w’è‚ÌƒAƒXƒL[•¶š—ñ‚ğSƒŒƒR[ƒh•¶š—ñ‚Æ‚µ‚ÄŠi”[‚µA‰ğÍ‚·‚éB‰ğÍŒ‹‰Ê‚Íƒƒ“ƒo•Ï”‚ÉŠi”[‚·‚éB
+// æŒ‡å®šã®ã‚¢ã‚¹ã‚­ãƒ¼æ–‡å­—åˆ—ã‚’Sãƒ¬ã‚³ãƒ¼ãƒ‰æ–‡å­—åˆ—ã¨ã—ã¦æ ¼ç´ã—ã€è§£æã™ã‚‹ã€‚è§£æçµæœã¯ãƒ¡ãƒ³ãƒå¤‰æ•°ã«æ ¼ç´ã™ã‚‹ã€‚
 void CMotorolaS::SetSRecord( char *pLine )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	strncpy(m_pLineBuff, pLine, MAX_MOTOROLAS_LINE_LENGTH);
 	if(!AnalyzeSRecord(m_pLineBuff)) {
-		InitSRecord(0);					// SƒŒƒR[ƒh‚ğ‰ğÍ‚µ‚½Œ‹‰ÊˆÙí‚ÈƒŒƒR[ƒh‚Å‚ ‚é‚±‚Æ‚ª•ª‚©‚Á‚½‚Ì‚ÅAƒIƒuƒWƒFƒNƒg‚ğ‰Šú‰»‚·‚é
+		InitSRecord(0);					// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’è§£æã—ãŸçµæœç•°å¸¸ãªãƒ¬ã‚³ãƒ¼ãƒ‰ã§ã‚ã‚‹ã“ã¨ãŒåˆ†ã‹ã£ãŸã®ã§ã€ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’åˆæœŸåŒ–ã™ã‚‹
 	}
 }
 
-// ƒf[ƒ^ƒoƒbƒtƒ@‚Ìƒf[ƒ^‚ğƒRƒs[‚µA‚»‚Ìæ“ªƒAƒhƒŒƒX‚ğ•Ô‚·
-// —^‚¦‚ç‚ê‚½ƒRƒs[æ‚ÌƒAƒhƒŒƒX‚Íƒf[ƒ^ƒRƒs[‚É\•ª‚ÈƒTƒCƒY‚ªŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ ‚è
+// ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚³ãƒ”ãƒ¼ã—ã€ãã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¿”ã™
+// ä¸ãˆã‚‰ã‚ŒãŸã‚³ãƒ”ãƒ¼å…ˆã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã¯ãƒ‡ãƒ¼ã‚¿ã‚³ãƒ”ãƒ¼ã«ååˆ†ãªã‚µã‚¤ã‚ºãŒç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ã‚ã‚Š
 unsigned char *CMotorolaS::GetDataBuff( unsigned char *pBuff )
 {
 	unsigned char *src, *dst;
-	if(!m_fAvailable) return 0;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return 0;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	src = m_pData;
 	dst = pBuff;
 	for(int i=0; i<m_nDataCount; i++) {
@@ -222,20 +222,20 @@ unsigned char *CMotorolaS::GetDataBuff( unsigned char *pBuff )
 	return pBuff;
 }
 
-// SƒŒƒR[ƒhƒoƒbƒtƒ@‚Ìƒf[ƒ^‚ğƒRƒs[‚µA‚»‚Ìæ“ªƒAƒhƒŒƒX‚ğ•Ô‚·
-// —^‚¦‚ç‚ê‚½ƒRƒs[æ‚ÌƒAƒhƒŒƒX‚Íƒf[ƒ^ƒRƒs[‚É\•ª‚ÈƒTƒCƒY‚ªŠm•Û‚³‚ê‚Ä‚¢‚é•K—v‚ ‚è
+// Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚³ãƒ”ãƒ¼ã—ã€ãã®å…ˆé ­ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¿”ã™
+// ä¸ãˆã‚‰ã‚ŒãŸã‚³ãƒ”ãƒ¼å…ˆã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã¯ãƒ‡ãƒ¼ã‚¿ã‚³ãƒ”ãƒ¼ã«ååˆ†ãªã‚µã‚¤ã‚ºãŒç¢ºä¿ã•ã‚Œã¦ã„ã‚‹å¿…è¦ã‚ã‚Š
 char *CMotorolaS::GetSRecordBuff( char *pBuff )
 {
-	if(!m_fAvailable) return 0;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return 0;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	strcpy(pBuff, m_pLineBuff);
 	return pBuff;
 }
 
-// w’è‚ÌƒAƒhƒŒƒX‚©‚çn‚Ü‚é‚æ‚¤‚ÉSƒŒƒR[ƒhƒf[ƒ^‚ğ‰Šú‰»‚·‚é
-// ƒAƒhƒŒƒX’l‚ğƒ`ƒFƒbƒN‚µ‚ÄA“KØ‚ÈƒŒƒR[ƒhƒ^ƒCƒv‚ğ‘I‘ğ‚·‚é
+// æŒ‡å®šã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‹ã‚‰å§‹ã¾ã‚‹ã‚ˆã†ã«Sãƒ¬ã‚³ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’åˆæœŸåŒ–ã™ã‚‹
+// ã‚¢ãƒ‰ãƒ¬ã‚¹å€¤ã‚’ãƒã‚§ãƒƒã‚¯ã—ã¦ã€é©åˆ‡ãªãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‚’é¸æŠã™ã‚‹
 void CMotorolaS::InitSRecord( unsigned long nAddress )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	m_nRecordType = 1;
 	if(nAddress+MAX_MOTOROLAS_LENGTH > 0x00010000) m_nRecordType = 2;
 	if(nAddress+MAX_MOTOROLAS_LENGTH > 0x01000000) m_nRecordType = 3;
@@ -244,10 +244,10 @@ void CMotorolaS::InitSRecord( unsigned long nAddress )
 	m_nCheckSum = CalcCheckSum();
 }
 
-// SƒŒƒR[ƒh‚Ìƒf[ƒ^‚ÌÅŒã‚Éƒf[ƒ^‚ğ’Ç‰Á‚·‚é
+// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã®ãƒ‡ãƒ¼ã‚¿ã®æœ€å¾Œã«ãƒ‡ãƒ¼ã‚¿ã‚’è¿½åŠ ã™ã‚‹
 void CMotorolaS::AddData( unsigned char data )
 {
-	if(!m_fAvailable) return;				// ‰Šú‰»¸”s‚µ‚Ä‚¢‚é
+	if(!m_fAvailable) return;				// åˆæœŸåŒ–å¤±æ•—ã—ã¦ã„ã‚‹
 	if(m_nDataCount>=MAX_MOTOROLAS_LENGTH) return;
 	SetData(m_nDataCount, data);
 }

@@ -36,17 +36,17 @@ bool CFDImg::ReadSectorID( long Offset, CSector *sect ) {
 	DWORD NOR;
 	CSectorImg *scti = (CSectorImg*)sect;
 	unsigned char reserve[5];
-	SetFilePointer(m_hFDImage, Offset, NULL, FILE_BEGIN);
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nC,				1, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nH,				1, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nR,				1, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nN,				1, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nNumberOfSectors,	2, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_fDensity,			1, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_fDDM,				1, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nStatus,			1, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)reserve,					5, &NOR, NULL) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nSectorSize,		2, &NOR, NULL) == 0) { SHOW_ERROR; }
+	SetFilePointer(m_hFDImage, Offset, nullptr, FILE_BEGIN);
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nC,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nH,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nR,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nN,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nNumberOfSectors,	2, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_fDensity,			1, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_fDDM,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nStatus,			1, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)reserve,					5, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nSectorSize,		2, &NOR, nullptr) == 0) { SHOW_ERROR; }
 	return true;
 }
 
@@ -60,10 +60,10 @@ FDC_STATUS	CFDImg::ReadSector( int C, int H, int R, CSector *sect ) {
 	Offset = GetSectorOffset(C, H, R);
 	if(Offset==0) return 1;											// Sector not found
 	ReadSectorID(Offset, sect);
-//	if(sect->m_pSectorData!=NULL) delete[](sect->m_pSectorData);		// Release reserved memory area
+//	if(sect->m_pSectorData!=nullptr) delete[](sect->m_pSectorData);		// Release reserved memory area
 //	sect->m_pSectorData = new unsigned char [sect->m_nSectorSize];	// Reserve memory area 
-//	if(sect->m_pSectorData==NULL) return 2;							// Not enough memory
-	if(ReadFile(m_hFDImage, (LPVOID)sect->m_pSectorData, sect->m_nSectorSize, &NOR, NULL) == 0) { SHOW_ERROR; }
+//	if(sect->m_pSectorData==nullptr) return 2;							// Not enough memory
+	if(ReadFile(m_hFDImage, (LPVOID)sect->m_pSectorData, sect->m_nSectorSize, &NOR, nullptr) == 0) { SHOW_ERROR; }
 	return 0;
 }
 
@@ -78,7 +78,7 @@ FDC_STATUS	CFDImg::WriteSector( int C, int H, int R, CSector *sect ) {
 	if(Offset==0) return 1;		// Sector not found
 	ReadSectorID(Offset, sect);	// SectorIDを読み飛ばし、データ部の頭だしをする
 	if(m_fWriteProtect==0x10) return FDC_WRITE_PROTECTED;	// Write Protected!
-	if(WriteFile(m_hFDImage, (LPCVOID)sect->m_pSectorData, sect->m_nSectorSize, &NOW, NULL) == 0) { SHOW_ERROR; }
+	if(WriteFile(m_hFDImage, (LPCVOID)sect->m_pSectorData, sect->m_nSectorSize, &NOW, nullptr) == 0) { SHOW_ERROR; }
 	return 0;
 }
 
@@ -86,7 +86,7 @@ FDC_STATUS	CFDImg::WriteSector( int C, int H, int R, CSector *sect ) {
 bool CFDImg::OpenFDImage( unsigned char *pFileName )
 {
 	m_hFDImage = CreateFile( (LPCTSTR)pFileName, GENERIC_READ | GENERIC_WRITE, 0,
-						NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, NULL);
+						nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, nullptr);
 	if(m_hFDImage==INVALID_HANDLE_VALUE) {
 		SHOW_ERROR;
 		return false;
@@ -108,14 +108,14 @@ bool CFDImg::CloseFDImage( void ) {
 bool CFDImg::ReadHeader( void ) {
 	if(m_hFDImage==INVALID_HANDLE_VALUE) return false;
 	DWORD NOR;		// Number Of Read
-	SetFilePointer(m_hFDImage, 0, NULL, FILE_BEGIN);
-	if(ReadFile(m_hFDImage, (LPVOID)m_sDiskName,		17, &NOR, NULL) == 0) { SHOW_ERROR; }
-	SetFilePointer(m_hFDImage, 17+9, NULL, FILE_BEGIN);
-	if(ReadFile(m_hFDImage, (LPVOID)&m_fWriteProtect,	1, &NOR, NULL)==0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&m_fDiskType,		1, &NOR, NULL)==0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&m_nDiskSize,		4, &NOR, NULL)==0) { SHOW_ERROR; }
+	SetFilePointer(m_hFDImage, 0, nullptr, FILE_BEGIN);
+	if(ReadFile(m_hFDImage, (LPVOID)m_sDiskName,		17, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	SetFilePointer(m_hFDImage, 17+9, nullptr, FILE_BEGIN);
+	if(ReadFile(m_hFDImage, (LPVOID)&m_fWriteProtect,	1, &NOR, nullptr)==0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&m_fDiskType,		1, &NOR, nullptr)==0) { SHOW_ERROR; }
+	if(ReadFile(m_hFDImage, (LPVOID)&m_nDiskSize,		4, &NOR, nullptr)==0) { SHOW_ERROR; }
 	for(int i=0; i<=_CFDIMAGE_MAX_TRACK_; i++) {
-		if(ReadFile(m_hFDImage, (LPVOID)&m_nTrackOffset[i],	4, &NOR, NULL)==0) { SHOW_ERROR; }
+		if(ReadFile(m_hFDImage, (LPVOID)&m_nTrackOffset[i],	4, &NOR, nullptr)==0) { SHOW_ERROR; }
 	}
 	return true;
 }

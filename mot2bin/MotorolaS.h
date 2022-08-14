@@ -1,4 +1,4 @@
-#ifndef _MOTOROLAS_H_
+ï»¿#ifndef _MOTOROLAS_H_
 #define _MOTOROLAS_H_
 
 #define motHEADER	(0)
@@ -9,7 +9,7 @@
 #define motEND24	(8)
 #define motEND16	(9)
 
-#define motUNIT		(0x10)		/* ƒ‚ƒgƒ[ƒ‰‚rƒŒƒR[ƒh’· */
+#define motUNIT		(0x10)		/* ãƒ¢ãƒˆãƒ­ãƒ¼ãƒ©ï¼³ãƒ¬ã‚³ãƒ¼ãƒ‰é•· */
 
 typedef struct {
 	unsigned char	Type;

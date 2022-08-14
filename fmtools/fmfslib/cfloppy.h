@@ -1,9 +1,8 @@
-#ifndef _CFLOPPY_H_
+﻿#ifndef _CFLOPPY_H_
 #define _CFLOPPY_H_
 
-#include "stdafx.h"
 #include "SYSDEF.H"
-#include <windows.h>
+#include "FMFSLIB.h"
 
 class FMFSLIB_API CSector {
 public:
@@ -16,11 +15,11 @@ public:
 	unsigned char m_nStatus;
 	unsigned short m_nSectorSize;
 	unsigned char *m_pSectorData;
-	CSector() { m_pSectorData=NULL; }
+	CSector() { m_pSectorData=nullptr; }
 	virtual ~CSector() { 
-//		if(m_pSectorData!=NULL) {
+//		if(m_pSectorData!=nullptr) {
 //			delete []m_pSectorData;
-//			m_pSectorData = NULL;
+//			m_pSectorData = nullptr;
 //		}
 	}
 };

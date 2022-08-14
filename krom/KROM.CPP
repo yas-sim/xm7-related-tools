@@ -1,4 +1,4 @@
-#include <windows.h>
+ï»¿#include <windows.h>
 #include <stdio.h>
 #include <process.h>
 #include <conio.h>
@@ -7,7 +7,7 @@
 
 FILE *fp;
 
-// JISƒR[ƒh‚©‚çShiftJISƒR[ƒh‚É•ÏŠ·‚·‚é
+// JISã‚³ãƒ¼ãƒ‰ã‹ã‚‰ShiftJISã‚³ãƒ¼ãƒ‰ã«å¤‰æ›ã™ã‚‹
 unsigned short JIS2SJIS( unsigned short c )
 {
 	int upper, lower;
@@ -30,7 +30,7 @@ unsigned short JIS2SJIS( unsigned short c )
 	return (upper<<8)+lower;
 }
 
-// JISƒR[ƒh‚Åw’è‚³‚ê‚½•¶š‚ğ(0,0)‚©‚ç‚É•\¦‚·‚é
+// JISã‚³ãƒ¼ãƒ‰ã§æŒ‡å®šã•ã‚ŒãŸæ–‡å­—ã‚’(0,0)ã‹ã‚‰ã«è¡¨ç¤ºã™ã‚‹
 void PutChar( HDC hdc, unsigned short jis )
 {
 	unsigned char cbuff[3];
@@ -47,7 +47,7 @@ void PutChar( HDC hdc, unsigned short jis )
 #endif
 }
 
-// (0,0)-(15,15)‚É•`‚©‚ê‚Ä‚¢‚é•¶š‚ğ“Ç‚İæ‚èA16i‚É•ÏŠ·‚µ‚Äƒtƒ@ƒCƒ‹‚É‘‚«o‚·
+// (0,0)-(15,15)ã«æã‹ã‚Œã¦ã„ã‚‹æ–‡å­—ã‚’èª­ã¿å–ã‚Šã€16é€²ã«å¤‰æ›ã—ã¦ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãå‡ºã™
 void ReadChar( HDC hdc )
 {
 	COLORREF pixel;
@@ -84,9 +84,9 @@ void ReadChar( HDC hdc )
 #endif
 }
 
-// Š¿šAddres to JIS code convert
-// FM-NEW7‚Ìƒ†[ƒU[ƒYƒ}ƒjƒ…ƒAƒ‹ƒVƒXƒeƒ€d—l‚Ìp.47‚Ì•\‚ÍŠÔˆá‚Á‚Ä‚é‚Ì‚Å’ˆÓ
-// •\‚ÍJC14,JC13,JC12,JC6,JC5 ‚Ì‡‚É‚È‚Á‚Ä‚¢‚é‚ªAJC5,JC6,JC12,JC13,JC14‚Ì‡‚ÌŠÔˆá‚¢
+// æ¼¢å­—Addres to JIS code convert
+// FM-NEW7ã®ãƒ¦ãƒ¼ã‚¶ãƒ¼ã‚ºãƒãƒ‹ãƒ¥ã‚¢ãƒ«ã‚·ã‚¹ãƒ†ãƒ ä»•æ§˜ã®p.47ã®è¡¨ã¯é–“é•ã£ã¦ã‚‹ã®ã§æ³¨æ„
+// è¡¨ã¯JC14,JC13,JC12,JC6,JC5 ã®é †ã«ãªã£ã¦ã„ã‚‹ãŒã€JC5,JC6,JC12,JC13,JC14ã®é †ã®é–“é•ã„
 unsigned short Kad2Jis( unsigned short kad )
 {
 	const unsigned char tbl[8] = { 0x00, 0x0a, 0x0d, 0x0e, 0x0f, 0x11, 0x12, 0x13 };
@@ -108,28 +108,28 @@ unsigned short Kad2Jis( unsigned short kad )
 	return jis;
 }
 
-// ƒƒCƒ“ƒ‹[ƒ`ƒ“ô
+// ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒãƒ³â™ª
 void main(void)
 {
 	puts("XM7 KANJI ROM File generator");
 	puts("Programmed by an XM7 supporter");
-	HDC hDC = CreateDC("DISPLAY", NULL, NULL, NULL);	// ‘S‰æ–Ê‚É‘Î‚·‚éDCæ“¾ô
+	HDC hDC = CreateDC("DISPLAY", NULL, NULL, NULL);	// å…¨ç”»é¢ã«å¯¾ã™ã‚‹DCå–å¾—â™ª
 	if(hDC==INVALID_HANDLE_VALUE) {
 		puts("Failed to create device context");
 		exit(0);
 	}
 
-	fp = fopen("KANJI.ROM", "wb");						// KANJI.ROMƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
+	fp = fopen("KANJI.ROM", "wb");						// KANJI.ROMãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 	if(fp==NULL) {
 		perror("Failed to create kanji.rom file");
 		exit(1);
 	}
 	puts("Kanji image generating...Wait a moment");
-	// Š¿šAddress‚Åƒ‹[ƒv‚³‚¹‚Ä‘S•¶šƒR[ƒh‚ğæ“¾‚·‚é
+	// æ¼¢å­—Addressã§ãƒ«ãƒ¼ãƒ—ã•ã›ã¦å…¨æ–‡å­—ã‚³ãƒ¼ãƒ‰ã‚’å–å¾—ã™ã‚‹
 	for(int kad=0; kad<0x1000; kad++) {
 		PutChar(hDC, Kad2Jis(kad));
 		ReadChar(hDC);
-//		while(!_kbhit()); _getch();		// 1•¶š‚²‚Æ‚ÉƒL[‚ğ‰Ÿ‚³‚¹‚éê‡AƒRƒƒ“ƒg‚ğŠO‚·
+//		while(!_kbhit()); _getch();		// 1æ–‡å­—ã”ã¨ã«ã‚­ãƒ¼ã‚’æŠ¼ã•ã›ã‚‹å ´åˆã€ã‚³ãƒ¡ãƒ³ãƒˆã‚’å¤–ã™
 	}
 	fclose(fp);
 	DeleteDC(hDC);

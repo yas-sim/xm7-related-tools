@@ -1,4 +1,4 @@
-#include "CFILE.H"
+ï»¿#include "CFILE.H"
 #include "CWAVE.H"
 
 #include <stdio.h>
@@ -25,7 +25,7 @@ void main(int argc, char *argv[])
 		exit(0);
 	}
 
-	// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+	// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æ
 	int source=0, dest=0;
 	bool fVerbose = false;
 	for(int i=1; i<argc; i++) {
@@ -39,14 +39,14 @@ void main(int argc, char *argv[])
 				break;
 			case 'v':
 			case 'V':
-				// Verbose modeƒZƒbƒg
+				// Verbose modeã‚»ãƒƒãƒˆ
 				fVerbose = true;
 				break;
 			default:
 				break;
 			}
 		} else {
-			// ƒIƒvƒVƒ‡ƒ“w’èq‚ª‚È‚¢ê‡Aƒtƒ@ƒCƒ‹–¼‚Æ‚İ‚È‚·
+			// ã‚ªãƒ—ã‚·ãƒ§ãƒ³æŒ‡å®šå­ãŒãªã„å ´åˆã€ãƒ•ã‚¡ã‚¤ãƒ«åã¨ã¿ãªã™
 			if(source==0)	source=i;
 			else			dest=i;
 		}
@@ -72,26 +72,26 @@ void main(int argc, char *argv[])
 	}
 
 	char buff[1024];
-	// ƒwƒbƒ_[ƒ`ƒFƒbƒN!
+	// ãƒ˜ãƒƒãƒ€ãƒ¼ãƒã‚§ãƒƒã‚¯!
 	fgets(buff, 20, fpi);
 	if(strcmp(buff, "XM7 TAPE IMAGE 0")!=0) {
 		puts("Source file is not a valid XM7 tape image file");
 		exit(1);
 	}
-	fseek(fpi, 0x12, SEEK_SET);		// ƒwƒbƒ_“Ç‚İ”ò‚Î‚µ
+	fseek(fpi, 0x12, SEEK_SET);		// ãƒ˜ãƒƒãƒ€èª­ã¿é£›ã°ã—
 	
-	double len=0.0;	// ’·‚³
-	int pol=0;		// ‹É«
+	double len=0.0;	// é•·ã•
+	int pol=0;		// æ¥µæ€§
 	while(1) {
 		int ch1 = fgetc(fpi);
 		int ch2 = fgetc(fpi);
 		if(feof(fpi)) break;
-		int tmp_len = (ch1<<8) | ch2;					// ’·‚³¶¬
-		int tmp_pol = ((tmp_len & 0x8000)==0?0:1);		// ‹É«”»’è
+		int tmp_len = (ch1<<8) | ch2;					// é•·ã•ç”Ÿæˆ
+		int tmp_pol = ((tmp_len & 0x8000)==0?0:1);		// æ¥µæ€§åˆ¤å®š
 		tmp_len &= 0x7fff;
-		tmp_len *= 9;									// 9Š|‚¯‚ÄŠÔ‚É’¼‚·(ƒÊs)
+		tmp_len *= 9;									// 9æ›ã‘ã¦æ™‚é–“ã«ç›´ã™(Î¼s)
 		if(pol!=tmp_pol) {
-			const double wav_period = 1.0e6/44.1e3;			// wavƒtƒ@ƒCƒ‹‚ÌüŠú(ƒÊs)
+			const double wav_period = 1.0e6/44.1e3;			// wavãƒ•ã‚¡ã‚¤ãƒ«ã®å‘¨æœŸ(Î¼s)
 			while(len>0) {
 				int sound=0x80-(pol==0?-1:1)*0x40;
 				wav.WriteSnd(sound);

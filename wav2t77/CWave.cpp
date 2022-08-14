@@ -1,4 +1,4 @@
-#include "CWave.h"
+Ôªø#include "CWave.h"
 
 void CWaveFile::WriteHeader( void )
 {
@@ -19,7 +19,7 @@ void CWaveFile::WriteHeader( void )
 		WriteWord(m_nBitPerSpl);
 		WriteByte('d'); WriteByte('a'); WriteByte('t'); WriteByte('a');
 		WriteDword(m_nNOSndData);	
-		CFile::Seek(pos);			// à íuÇå≥Ç…Ç‡Ç«Ç∑
+		CFile::Seek(pos);			// ‰ΩçÁΩÆ„ÇíÂÖÉ„Å´„ÇÇ„Å©„Åô
 	}
 }
 
@@ -54,7 +54,7 @@ bool CWaveFile::Open(char *pFilename, int bFlag)
 		return true;
 	} else if(bFlag & FMODE_WRITE) {
 		if(CFile::Open(pFilename, bFlag)) {
-			for(int i=0; i<0x2c; i++) {		// DummyÇÃÉwÉbÉ_Å[ÇèëÇ´çûÇÒÇ≈Ç®Ç≠
+			for(int i=0; i<0x2c; i++) {		// Dummy„ÅÆ„Éò„ÉÉ„ÉÄ„Éº„ÇíÊõ∏„ÅçËæº„Çì„Åß„Åä„Åè
 				WriteByte(0);
 			}
 		} else {
@@ -73,7 +73,7 @@ void CWaveFile::Close( void )
 	CFile::Close();
 }
 
-// ÉrÉbÉg/ÉTÉìÉvÉãÇÃílÇ…ÇµÇΩÇ™Ç¡ÇƒÇPÉTÉìÉvÉäÉìÉOï™ÇÃÉfÅ[É^ÇèëÇ´çûÇﬁ
+// „Éì„ÉÉ„Éà/„Çµ„É≥„Éó„É´„ÅÆÂÄ§„Å´„Åó„Åü„Åå„Å£„Å¶Ôºë„Çµ„É≥„Éó„É™„É≥„Ç∞ÂàÜ„ÅÆ„Éá„Éº„Çø„ÇíÊõ∏„ÅçËæº„ÇÄ
 void CWaveFile::WriteData( unsigned long data )
 {
 	switch(m_nBitPerSpl) {
@@ -88,7 +88,7 @@ void CWaveFile::WriteData( unsigned long data )
 	}
 }
 
-// Bit/SplÇÃílÇ…ÇµÇΩÇ™Ç¡ÇƒÉfÅ[É^Çì«Ç›èoÇ∑
+// Bit/Spl„ÅÆÂÄ§„Å´„Åó„Åü„Åå„Å£„Å¶„Éá„Éº„Çø„ÇíË™≠„ÅøÂá∫„Åô
 unsigned long CWaveFile::ReadData( void )
 {
 	switch(m_nBitPerSpl) {
@@ -138,27 +138,27 @@ unsigned short CWaveFile::MixDown( unsigned long left, unsigned long right ) {
 	return (unsigned short)((left+right)/2);
 }
 
-// Ç¬ÇÀÇ…16ÉrÉbÉgÉÇÉmÉâÉãÇ∆ÇµÇƒâπê∫ÉfÅ[É^Çì«Ç›èoÇ∑
-// âπê∫ÉtÉ@ÉCÉãÇ™ÉXÉeÉåÉIÇÃèÍçáÅAÉÇÉmÉâÉãÇ…É~ÉbÉNÉXÉ_ÉEÉìÇµÅA
-// 8ÉrÉbÉgÉTÉìÉvÉäÉìÉOÇÃèÍçáÅA16ÉrÉbÉgÇ…ägí£Ç∑ÇÈ
+// „Å§„Å≠„Å´16„Éì„ÉÉ„Éà„É¢„Éé„É©„É´„Å®„Åó„Å¶Èü≥Â£∞„Éá„Éº„Çø„ÇíË™≠„ÅøÂá∫„Åô
+// Èü≥Â£∞„Éï„Ç°„Ç§„É´„Åå„Çπ„ÉÜ„É¨„Ç™„ÅÆÂ†¥Âêà„ÄÅ„É¢„Éé„É©„É´„Å´„Éü„ÉÉ„ÇØ„Çπ„ÉÄ„Ç¶„É≥„Åó„ÄÅ
+// 8„Éì„ÉÉ„Éà„Çµ„É≥„Éó„É™„É≥„Ç∞„ÅÆÂ†¥Âêà„ÄÅ16„Éì„ÉÉ„Éà„Å´Êã°Âºµ„Åô„Çã
 unsigned short CWaveFile::ReadWavDataMono( void ) {
 	unsigned short result;
 	if(m_nNOChannel==2) {
-		// ÉXÉeÉåÉIÇÃéû
+		// „Çπ„ÉÜ„É¨„Ç™„ÅÆÊôÇ
 		unsigned long left, right;
-		ReadSnd(left, right);		// ÉTÉEÉìÉhÉfÅ[É^ì«Ç›çûÇ›
+		ReadSnd(left, right);		// „Çµ„Ç¶„É≥„Éâ„Éá„Éº„ÇøË™≠„ÅøËæº„Åø
 		if(m_nBitPerSpl==8) {
-			// 8ÉrÉbÉgÉTÉìÉvÉãéûÇÕ256î{ÇµÇƒ16ÉrÉbÉgÉTÉìÉvÉãílÇ∆Ç†ÇÌÇπÇÈ
+			// 8„Éì„ÉÉ„Éà„Çµ„É≥„Éó„É´ÊôÇ„ÅØ256ÂÄç„Åó„Å¶16„Éì„ÉÉ„Éà„Çµ„É≥„Éó„É´ÂÄ§„Å®„ÅÇ„Çè„Åõ„Çã
 			left  <<= 8;
 			right <<= 8;
 		}
-		result = MixDown(left, right);	// ÉÇÉmÉâÉãÇ…É~ÉbÉNÉXÉ_ÉEÉì
+		result = MixDown(left, right);	// „É¢„Éé„É©„É´„Å´„Éü„ÉÉ„ÇØ„Çπ„ÉÄ„Ç¶„É≥
 	} else {
-		// ÉÇÉmÉâÉãÇÃÇ∆Ç´
+		// „É¢„Éé„É©„É´„ÅÆ„Å®„Åç
 		unsigned long snd;
-		ReadSnd(snd);				// ÉTÉEÉìÉhÉfÅ[É^ì«Ç›çûÇ›
+		ReadSnd(snd);				// „Çµ„Ç¶„É≥„Éâ„Éá„Éº„ÇøË™≠„ÅøËæº„Åø
 		if(m_nBitPerSpl==8) {
-			// 8ÉrÉbÉgÉTÉìÉvÉãéûÇÕ256î{ÇµÇƒ16ÉrÉbÉgÉTÉìÉvÉãílÇ∆Ç†ÇÌÇπÇÈ
+			// 8„Éì„ÉÉ„Éà„Çµ„É≥„Éó„É´ÊôÇ„ÅØ256ÂÄç„Åó„Å¶16„Éì„ÉÉ„Éà„Çµ„É≥„Éó„É´ÂÄ§„Å®„ÅÇ„Çè„Åõ„Çã
 			snd <<= 8;
 		}
 		result = (unsigned short)snd;

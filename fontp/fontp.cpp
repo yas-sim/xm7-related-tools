@@ -1,4 +1,4 @@
-// XM7�t�H���g�p�b�`�c�[��
+﻿// XM7フォントパッチツール
 #define VERSION "v0.1"
 
 #define FONT_PATCH	(1)
@@ -8,20 +8,20 @@
 #include <string.h>
 #include <stdlib.h>
 
-// �w��̃t�@�C��������A�g���q�𔲂��o���B�g���q�͑啶���ɕϊ����ĕԂ�
+// 指定のファイル名から、拡張子を抜き出す。拡張子は大文字に変換して返す
 void GetExtension( char *filename, char *buff ) {
 	char *ptr = filename;
-	while(*filename) {			// ��������Ō�܂Ō���
-		if(*filename=='.') ptr = filename+1;	// �Ō�Ɍ������s���I�h�ʒu���L��
+	while(*filename) {			// 文字列を最後まで検索
+		if(*filename=='.') ptr = filename+1;	// 最後に見つけたピリオド位置を記憶
 		filename++;
 	}
-	strcpy(buff, ptr);		// �g���q�������R�s�[
-	_strupr(buff);			// �啶���ϊ�
+	strcpy(buff, ptr);		// 拡張子部分をコピー
+	_strupr(buff);			// 大文字変換
 }
 
-// SUBSYS_C.ROM�t�@�C���̒��̃t�H���g�Ƀp�b�`�𓖂Ă�
+// SUBSYS_C.ROMファイルの中のフォントにパッチを当てる
 bool FontPatch( FILE *fp, char *fontfile ) {
-	// �t�H���g�t�@�C�����I�[�v������
+	// フォントファイルをオープンする
 	FILE *fpi;
 	if((fpi=fopen(fontfile, "rt"))==NULL) {
 		perror("Failed to open font file");
@@ -31,37 +31,37 @@ bool FontPatch( FILE *fp, char *fontfile ) {
 	int line=-1, ch=0;
 	do {
 		fgets(buff, 255, fpi);
-		if(buff[0]==';' || buff[0]=='#') continue;	// ;��#�Ŏn�܂�s�̓R�����g
-		if(line>=0 && ch>0) {		// line�����̐��łȂ����́A�t�H���g�ǂݍ��ݒ�
+		if(buff[0]==';' || buff[0]=='#') continue;	// ;と#で始まる行はコメント
+		if(line>=0 && ch>0) {		// lineが負の数でない時は、フォント読み込み中
 			int val=0;
 			for(int i=0; i<7; i++) {
 				val = (val<<1) | (buff[i]=='0'?0:1);
 			}
-			fseek(fp, ch*8+line, SEEK_SET);	// �t�H���g�ԍ��ƃ��C������t�@�C���|�C���^���ړ�������
+			fseek(fp, ch*8+line, SEEK_SET);	// フォント番号とラインからファイルポインタを移動させる
 			fputc(val, fp);
-			if(++line>7) line=-1;			// 8���C��(1�t�H���g)���ǂݏI������̂ŁA�ҋ@��Ԃɖ߂�
+			if(++line>7) line=-1;			// 8ライン(1フォント)分読み終わったので、待機状態に戻す
 		}
-		if(buff[0]=='@') {	// �t�H���g�ԍ��w��
-			line=0;			// �t�H���g�ǂݍ��ݒ��ɂ���
-			sscanf(buff+1, "%x", &ch);		// �t�H���g�ԍ�(16�i)��ǂݍ���
+		if(buff[0]=='@') {	// フォント番号指定
+			line=0;			// フォント読み込み中にする
+			sscanf(buff+1, "%x", &ch);		// フォント番号(16進)を読み込む
 		}
 	} while(!feof(fpi));
-	rewind(fp);			// SUBSYS_C.ROM�t�@�C���̃t�@�C���|�C���^��擪�ɂ܂��߂�
+	rewind(fp);			// SUBSYS_C.ROMファイルのファイルポインタを先頭にまき戻す
 	fclose(fpi);
 	return true;
 }
 
-// SUBSYS_C.ROM�t�@�C���̐擪����ɁA�w��̃o�C�i���t�H���g�t�@�C���̒��g���㏑������
+// SUBSYS_C.ROMファイルの先頭からに、指定のバイナリフォントファイルの中身を上書きする
 bool BinFont( FILE *fp, char *fontfile ) {
-	// �t�H���g�t�@�C�����I�[�v������
+	// フォントファイルをオープンする
 	FILE *fpi;
 	if((fpi=fopen(fontfile, "rb"))==NULL) {
 		perror("Failed to open font file");
 		return false;
 	}
-	rewind(fp);			// SUBSYS_C.ROM�t�@�C���̃t�@�C���|�C���^��擪�ɂ܂��߂�
+	rewind(fp);			// SUBSYS_C.ROMファイルのファイルポインタを先頭にまき戻す
 	int ch;
-	while((ch=fgetc(fpi))>=0) {	// �o�C�i���t�H���g�̒��g��SUBSYS_C.ROM�̐擪����ɏ㏑������
+	while((ch=fgetc(fpi))>=0) {	// バイナリフォントの中身をSUBSYS_C.ROMの先頭からに上書きする
 		fputc(ch, fp);
 	}
 	fclose(fpi);
@@ -75,12 +75,12 @@ void title( void ) {
 
 void usage( void ) {
 	puts("SYNOPSIS: fontp fontfile");
-	puts("fontfile�̊g���q��'txt'�̂Ƃ��́A�t�H���g�p�b�`�`��");
-	puts("    �V            'bin'�̂Ƃ��́A�o�C�i���t�H���g�`��");
-	puts("�Ƃ���ROM file(SUBSYS_C.ROM�܂���SUBSYSCG.ROM)�̒��g������������");
-	puts("SUBSYSCG.ROM��XM7 V2�p�̃t�@�C���ŁASUBSYS_C.ROM��XM7 V1�p�̃t�@�C���ł�");
-	puts("���̃v���O�����́A���SUBSYSCG.ROM���I�[�v�����A���߂Ȃ�SUBSYS_C.ROM���I�[�v�����悤�Ƃ��܂�");
-	puts("SUBSYS_C.ROM�܂��́ASUBSYSCG.ROM�t�@�C���́A���̃t�@�C���Ɠ����f�B���N�g���ɂ����Ă����K�v������܂�");
+	puts("fontfileの拡張子が'txt'のときは、フォントパッチ形式");
+	puts("    〃            'bin'のときは、バイナリフォント形式");
+	puts("としてROM file(SUBSYS_C.ROMまたはSUBSYSCG.ROM)の中身を書き換える");
+	puts("SUBSYSCG.ROMはXM7 V2用のファイルで、SUBSYS_C.ROMはXM7 V1用のファイルです");
+	puts("このプログラムは、先にSUBSYSCG.ROMをオープンし、だめならSUBSYS_C.ROMをオープンしようとします");
+	puts("SUBSYS_C.ROMまたは、SUBSYSCG.ROMファイルは、このファイルと同じディレクトリにおいておく必要があります");
 }
 
 void main( int argc, char *argv[] ) {
@@ -93,20 +93,20 @@ void main( int argc, char *argv[] ) {
 		exit(1);
 	}
 
-	// �g���q����t�@�C���`���𔻒f����
+	// 拡張子からファイル形式を判断する
 	char extension[10];
 	GetExtension(argv[1], extension);
-	if(stricmp(extension, "txt")==0) nFileType = FONT_PATCH;	// �t�H���g�p�b�`�`��
-	if(stricmp(extension, "bin")==0) nFileType = BIN_FONT;		// �o�C�i���t�H���g�`��
-	if(nFileType==0) {		// txt, bin�ȊO�̃t�@�C���`�����w�肵���ꍇ
+	if(stricmp(extension, "txt")==0) nFileType = FONT_PATCH;	// フォントパッチ形式
+	if(stricmp(extension, "bin")==0) nFileType = BIN_FONT;		// バイナリフォント形式
+	if(nFileType==0) {		// txt, bin以外のファイル形式を指定した場合
 		puts("Unsupported file specified");
 		usage();
 		exit(1);
 	}
 
-	// ���SUBSYS_CG.ROM(V2�p)���J���A���߂Ȃ�SUBSYS_C.ROM(V1�p)���J��
+	// 先にSUBSYS_CG.ROM(V2用)を開き、だめならSUBSYS_C.ROM(V1用)を開く
 	FILE *fpo;
-	if((fpo=fopen("SUBSYSCG.ROM", "rb+"))==NULL) {	// �㏑�����[�h�Ńt�@�C���I�[�v��		
+	if((fpo=fopen("SUBSYSCG.ROM", "rb+"))==NULL) {	// 上書きモードでファイルオープン		
 		if((fpo=fopen("SUBSYS_C.ROM", "rb+"))==NULL) {
 			perror("Failed to open 'SUBSYS_C.ROM(V1) or SUBSYS_CG.ROM(V2)' file");
 			exit(1);
@@ -117,7 +117,7 @@ void main( int argc, char *argv[] ) {
 			puts("Target file is the SUBSYSCG.ROM");
 	} 
 
-	// �t�@�C���`���ʂɏ������s��
+	// ファイル形式別に処理を行う
 	switch(nFileType) {
 	case FONT_PATCH:
 		FontPatch(fpo, argv[1]);
@@ -131,5 +131,5 @@ void main( int argc, char *argv[] ) {
 	fclose(fpo);
 }
 
-// v0.0	���񃊃��[�X
-// v0.1	000521	SUBSYS_CG.ROM���ɃI�[�v�����悤�Ƃ���悤�ɕύX(V2�Ή�)
+// v0.0	初回リリース
+// v0.1	000521	SUBSYS_CG.ROMを先にオープンしようとするように変更(V2対応)

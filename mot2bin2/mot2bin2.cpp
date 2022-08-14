@@ -1,7 +1,7 @@
-// ���g���[��S�t�@�C������͂��A����S���R�[�h��S�ēW�J�����o�C�i���C���[�W�t�@�C�����쐬����B
-// �܂��A�I�v�V�����w�肷�邱�Ƃɂ��A�C�ӂ̌���ROM, ROM�f�[�^���ɑΉ�����S���R�[�h�t�@�C����
-// ��������B�������ꂽ�t�@�C�������ꂼ���ROM�ɏ������ނ��ƂŁACPU����͌���S���R�[�h�t�@�C����
-// �C���[�W��������B
+﻿// モトローラSファイルを入力し、そのSレコードを全て展開したバイナリイメージファイルを作成する。
+// また、オプション指定することにより、任意の個数のROM, ROMデータ幅に対応したSレコードファイルを
+// 生成する。生成されたファイルをそれぞれのROMに書き込むことで、CPUからは元のSレコードファイルの
+// イメージが見える。
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,32 +9,32 @@
 #include <ctype.h>
 #include <process.h>
 
-#define _ALLOC_UNIT		(0x1000)		// �������C���[�W�o�b�t�@�����蓖�Ă�Ƃ��̊��蓖�ĒP��
+#define _ALLOC_UNIT		(0x1000)		// メモリイメージバッファを割り当てるときの割り当て単位
 #define MOTS_ADRMASK	(~0xe0000000)
 
 #include "cmotorolas.h"
 #include "crange.h"
 
-unsigned char *pBuff;					// �������C���[�W�o�b�t�@�ւ̃|�C���^
-unsigned long nBufSiz;					// ���݂̃o�b�t�@�T�C�Y�i�ρj
-unsigned long nMaxAddr;					// ���݂܂ł̃C���[�W�o�b�t�@���̍ō��A�h���X(�����o�����Ɏg�p)
+unsigned char *pBuff;					// メモリイメージバッファへのポインタ
+unsigned long nBufSiz;					// 現在のバッファサイズ（可変）
+unsigned long nMaxAddr;					// 現在までのイメージバッファ内の最高アドレス(書き出し時に使用)
 
-CRanges oRanges;						// ����S���R�[�h�t�@�C���ɑ��݂��Ă����͈͂��L�^����(S���R�[�h�o�͎��ɁA�f�[�^�̂��镔���������o�͂���̂Ɏg�p)
+CRanges oRanges;						// 入力Sレコードファイルに存在していた範囲を記録する(Sレコード出力時に、データのある部分だけを出力するのに使用)
 
-bool fVerbose;							// ���܂��܂ȃ��b�Z�[�W��\�������邩�ǂ���
+bool fVerbose;							// さまざまなメッセージを表示させるかどうか
 
-// �������C���[�W�o�b�t�@���w��̃T�C�Y�Ŋm�ۂ���B
-// ���������蓖�ĒP�ʂɐ؂�グ�Ċm�ۂ���
+// メモリイメージバッファを指定のサイズで確保する。
+// メモリ割り当て単位に切り上げて確保する
 bool BuffAlloc( unsigned long size )
 {
 	if(nBufSiz<size) {
-		unsigned long nAllocSize = ((size+_ALLOC_UNIT-1)/_ALLOC_UNIT)*_ALLOC_UNIT;		// ���蓖�ăT�C�Y�ۂߍ���
-		unsigned char *pTmp = (unsigned char*)realloc(pBuff, nAllocSize);				// �������m�ہI
-		if(pTmp==NULL) {						// ���蓖�Ď��s
+		unsigned long nAllocSize = ((size+_ALLOC_UNIT-1)/_ALLOC_UNIT)*_ALLOC_UNIT;		// 割り当てサイズ丸め込み
+		unsigned char *pTmp = (unsigned char*)realloc(pBuff, nAllocSize);				// メモリ確保！
+		if(pTmp==NULL) {						// 割り当て失敗
 			puts("Memory allocation failed.");
 			puts("Too few memory");
 			exit(-1);
-		} else {								// ���蓖�Đ���
+		} else {								// 割り当て成功
 			pBuff = pTmp;
 			nBufSiz = nAllocSize;
 		}
@@ -44,8 +44,8 @@ bool BuffAlloc( unsigned long size )
 }
 
 
-// �^����ꂽ�������S���R�[�h�Ƃ݂Ȃ��A��͂���
-// pBuff�ɂ���S���R�[�h�̃f�[�^����������
+// 与えられた文字列をSレコードとみなし、解析する
+// pBuffにそのSレコードのデータを書き込む
 void mot2bin( char *pLine )
 {
 	CMotorolaS oMot;
@@ -53,55 +53,55 @@ void mot2bin( char *pLine )
 	unsigned long addr;
 	int length;
 
-	oMot.SetSRecord(pLine);					// CMotorolaS�I�u�W�F�N�g�Ƀt�@�C������ǂݍ��񂾍s��n��
-	addr = oMot.GetLoadAddress();			// ��͌��ʂ̃��[�h�A�h���X���擾
-	length = oMot.GetDataCount();			// �f�[�^�o�C�g�����擾
-	addr = addr & MOTS_ADRMASK;				// SH�͏�ʃA�h���X�͏o�͂���Ȃ��̂Ń}�X�N����
+	oMot.SetSRecord(pLine);					// CMotorolaSオブジェクトにファイルから読み込んだ行を渡す
+	addr = oMot.GetLoadAddress();			// 解析結果のロードアドレスを取得
+	length = oMot.GetDataCount();			// データバイト数を取得
+	addr = addr & MOTS_ADRMASK;				// SHは上位アドレスは出力されないのでマスクする
 
-	oRanges.add(addr, addr+length-1);		// �g�p�͈͂��L�^����
+	oRanges.add(addr, addr+length-1);		// 使用範囲を記録する
 
-	// 1�s���̃f�[�^���o�b�t�@�ɏ�������
+	// 1行分のデータをバッファに書き込む
 	int ch, type;
 	for(int i=0; i<length; i++) {
-		ch = oMot.GetData(i);					// �f�[�^����P�o�C�g�ǂݍ���
+		ch = oMot.GetData(i);					// データから１バイト読み込む
 		type = oMot.GetRecordType();
-		if(type==1 || type==2 || type==3) {		// �f�[�^���R�[�h�̂Ƃ������������s���B�w�b�_���R�[�h�Ȃǂ͖�������
-			while(addr>=nBufSiz) {					// �������ރA�h���X���o�b�t�@�e�ʂ��z���Ă��Ȃ��`�F�b�N
-				BuffAlloc(addr+1);					// �o�b�t�@�e�ʂ��������čĊ��蓖��
+		if(type==1 || type==2 || type==3) {		// データレコードのときだけ処理を行う。ヘッダレコードなどは無視する
+			while(addr>=nBufSiz) {					// 書き込むアドレスがバッファ容量を越えていなかチェック
+				BuffAlloc(addr+1);					// バッファ容量を割増して再割り当て
 			}
 			pBuff[addr] = ch;
-			if(nMaxAddr<addr) {						// �ő发���݃A�h���X���L�^����
+			if(nMaxAddr<addr) {						// 最大書込みアドレスを記録する
 				nMaxAddr = addr;
 			}
-			pLine += 2;								// �A�X�L�[��16�i�������̂ŁA�P�o�C�g�������ƂɂQ�o�C�g�|�C���^��i�߂�
+			pLine += 2;								// アスキー化16進を扱うので、１バイト処理ごとに２バイトポインタを進める
 			addr ++;
 		}
 	}
 }
 
-// CPU���猩���A�h���X����AROM���猩���A�h���X�ɕϊ�����B
-// ROM�̌��AROM1�̃r�b�g���Ȃǂ���ROM�ԍ��AROM�A�h���X�A�o�C�g�A�h���X���v�Z����
-// �{���ɂ����Ă��邩������ƕs��
-void CalcRomAddress( unsigned long nAddress,	// CPU���猩���A�h���X
-					int nRoms,					// ROM�̌�
-					int nRomWidth,				// ROM1�̃o�C�g��(16�r�b�g���Ȃ�2)
-					int &nRomNumber,			// �Y������ROM�ԍ�
-					unsigned long &nRomAddress,	// ROM���猩���A�h���X(�o�X���Ɋ֌W�Ȃ��A�^�̃A�h���X�BROM�̃A�h���X�o�X�̒l�ł͂Ȃ�)
-					int &nByteAddress)			// ROM���̃o�C�g�A�h���X
+// CPUから見たアドレスから、ROMから見たアドレスに変換する。
+// ROMの個数、ROM1個のビット幅などからROM番号、ROMアドレス、バイトアドレスを計算する
+// 本当にあっているかちょっと不安
+void CalcRomAddress( unsigned long nAddress,	// CPUから見たアドレス
+					int nRoms,					// ROMの個数
+					int nRomWidth,				// ROM1個のバイト数(16ビット幅なら2)
+					int &nRomNumber,			// 該当するROM番号
+					unsigned long &nRomAddress,	// ROMから見たアドレス(バス幅に関係ない、真のアドレス。ROMのアドレスバスの値ではない)
+					int &nByteAddress)			// ROM内のバイトアドレス
 
 // |        Address                        |
-// |RomAddressHIGH|XXXXXXXXXX|RomAddressLOW| ROM�A�h���X��XXXX�̕�����������āAHIGH�̕����͍��ɃV�t�g������
+// |RomAddressHIGH|XXXXXXXXXX|RomAddressLOW| ROMアドレスはXXXXの部分だけ削って、HIGHの部分は左にシフトさせる
 // |              |nRomNumber|nByteAddress |
 {
 	int i;
 	for(i=0; !(nRoms     & 1); i++) nRoms    >>=1; nRoms = i;		// nRoms = log(nRoms)/log(2)
 	for(i=0; !(nRomWidth & 1); i++) nRomWidth>>=1; nRomWidth = i;	// nRomWidth = log(nRomWidth)/log(2)
 
-	// �e�f�[�^������o�����߂̃r�b�g�}�X�N�Ȃǂ𐶐�
+	// 各データを割り出すためのビットマスクなどを生成
 	unsigned long BAmask, RNmask, RAmask, ByteShift;
-	BAmask = (1<<(nRomWidth))-1;					// �o�C�g�A�h���X�p�̃}�X�N
-	RAmask = ~BAmask;								// ROM�A�h���X�p�̃}�X�N
-	RNmask = ((1<<(nRomWidth+nRoms))-1) & RAmask;	// ROM�ԍ��p�̃}�X�N
+	BAmask = (1<<(nRomWidth))-1;					// バイトアドレス用のマスク
+	RAmask = ~BAmask;								// ROMアドレス用のマスク
+	RNmask = ((1<<(nRomWidth+nRoms))-1) & RAmask;	// ROM番号用のマスク
 	ByteShift = nRomWidth;
 	
 	nByteAddress = nAddress & BAmask;
@@ -109,65 +109,65 @@ void CalcRomAddress( unsigned long nAddress,	// CPU���猩���A�h���X
 	nRomNumber = (nAddress & RNmask) >> ByteShift;
 }
 
-// �쐬�����������C���[�W�o�b�t�@�̒��g���A�w���ROM���AROM�f�[�^���Ƃ��ĕ�����
-// MOT�t�@�C���ɕ������ďo�͂���
+// 作成したメモリイメージバッファの中身を、指定のROM個数、ROMデータ幅として複数の
+// MOTファイルに分割して出力する
 void motout(int nRoms, int nRomWidthInByte, CRanges &ranges)
 {
 	int nRWIB = nRomWidthInByte;
-	if(nRoms==0) return;			// ROM�̌���0��NG
-	if(nRWIB==0) return;			// ROM�̃r�b�g����0��NG
+	if(nRoms==0) return;			// ROMの個数が0はNG
+	if(nRWIB==0) return;			// ROMのビット幅が0はNG
 
-	// �w���ROM�����t�@�C�����J���B�o�̓t�@�C������ROMx.mot�ɌŒ�
-	FILE **fpo = new FILE*[nRoms];		// �t�@�C���n���h���p�|�C���^���m��
+	// 指定のROM個数分ファイルを開く。出力ファイル名はROMx.motに固定
+	FILE **fpo = new FILE*[nRoms];		// ファイルハンドル用ポインタを確保
 	char filename[32];
 	for(int i=0; i<nRoms; i++) {
 		sprintf(filename, "ROM%d.mot", i);
 		fpo[i] = fopen(filename, "wt");
 	}
 
-	CMotorolaS *mot = new CMotorolaS[nRoms];		// ROM�̌���CMotorolaS�I�u�W�F�N�g���m��
+	CMotorolaS *mot = new CMotorolaS[nRoms];		// ROMの個数分CMotorolaSオブジェクトを確保
 	CRange range;
 	int RN, BA;										// RN=RomNumber, BA=ByteAddress
 	unsigned long RA;								// RA=RomAddress
-	char tmp[256];									// S���R�[�h��������ꎞ�I�Ɋi�[���邽�߂̃o�b�t�@
+	char tmp[256];									// Sレコード文字列を一時的に格納するためのバッファ
 
-	// S���R�[�h��͎��ɓo�^���Ă������g�p�͈͑S�Ă��o�͂���
-	for(i=0; i<ranges.getNumberOfItems(); i++) {
-		ranges.getRange(i, range);					// i�Ԗڂ͈̔͏����擾
-		for(int j=0; j<nRoms; j++) {				// ROM�̌���CMotorolaS�I�u�W�F�N�g��������
-			mot[j].SetDataCount(0);					// MotorolaS�I�u�W�F�N�g�̃f�[�^�T�C�Y��0�ɏ�����
+	// Sレコード解析時に登録しておいた使用範囲全てを出力する
+	for(int i=0; i<ranges.getNumberOfItems(); i++) {
+		ranges.getRange(i, range);					// i番目の範囲情報を取得
+		for(int j=0; j<nRoms; j++) {				// ROMの個数分CMotorolaSオブジェクトを初期化
+			mot[j].SetDataCount(0);					// MotorolaSオブジェクトのデータサイズを0に初期化
 		}
-		// �擾�����͈͂̊Ԃ̃f�[�^��S�ďo�͂���
+		// 取得した範囲の間のデータを全て出力する
 		for(unsigned long adr=range.top; adr<=range.bottom; adr++) {
-			CalcRomAddress(adr, nRoms, nRomWidthInByte, RN, RA, BA);		// ROM�A�h���X���v�Z
-			if(mot[RN].GetDataCount()==0) {									// CMotorolaS���R�[�h�̕ێ��f�[�^����0�̂Ƃ��͏��������������Ȃ̂ŁA���[�h�A�h���X�Ȃǂ�ݒ肷��K�v������
-				mot[RN].InitSRecord(RA);									// ���[�h�A�h���X�A���R�[�h�^�C�v��ݒ肷��
+			CalcRomAddress(adr, nRoms, nRomWidthInByte, RN, RA, BA);		// ROMアドレスを計算
+			if(mot[RN].GetDataCount()==0) {									// CMotorolaSレコードの保持データ数が0のときは初期化しただけなので、ロードアドレスなどを設定する必要がある
+				mot[RN].InitSRecord(RA);									// ロードアドレス、レコードタイプを設定する
 			}
-			mot[RN].SetData(RA-mot[RN].GetLoadAddress(), pBuff[adr]);		// S�I�u�W�F�N�g�̎w��̈ʒu�Ƀf�[�^��ǉ�
-			if(mot[RN].GetDataCount()>=0x10) {								// S�I�u�W�F�N�g�̕ێ��f�[�^����0x10�ɂȂ�����t�@�C���ɏo�͂��A�ێ��f�[�^���N���A����
-				fputs(mot[RN].GetSRecordBuff(tmp), fpo[RN]);				// S���R�[�h��������o��
+			mot[RN].SetData(RA-mot[RN].GetLoadAddress(), pBuff[adr]);		// Sオブジェクトの指定の位置にデータを追加
+			if(mot[RN].GetDataCount()>=0x10) {								// Sオブジェクトの保持データ数が0x10になったらファイルに出力し、保持データをクリアする
+				fputs(mot[RN].GetSRecordBuff(tmp), fpo[RN]);				// Sレコード文字列を出力
 				fputs("\n", fpo[RN]);
-				mot[RN].SetDataCount(0);									// �ێ��f�[�^����0�ɂ���
+				mot[RN].SetDataCount(0);									// 保持データ数を0にする
 			}
 		}
-		// �t�@�C���ɏo�͂��ꂸ�Ɏc���Ă��܂��Ă���S���R�[�h�����t�@�C���ɏ����o���i�t���b�V���j
-		for(j=0; j<nRoms; j++) {
-			if(mot[j].GetDataCount()>0) {						// �c���Ă邩�H
-				fputs(mot[j].GetSRecordBuff(tmp), fpo[j]);		// S���R�[�h��������o��
+		// ファイルに出力されずに残ってしまっているSレコード情報をファイルに書き出す（フラッシュ）
+		for(int j=0; j<nRoms; j++) {
+			if(mot[j].GetDataCount()>0) {						// 残ってるか？
+				fputs(mot[j].GetSRecordBuff(tmp), fpo[j]);		// Sレコード文字列を出力
 				fputs("\n", fpo[j]);
 				mot[j].SetDataCount(0);
 			}
 		}
 	}
-	// �S�Ẵt�@�C���n���h�����N���[�Y
-	for(i=0; i<nRoms; i++) {
+	// 全てのファイルハンドルをクローズ
+	for(int i=0; i<nRoms; i++) {
 		fclose(fpo[i]);
 	}
-	delete []fpo;	// new�Ŋm�ۂ����I�u�W�F�N�g�͊J������
-	delete []mot;	// new�Ŋm�ۂ����I�u�W�F�N�g�͊J������
+	delete []fpo;	// newで確保したオブジェクトは開放する
+	delete []mot;	// newで確保したオブジェクトは開放する
 }
 
-// �g�����̕\��
+// 使い方の表示
 void usage( void )
 {
 	puts("");
@@ -182,14 +182,14 @@ void usage( void )
 	puts("     ROM 2pcs, 16bit width ROM");
 }
 
-// �^����ꂽ������𐔒l�ɕϊ����āA���̒l��2^x�̒l���ǂ����`�F�b�N����
-// 2^x�ȊO�̒l�������ꍇ����rtn��Ԃ��B2^x��������A�ϊ��������l��Ԃ�
-// main()�̈����]���p�̃J�X�^���֐�
+// 与えられた文字列を数値に変換して、その値が2^xの値かどうかチェックする
+// 2^x以外の値だった場合引数rtnを返す。2^xだったら、変換した数値を返す
+// main()の引数評価用のカスタム関数
 int CheckPow2( char *str, int rtn )
 {
 	int tmp1, tmp2;
-	tmp1 = atoi(str);						// �����𐔒l�ɕϊ�
-	for(tmp2=1; tmp2<=0x0020; tmp2<<=1) {	// ������2^x�̒l�ɂȂ��Ă��邩�`�F�b�N
+	tmp1 = atoi(str);						// 引数を数値に変換
+	for(tmp2=1; tmp2<=0x0020; tmp2<<=1) {	// 引数が2^xの値になっているかチェック
 		if(tmp2==tmp1) return tmp1;
 	}
 	return rtn;
@@ -200,29 +200,29 @@ void main( int argc, char *argv[])
 	FILE *fo;
 	FILE *fi;
 
-	char sourcefile[128], outputfile[128];		// ���̓t�@�C����
+	char sourcefile[128], outputfile[128];		// 入力ファイル名
 
 	puts("*** Motorola-S to Binary converter ***");
 	puts("Copyright 1999 EASTON Co.,Ltd. All rights reserved.");
 
-	// �I�v�V�������
-	int nNumberOfRoms = 1;			// ROM�̌��i�������j
-	int nRomWidthInByte = 1;		// ROM�P�̃o�X���i�o�C�g�P�ʁj
+	// オプション解析
+	int nNumberOfRoms = 1;			// ROMの個数（分割数）
+	int nRomWidthInByte = 1;		// ROM１個のバス幅（バイト単位）
 	sourcefile[0] = '\0';
-	strcpy(outputfile, "temp.bin");	// �o�̓t�@�C���ȗ����̃t�@�C����
+	strcpy(outputfile, "temp.bin");	// 出力ファイル省略時のファイル名
 	bool fExit, fSplit;
 	fExit = false;
 	fSplit = false;
 	fVerbose = false;
 	for(int i=1; i<argc; i++) {
-		if(argv[i][0]=='-' || argv[i][0]=='/') {		// �����̂P�����ڂ�'-'��'/'�Ȃ�I�v�V�����w��Ƃ݂Ȃ�
+		if(argv[i][0]=='-' || argv[i][0]=='/') {		// 引数の１文字目が'-'か'/'ならオプション指定とみなす
 			switch(argv[i][1]) {
 			case 'r':
-			case 'R':		// ROM�̌�
+			case 'R':		// ROMの個数
 				nNumberOfRoms = CheckPow2(argv[i]+2, nNumberOfRoms);
 				break;
 			case 'w':
-			case 'W':		// ROM�P������̃o�X���i�o�C�g�P�ʁj
+			case 'W':		// ROM１個あたりのバス幅（バイト単位）
 				nRomWidthInByte = CheckPow2(argv[i]+2, nRomWidthInByte);
 				break;
 			case 'v':
@@ -261,17 +261,17 @@ void main( int argc, char *argv[])
 	}
 	if(fExit) {
 		usage();
-		exit(-1);								// �I�v�V������͂Ŗ�肪�������Ƃ��i�w���v�\���̂Ƃ����j	
+		exit(-1);								// オプション解析で問題があったとき（ヘルプ表示のときも）	
 	}
 
-	// ���̓t�@�C�����I�[�v��
+	// 入力ファイルをオープン
 	if((fi = fopen(sourcefile, "rt"))==NULL) {
 		puts("Couldn't open source file.");
 		puts(argv[1]);
 		exit(-1);
 	}
 	
-	// �o�̓t�@�C�����I�[�v��
+	// 出力ファイルをオープン
 	if((fo = fopen(outputfile, "wb"))==NULL) {
 		puts("Couldn't open output file.");
 		puts(argv[2]);
@@ -279,13 +279,13 @@ void main( int argc, char *argv[])
 		exit(-1);
 	}
 
-	// �����\��
+	// 条件表示
 	if(fVerbose) {
 		printf("*** ROM=%dpcs, ROM DATA BUS WIDTH=%dbit ***\n", nNumberOfRoms, nRomWidthInByte*8);
 		printf("INPUT %s  OUTPUT %s\n", sourcefile, outputfile);
 	}
 
-	// �����������C���[�W�o�b�t�@���蓖��
+	// 初期メモリイメージバッファ割り当て
 	pBuff = (unsigned char*)calloc(_ALLOC_UNIT, 1);
 	if(pBuff==NULL) {
 		puts("Too few memory");
@@ -295,26 +295,26 @@ void main( int argc, char *argv[])
 	nBufSiz = _ALLOC_UNIT;
 	nMaxAddr = 0L;
 
-	// ���̓t�@�C���ǂݍ���
+	// 入力ファイル読み込み
 	char line[512];
 	while(1) {
-		fgets(line, 511, fi);			// �P�s�ǂݍ���
+		fgets(line, 511, fi);			// １行読み込み
 		if(feof(fi)) break;
-		mot2bin(line);					// S���R�[�h���������C���[�W�o�b�t�@�ɏ�������
+		mot2bin(line);					// Sレコードをメモリイメージバッファに書き込む
 	}
 
-	fwrite(pBuff, 1, nMaxAddr+1, fo);	// �������C���[�W�t�@�C�������o��
+	fwrite(pBuff, 1, nMaxAddr+1, fo);	// メモリイメージファイル書き出し
 
-	oRanges.combineAll();				// �L�^�����g�p�͈͂̂����A�����ł���͈͂���������
+	oRanges.combineAll();				// 記録した使用範囲のうち、結合できる範囲を結合する
 	
-	if(fSplit) motout(nNumberOfRoms, nRomWidthInByte, oRanges);		// ���g���[��S�t�H�[�}�b�g�ŏo��
+	if(fSplit) motout(nNumberOfRoms, nRomWidthInByte, oRanges);		// モトローラSフォーマットで出力
 
-	// ���̓t�@�C���̒��Ŏg�p�����̈��\��
+	// 入力ファイルの中で使用した領域を表示
 	if(fVerbose) {
 		puts("*** Used area");
-		oRanges.show();					// �g�p�͈͈ꗗ��\������
+		oRanges.show();					// 使用範囲一覧を表示する
 	}
-	if(fVerbose) printf("*** Max address = 0x%08x\n", nMaxAddr);	// �g�p�����ő�A�h���X��\��
+	if(fVerbose) printf("*** Max address = 0x%08x\n", nMaxAddr);	// 使用した最大アドレスを表示
 	printf("*** File conversion succeeded.");
 	if(fVerbose) puts(" Trust me!"); else puts("");
 

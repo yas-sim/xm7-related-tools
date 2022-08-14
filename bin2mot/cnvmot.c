@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #include "motgen.h"
@@ -30,26 +30,26 @@ void main( int argc , char *argv[] )
 	fpi=fopen_(argv[1], "rb");
 
 	motInit();
-	motSetType(motHEADER);			/* ƒwƒbƒ_ƒŒƒR[ƒh */
+	motSetType(motHEADER);			/* ãƒ˜ãƒƒãƒ€ãƒ¬ã‚³ãƒ¼ãƒ‰ */
 	motSetAddress(0L);
 	ptr=argv[1];
-	while(*ptr!=(char)NULL) {		/* ƒwƒbƒ_ƒŒƒR[ƒh‚Ì’†g‚Íƒtƒ@ƒCƒ‹–¼ */
+	while(*ptr!=(char)NULL) {		/* ãƒ˜ãƒƒãƒ€ãƒ¬ã‚³ãƒ¼ãƒ‰ã®ä¸­èº«ã¯ãƒ•ã‚¡ã‚¤ãƒ«å */
 		motStock(*ptr++);
 	}
 	motFlush();
 
 	motSetType(motDATA24);
-	motSetAddress(0L);				/* ŽŸ‚ÌƒŒƒR[ƒh‚ÌŠJŽnƒAƒhƒŒƒX */
+	motSetAddress(0L);				/* æ¬¡ã®ãƒ¬ã‚³ãƒ¼ãƒ‰ã®é–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ */
 	while(!feof(fpi)) {
-		ch=fgetc(fpi);				/* ƒtƒ@ƒCƒ‹‚©‚ç‚PƒoƒCƒg“Ç‚Ýž‚Ý */
+		ch=fgetc(fpi);				/* ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ï¼‘ãƒã‚¤ãƒˆèª­ã¿è¾¼ã¿ */
 		if(ch==-1) break;
-		motStock((unsigned char)ch);	/* ƒŒƒR[ƒhƒoƒbƒtƒ@‚ÉŠi”[ */
+		motStock((unsigned char)ch);	/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã«æ ¼ç´ */
 	}
-	motFlush();							/* ƒŒƒR[ƒhƒoƒbƒtƒ@‚ÉA–¢‘—oƒf[ƒ^‚ªŽc‚Á‚Ä‚¢‚éê‡A‚»‚ê‚ðo—Í‚·‚é */
+	motFlush();							/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã«ã€æœªé€å‡ºãƒ‡ãƒ¼ã‚¿ãŒæ®‹ã£ã¦ã„ã‚‹å ´åˆã€ãã‚Œã‚’å‡ºåŠ›ã™ã‚‹ */
 
-	/* ÅŒã‚ÉƒGƒ“ƒhƒŒƒR[ƒh‚ðo—Í‚·‚é */
+	/* æœ€å¾Œã«ã‚¨ãƒ³ãƒ‰ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã™ã‚‹ */
 	motSetAddress(0L);
-	motSetType(motEND24);			/* ƒGƒ“ƒhƒŒƒR[ƒhƒ^ƒCƒv */
+	motSetType(motEND24);			/* ã‚¨ãƒ³ãƒ‰ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ— */
 	motFlush();
 
 	fclose(fpi);

@@ -1,0 +1,1 @@
+add_executable(t77dec t77dec.cpp)

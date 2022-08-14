@@ -1,4 +1,4 @@
-#include "CFILE.H"
+ï»¿#include "CFILE.H"
 #include "CWAVE.H"
 #include "CPreCalc.h"
 #include "CLPF.h"
@@ -11,12 +11,12 @@
 #define CENTER	(0x8000)
 #define VERSION	"v0.4"
 
-// v0.0 20000229 ‰ŠúŒöŠJƒo[ƒWƒ‡ƒ“
-// v0.1 20000229 -th, -tlƒIƒvƒVƒ‡ƒ“’Ç‰Á
-// v0.2 20000301 ˜^‰¹ƒŒƒxƒ‹‚ÌŒŸo•û–@‚É•W€•Î·‚ğg‚¤‚æ‚¤‚É•ÏX
-// v0.3 20000303 LPF‚Ì•û®‚ğÏ•ª•û®‚É•ÏX
-// v0.3 20000521 ˆÊ‘Š‚ğw’è‚Å‚«‚é‚æ‚¤‚É‚µ‚½
-// v0.4 20000611 AGCƒIƒvƒVƒ‡ƒ“‚ğ’Ç‰Á,©“®ƒŒƒxƒ‹‰ğÍ‚ğ”p~
+// v0.0 20000229 åˆæœŸå…¬é–‹ãƒãƒ¼ã‚¸ãƒ§ãƒ³
+// v0.1 20000229 -th, -tlã‚ªãƒ—ã‚·ãƒ§ãƒ³è¿½åŠ 
+// v0.2 20000301 éŒ²éŸ³ãƒ¬ãƒ™ãƒ«ã®æ¤œå‡ºæ–¹æ³•ã«æ¨™æº–åå·®ã‚’ä½¿ã†ã‚ˆã†ã«å¤‰æ›´
+// v0.3 20000303 LPFã®æ–¹å¼ã‚’ç©åˆ†æ–¹å¼ã«å¤‰æ›´
+// v0.3 20000521 ä½ç›¸ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«ã—ãŸ
+// v0.4 20000611 AGCã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’è¿½åŠ ,è‡ªå‹•ãƒ¬ãƒ™ãƒ«è§£æã‚’å»ƒæ­¢
 
 void usage( void )
 {
@@ -51,25 +51,25 @@ void main( int argc, char *argv[] ) {
 		exit(0);
 	}
 
-	// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+	// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æ
 	int source=0, dest=0;
 	bool fVerbose = false;
-	bool fPhase=true;		// ‰¹ºƒtƒ@ƒCƒ‹‚ÌˆÊ‘Š(true=Normal False=Reverse)
+	bool fPhase=true;		// éŸ³å£°ãƒ•ã‚¡ã‚¤ãƒ«ã®ä½ç›¸(true=Normal False=Reverse)
 	bool fAGC = false;
 	unsigned long pth=0xffff, ptl=0;
 	for(int i=1; i<argc; i++) {
 		if(argv[i][0]=='-' || argv[i][0]=='/') {
 			switch(argv[i][1]) {
 			case 'p':
-			case 'P':					// ˆÊ‘Š‚Ìw’è
+			case 'P':					// ä½ç›¸ã®æŒ‡å®š
 				switch(argv[i][2]) {
 				case 'n':
 				case 'N':
-					fPhase = true;		// ³‘Š
+					fPhase = true;		// æ­£ç›¸
 					break;
 				case 'r':
 				case 'R':
-					fPhase = false;		// ‹t‘Š
+					fPhase = false;		// é€†ç›¸
 					break;
 				}
 				break;
@@ -81,16 +81,16 @@ void main( int argc, char *argv[] ) {
 				break;
 			case 'v':
 			case 'V':
-				// Verbose modeƒZƒbƒg
+				// Verbose modeã‚»ãƒƒãƒˆ
 				fVerbose = true;
 				break;
 			case 't':
 			case 'T':
-				// ThresholdƒŒƒxƒ‹w’è
+				// Thresholdãƒ¬ãƒ™ãƒ«æŒ‡å®š
 				switch(argv[i][2]) {
 				case 'h':
 				case 'H':
-					// Th‚Ìw’è
+					// Thã®æŒ‡å®š
 					pth = htol(argv[i]+3);
 					if(pth<ptl) {
 						puts("Illegal parameter. th must be higher than tl.");
@@ -99,7 +99,7 @@ void main( int argc, char *argv[] ) {
 					break;
 				case 'l':
 				case 'L':
-					// Tl‚Ìw’è
+					// Tlã®æŒ‡å®š
 					ptl = htol(argv[i]+3);
 					if(ptl>pth) {
 						puts("Illegal parameter. tl must be lower than th.");
@@ -109,7 +109,7 @@ void main( int argc, char *argv[] ) {
 				}
 				break;
 			case 'a':
-			case 'A':			// AGCƒIƒvƒVƒ‡ƒ“
+			case 'A':			// AGCã‚ªãƒ—ã‚·ãƒ§ãƒ³
 				if(stricmp(argv[i]+1, "AGC")==0) {
 					fAGC = true;
 				}
@@ -118,7 +118,7 @@ void main( int argc, char *argv[] ) {
 				break;
 			}
 		} else {
-			// ƒIƒvƒVƒ‡ƒ“w’èq‚ª‚È‚¢ê‡Aƒtƒ@ƒCƒ‹–¼‚Æ‚İ‚È‚·
+			// ã‚ªãƒ—ã‚·ãƒ§ãƒ³æŒ‡å®šå­ãŒãªã„å ´åˆã€ãƒ•ã‚¡ã‚¤ãƒ«åã¨ã¿ãªã™
 			if(source==0)	source=i;
 			else			dest=i;
 		}
@@ -131,19 +131,19 @@ void main( int argc, char *argv[] ) {
 	
 	unsigned long NoiseLevel, High, Low;
 	if(pth==0xffff || ptl==0) {
-//		// ƒIƒvƒVƒ‡ƒ“‚ÅƒXƒŒƒVƒ‡ƒ‹ƒh‚ªw’è‚³‚ê‚Ä‚¢‚È‚¢ê‡A
-//		// “ü—ÍWAVƒtƒ@ƒCƒ‹‚ğ1ƒpƒX’Ê‚µ‚ÄAƒpƒ‰ƒ[ƒ^‚ğŒvZ
+//		// ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã§ã‚¹ãƒ¬ã‚·ãƒ§ãƒ«ãƒ‰ãŒæŒ‡å®šã•ã‚Œã¦ã„ãªã„å ´åˆã€
+//		// å…¥åŠ›WAVãƒ•ã‚¡ã‚¤ãƒ«ã‚’1ãƒ‘ã‚¹é€šã—ã¦ã€ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’è¨ˆç®—
 //		CPreCalc pc;
 //		if(fVerbose) {
 //			puts("\nPASS1: Analyzing record level..."); 
 //		}
 //		pc.CalcParam(argv[1], &NoiseLevel, &High, &Low, fPhase);
-		// ©“®ƒŒƒxƒ‹‰ğÍ‚Í–³ˆÓ–¡‚È‚Ì‚Å”p~
+		// è‡ªå‹•ãƒ¬ãƒ™ãƒ«è§£æã¯ç„¡æ„å‘³ãªã®ã§å»ƒæ­¢
 		NoiseLevel = 0x8000;
 		High = 0x8200;
 		Low = 0x7e00;
 	} else {
-		// ƒIƒvƒVƒ‡ƒ“‚ÅƒXƒŒƒVƒ‡ƒ‹ƒh‚ªw’è‚³‚ê‚Ä‚¢‚éê‡
+		// ã‚ªãƒ—ã‚·ãƒ§ãƒ³ã§ã‚¹ãƒ¬ã‚·ãƒ§ãƒ«ãƒ‰ãŒæŒ‡å®šã•ã‚Œã¦ã„ã‚‹å ´åˆ
 		NoiseLevel = 0x8000;
 		High = pth;
 		Low = ptl;
@@ -153,7 +153,7 @@ void main( int argc, char *argv[] ) {
 	}
 	CComparator cmp;
 	cmp.SetThreshold((High-CENTER)/2+CENTER, 
-					 CENTER-(CENTER- Low)/2);		// ƒRƒ“ƒpƒŒ[ƒ^‚ÌƒXƒŒƒVƒ‡ƒ‹ƒh‚ğİ’è
+					 CENTER-(CENTER- Low)/2);		// ã‚³ãƒ³ãƒ‘ãƒ¬ãƒ¼ã‚¿ã®ã‚¹ãƒ¬ã‚·ãƒ§ãƒ«ãƒ‰ã‚’è¨­å®š
 
 	if(wav.Open(argv[1], FMODE_READ | FMODE_BIN)==false) {
 		perror("Source file open");
@@ -170,9 +170,9 @@ void main( int argc, char *argv[] ) {
 		if(fAGC) puts("AGC on"); else puts("AGC off");
 //		puts("PASS2: Converting...");
 	}
-	double period = 1.0/wav.GetSplRate();		// 1ƒTƒ“ƒvƒ‹üŠú‚ğ‹‚ß‚é
+	double period = 1.0/wav.GetSplRate();		// 1ã‚µãƒ³ãƒ—ãƒ«å‘¨æœŸã‚’æ±‚ã‚ã‚‹
 	fputs("XM7 TAPE IMAGE 0", fo);
-	// ƒ}[ƒJ[o—Í
+	// ãƒãƒ¼ã‚«ãƒ¼å‡ºåŠ›
 	fputc(0x00, fo);
 	fputc(0x00, fo);
 
@@ -181,28 +181,28 @@ void main( int argc, char *argv[] ) {
 	unsigned short snd;
 	CLPF lpf;
 	CAGC agc;
-	wav.Seek(0x3a);		// wavƒtƒ@ƒCƒ‹‚Ìƒwƒbƒ_‚ğ”ò‚Î‚·
+	wav.Seek(0x3a);		// wavãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ˜ãƒƒãƒ€ã‚’é£›ã°ã™
 	while(!wav.eof()) {
 		snd = wav.ReadWavDataMono();
 
-		if(fPhase==false) snd = 0xffff-snd;		// ˆÊ‘Š”½“]
+		if(fPhase==false) snd = 0xffff-snd;		// ä½ç›¸åè»¢
 
-		// LPF‚É’Ê‚·
+		// LPFã«é€šã™
 		lpf.DataInput(snd);
 		snd = (unsigned short)lpf.DataOutput();
 
-		// AGC‚ğ‚©‚¯‚é
+		// AGCã‚’ã‹ã‘ã‚‹
 		if(fAGC) {
 			agc.DataInput(snd);
 			snd = (unsigned short)agc.DataOutput();
 		}
 
-		data = cmp.Comparate(snd);				// ‰¹ºƒf[ƒ^‚ğƒRƒ“ƒpƒŒ[ƒ^‚É“ü—Í
+		data = cmp.Comparate(snd);				// éŸ³å£°ãƒ‡ãƒ¼ã‚¿ã‚’ã‚³ãƒ³ãƒ‘ãƒ¬ãƒ¼ã‚¿ã«å…¥åŠ›
 		if(data==last) {
-			// ‘O‰ñ‚Æ”äŠrŒ‹‰Ê‚ª“¯‚¶‚È‚Ì‚ÅŒp‘±ŠúŠÔ‚ğ‘‚â‚·
+			// å‰å›ã¨æ¯”è¼ƒçµæœãŒåŒã˜ãªã®ã§ç¶™ç¶šæœŸé–“ã‚’å¢—ã‚„ã™
 			Length += period;
 		} else {
-			// true<->false‚ªØ‚è‘Ö‚í‚Á‚½‚Ì‚ÅAŒp‘±ŠúŠÔ‚Ìƒf[ƒ^‚ğo—Í
+			// true<->falseãŒåˆ‡ã‚Šæ›¿ã‚ã£ãŸã®ã§ã€ç¶™ç¶šæœŸé–“ã®ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›
 			long p = (long)((Length+period)/9e-6);
 			Length = 0.0;
 			while(p>0) {
@@ -210,11 +210,11 @@ void main( int argc, char *argv[] ) {
 				if(p>0x7fff) p1 = 0x7fff;
 				else		 p1 = p;
 				if(data==false) {
-					// 0‚ÌŠúŠÔ‚Ìƒf[ƒ^o—Í
+					// 0ã®æœŸé–“ã®ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
 					fputc(((p1>>8) | 0x80) & 0x00ff, fo);
 					fputc(  p1             & 0x00ff, fo);
 				} else {
-					// 1‚ÌŠúŠÔ‚Ìƒf[ƒ^o—Í
+					// 1ã®æœŸé–“ã®ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
 					fputc((p1>>8) & 0x007f, fo);
 					fputc( p1     & 0x00ff, fo);
 				}

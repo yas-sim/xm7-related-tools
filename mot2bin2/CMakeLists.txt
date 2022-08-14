@@ -1,0 +1,1 @@
+add_executable(mot2bin2 mot2bin2.cpp cmotorolas.cpp crange.cpp cmotorolas.h crange.h)

@@ -1,8 +1,8 @@
-#include "CLPF.H"
+ï»¿#include "CLPF.H"
 
 #define LPFTYPE	(1)
 
-// ƒf[ƒ^‚ðŒã‚ë‚É‚¸‚ç‚·
+// ãƒ‡ãƒ¼ã‚¿ã‚’å¾Œã‚ã«ãšã‚‰ã™
 void CLPF::ShiftData( void ) {
 	for(int i=CLPF_DEPTH-1; i>0; i--) {
 		m_Buff[i] = m_Buff[i-1];

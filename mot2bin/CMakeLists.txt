@@ -1,0 +1,1 @@
+add_executable(mot2bin mot2bin.cpp motorolas.cpp motorolas.h)

@@ -1,4 +1,4 @@
-#include "CPreCalc.h"
+ï»¿#include "CPreCalc.h"
 #include "CFile.h"
 #include "CWave.h"
 
@@ -17,21 +17,22 @@ void CPreCalc::DataInput( unsigned long data ) {
 	m_Buff[0] = data;
 }
 
-// ’~Ïƒf[ƒ^‚Ì•½‹Ï‚ÆA‚Î‚ç‚Â‚«(•W€•Î·)‚ğƒ`ƒFƒbƒN‚·‚é
+// è“„ç©ãƒ‡ãƒ¼ã‚¿ã®å¹³å‡ã¨ã€ã°ã‚‰ã¤ã(æ¨™æº–åå·®)ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 void CPreCalc::CheckData( unsigned long *center, unsigned long *delta ) {
 	*delta = 0L;
 	*center = 0L;
 	long s1=0L, s2=0L;
 	long data;
-	for(int i=0; i<CPRECALC_NOD; i++) {
+	int i;
+	for(i=0; i<CPRECALC_NOD; i++) {
 		data  = (long)m_Buff[i];
 		data -= s1;
 		s1   += data/(i+1);
 		s2   += i*data*data/(i+1);
 	}
 	s2 = (long)sqrt(s2/(i-1));
-	*center = (unsigned long)s1;		// •½‹Ï’l
-	*delta  = (unsigned long)s2;		// •W€•Î·
+	*center = (unsigned long)s1;		// å¹³å‡å€¤
+	*delta  = (unsigned long)s2;		// æ¨™æº–åå·®
 }
 
 bool CPreCalc::CalcParam( char *filename, unsigned long *noiselevel, 
@@ -40,17 +41,17 @@ bool CPreCalc::CalcParam( char *filename, unsigned long *noiselevel,
 	unsigned long center, delta;
 	unsigned short wavedata;
 	if(wav.Open(filename, FMODE_READ | FMODE_BIN)==false) return false;
-	wav.Seek(0x3a);		// wavƒtƒ@ƒCƒ‹‚Ìƒwƒbƒ_‚ğ”ò‚Î‚·
+	wav.Seek(0x3a);		// wavãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ˜ãƒƒãƒ€ã‚’é£›ã°ã™
 	m_NoiseLevel = CPRECALC_NOISE_LEVEL;
 	m_High = CPRECALC_AUDIO_CENTER;
 	m_Low  = CPRECALC_AUDIO_CENTER;
 	while(!wav.eof()) {
 		wavedata = wav.ReadWavDataMono();
-		if(fPhase==false) wavedata = 0xffff-wavedata;		// ˆÊ‘Š”½“]
+		if(fPhase==false) wavedata = 0xffff-wavedata;		// ä½ç›¸åè»¢
 		DataInput(wavedata);
-		// ƒf[ƒ^‚Ìƒoƒ‰ƒcƒL‚ğŒvZ
+		// ãƒ‡ãƒ¼ã‚¿ã®ãƒãƒ©ãƒ„ã‚­ã‚’è¨ˆç®—
 		CheckData(&center, &delta);
-		// ‚Î‚ç‚Â‚«‚ª¬‚³‚¢‚Æ‚«‚ÍAˆÀ’è‚µ‚Ä‚¢‚éŠúŠÔ‚Æ”»’f
+		// ã°ã‚‰ã¤ããŒå°ã•ã„ã¨ãã¯ã€å®‰å®šã—ã¦ã„ã‚‹æœŸé–“ã¨åˆ¤æ–­
 		if(delta<CPRECALC_TORELANT) {
 			if((unsigned long)abs(center-CPRECALC_AUDIO_CENTER)>m_NoiseLevel) {
 				if(center>CPRECALC_AUDIO_CENTER) {

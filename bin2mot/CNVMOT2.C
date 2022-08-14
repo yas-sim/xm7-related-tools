@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #define DATATYPE	(2)
@@ -20,7 +20,7 @@ typedef struct {
 
 SFORM Sdata;
 
-/* SFORM‚Ì’†g‚ğ‹ó‚É‚·‚é */
+/* SFORMã®ä¸­èº«ã‚’ç©ºã«ã™ã‚‹ */
 void Flush( SFORM *data )
 {
 	data->Type=0;
@@ -29,26 +29,26 @@ void Flush( SFORM *data )
 	data->Sum=0;
 }
 
-/* ƒŒƒR[ƒhƒ^ƒCƒv‚ğƒZƒbƒg‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ */
 void SetType( unsigned char type , SFORM *data )
 {
 	data->Type=type;
 }
 
-/* ƒŒƒR[ƒhŠJnƒAƒhƒŒƒX‚ğƒZƒbƒg‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰é–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ */
 void SetAddress( unsigned long address , SFORM *data )
 {
 	data->Address=address;
 }
 
-/* ƒŒƒR[ƒh‚Éƒf[ƒ^‚ğƒXƒgƒbƒN‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã«ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒƒã‚¯ã™ã‚‹ */
 void Stock( unsigned char stkdata , SFORM *data )
 {
 	data->Data[data->Size++]=stkdata;
 	data->Sum+=stkdata;
 }
 
-/* ƒŒƒR[ƒh‚ğo—Í‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã™ã‚‹ */
 void Put( SFORM *data )
 {
 	int i;
@@ -88,7 +88,7 @@ void Put( SFORM *data )
 	for(i=0; i<data->Size; i++ ) {
 		fprintf(stdout, "%02X", data->Data[i]);
 	}
-	fprintf(stdout, "%02X\n", (unsigned char)(~(data->Sum)));		/* ƒf[ƒ^‡Œv‚Ì•â”‚ªƒ`ƒFƒbƒNƒTƒ€ */
+	fprintf(stdout, "%02X\n", (unsigned char)(~(data->Sum)));		/* ãƒ‡ãƒ¼ã‚¿åˆè¨ˆã®è£œæ•°ãŒãƒã‚§ãƒƒã‚¯ã‚µãƒ  */
 }
 
 FILE *fopen_( char *filename , char *type )
@@ -120,10 +120,10 @@ void main( int argc , char *argv[] )
 	fpi=fopen_(argv[1], "rb");
 
 	Flush(&data);
-	SetType(0, &data);			/* ƒwƒbƒ_ƒŒƒR[ƒh */
+	SetType(0, &data);			/* ãƒ˜ãƒƒãƒ€ãƒ¬ã‚³ãƒ¼ãƒ‰ */
 	SetAddress(0L, &data);
 	ptr=argv[1];
-	while(*ptr!=(char)NULL) {	/* ƒwƒbƒ_ƒŒƒR[ƒh‚Ì’†g‚Íƒtƒ@ƒCƒ‹–¼ */
+	while(*ptr!=(char)NULL) {	/* ãƒ˜ãƒƒãƒ€ãƒ¬ã‚³ãƒ¼ãƒ‰ã®ä¸­èº«ã¯ãƒ•ã‚¡ã‚¤ãƒ«å */
 		Stock(*ptr++, &data);
 	}
 	Put(&data);
@@ -131,27 +131,27 @@ void main( int argc , char *argv[] )
 	adrs=0L;
 	count=0;
 	Flush(&data);
-	SetAddress(adrs, &data);	/* Ÿ‚ÌƒŒƒR[ƒh‚ÌŠJnƒAƒhƒŒƒX */
-	SetType(DATATYPE, &data);	/* ƒf[ƒ^ƒŒƒR[ƒhƒ^ƒCƒv‚ğw’è */
+	SetAddress(adrs, &data);	/* æ¬¡ã®ãƒ¬ã‚³ãƒ¼ãƒ‰ã®é–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ */
+	SetType(DATATYPE, &data);	/* ãƒ‡ãƒ¼ã‚¿ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‚’æŒ‡å®š */
 	while(!feof(fpi)) {
-		ch=fgetc(fpi);			/* ƒtƒ@ƒCƒ‹‚©‚ç‚PƒoƒCƒg“Ç‚İ‚İ */
+		ch=fgetc(fpi);			/* ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ï¼‘ãƒã‚¤ãƒˆèª­ã¿è¾¼ã¿ */
 		if(ch==-1) break;
-		Stock((unsigned char)ch, &data);		/* ƒŒƒR[ƒhƒoƒbƒtƒ@‚ÉŠi”[ */
-		count++;				/* ƒŒƒR[ƒhƒoƒbƒtƒ@ƒJƒEƒ“ƒ^‚ğ‘‚â‚· */
-		adrs++;					/* ƒAƒhƒŒƒXƒJƒEƒ“ƒ^‚ğ‘‚â‚· */
-		if(count>=0x10) {		/* ƒŒƒR[ƒhƒoƒbƒtƒ@ƒJƒEƒ“ƒ^‚ª0x10‚É‚È‚Á‚½‚çA‚»‚±‚Ü‚Å‚Ìƒf[ƒ^‚ğ“f‚«o‚· */
-			Put(&data);			/* ƒŒƒR[ƒho—Í */
-			Flush(&data);		/* ƒŒƒR[ƒhƒoƒbƒtƒ@‚ğƒtƒ‰ƒbƒVƒ…‚·‚é */
-			SetType(DATATYPE,&data);	/* ƒf[ƒ^ƒŒƒR[ƒhƒ^ƒCƒv‚ğw’è */
-			SetAddress(adrs, &data);	/* Ÿ‚ÌƒŒƒR[ƒh‚ÌƒAƒhƒŒƒXİ’è */
-			count=0;			/* ƒŒƒR[ƒhƒoƒbƒtƒ@ƒJƒEƒ“ƒ^‚ğƒNƒŠƒA */
+		Stock((unsigned char)ch, &data);		/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã«æ ¼ç´ */
+		count++;				/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã‚«ã‚¦ãƒ³ã‚¿ã‚’å¢—ã‚„ã™ */
+		adrs++;					/* ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚«ã‚¦ãƒ³ã‚¿ã‚’å¢—ã‚„ã™ */
+		if(count>=0x10) {		/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã‚«ã‚¦ãƒ³ã‚¿ãŒ0x10ã«ãªã£ãŸã‚‰ã€ãã“ã¾ã§ã®ãƒ‡ãƒ¼ã‚¿ã‚’åãå‡ºã™ */
+			Put(&data);			/* ãƒ¬ã‚³ãƒ¼ãƒ‰å‡ºåŠ› */
+			Flush(&data);		/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã™ã‚‹ */
+			SetType(DATATYPE,&data);	/* ãƒ‡ãƒ¼ã‚¿ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‚’æŒ‡å®š */
+			SetAddress(adrs, &data);	/* æ¬¡ã®ãƒ¬ã‚³ãƒ¼ãƒ‰ã®ã‚¢ãƒ‰ãƒ¬ã‚¹è¨­å®š */
+			count=0;			/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã‚«ã‚¦ãƒ³ã‚¿ã‚’ã‚¯ãƒªã‚¢ */
 		}
 	}
-	if(count)	Put(&data);		/* ƒŒƒR[ƒhƒoƒbƒtƒ@‚ÉA–¢‘—oƒf[ƒ^‚ªc‚Á‚Ä‚¢‚éê‡A‚»‚ê‚ğo—Í‚·‚é */
+	if(count)	Put(&data);		/* ãƒ¬ã‚³ãƒ¼ãƒ‰ãƒãƒƒãƒ•ã‚¡ã«ã€æœªé€å‡ºãƒ‡ãƒ¼ã‚¿ãŒæ®‹ã£ã¦ã„ã‚‹å ´åˆã€ãã‚Œã‚’å‡ºåŠ›ã™ã‚‹ */
 
-	Flush(&data);				/* ÅŒã‚ÉƒGƒ“ƒhƒŒƒR[ƒh‚ğo—Í‚·‚é */
+	Flush(&data);				/* æœ€å¾Œã«ã‚¨ãƒ³ãƒ‰ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã™ã‚‹ */
 	SetAddress(0L, &data);
-	SetType(ENDTYPE, &data);	/* ƒGƒ“ƒhƒŒƒR[ƒhƒ^ƒCƒv */
+	SetType(ENDTYPE, &data);	/* ã‚¨ãƒ³ãƒ‰ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ— */
 	Put(&data);
 
 	fclose(fpi);

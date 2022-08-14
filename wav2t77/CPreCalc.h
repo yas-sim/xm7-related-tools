@@ -1,11 +1,11 @@
-#ifndef _CPRECALC_H_
+ï»¿#ifndef _CPRECALC_H_
 #define _CPRECALC_H_
 
-// FM-7ƒZ[ƒuƒf[ƒ^‚Ìwavƒtƒ@ƒCƒ‹‚ðƒXƒLƒƒƒ“‚µ‚ÄAƒmƒCƒYƒŒƒxƒ‹AH,L‚ÌŠeƒŒƒxƒ‹‚ð
-// ‹‚ß‚éƒNƒ‰ƒX
+// FM-7ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ã®wavãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¹ã‚­ãƒ£ãƒ³ã—ã¦ã€ãƒŽã‚¤ã‚ºãƒ¬ãƒ™ãƒ«ã€H,Lã®å„ãƒ¬ãƒ™ãƒ«ã‚’
+// æ±‚ã‚ã‚‹ã‚¯ãƒ©ã‚¹
 
 #define CPRECALC_NOD				(10)
-#define CPRECALC_TORELANT			(120)		// •W€•Î·‚Ì‹–—e”ÍˆÍ
+#define CPRECALC_TORELANT			(120)		// æ¨™æº–åå·®ã®è¨±å®¹ç¯„å›²
 #define CPRECALC_AUDIO_CENTER		(0x8000)
 #define CPRECALC_NOISE_LEVEL		(0x200)
 

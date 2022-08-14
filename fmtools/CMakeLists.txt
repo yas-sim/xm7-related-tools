@@ -1,1 +1,7 @@
 add_subdirectory(fmfslib)
+add_subdirectory(fmcopy)
+add_subdirectory(fmdecode)
+add_subdirectory(fmdir)
+add_subdirectory(fmencode)
+add_subdirectory(fmread)
+add_subdirectory(fmwrite)

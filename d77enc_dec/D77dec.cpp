@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,7 +21,7 @@ typedef struct {
 	char	R;
 	char	N;
 	short	SPT;		// Sector per track
-	char	Density;	// 00:”{–§ 40:’P–§
+	char	Density;	// 00:å€å¯† 40:å˜å¯†
 	char	DDM;		// Deleted data mark 00:Normal 10:DDM
 	char	Status;
 	char	Reserve[5];
@@ -129,9 +129,9 @@ void main( int argc, char *argv[])
 			break;
 		default:
 			if(strlen(infile)==0) {
-				strcpy(infile, argv[i]);	// infile‚ª‹ó‚È‚çinfile‚Éargv‚ğİ’è
+				strcpy(infile, argv[i]);	// infileãŒç©ºãªã‚‰infileã«argvã‚’è¨­å®š
 			} else {
-				strcpy(outfile, argv[i]);	// infile‚É‚È‚É‚©“ü‚Á‚Ä‚¢‚ê‚Îoutfile‚Éargv‚ğİ’è
+				strcpy(outfile, argv[i]);	// infileã«ãªã«ã‹å…¥ã£ã¦ã„ã‚Œã°outfileã«argvã‚’è¨­å®š
 			}
 			break;
 		}

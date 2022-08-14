@@ -1,12 +1,12 @@
-// ROMƒ‰ƒCƒ^‚©‚ç‹z‚¢o‚µ‚½ROMƒtƒ@ƒCƒ‹‚©‚çXM7‚Å—˜—p‚·‚éƒtƒ@ƒCƒ‹‚ğØ‚èo‚·ƒvƒƒOƒ‰ƒ€
+ï»¿// ROMãƒ©ã‚¤ã‚¿ã‹ã‚‰å¸ã„å‡ºã—ãŸROMãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰XM7ã§åˆ©ç”¨ã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã‚’åˆ‡ã‚Šå‡ºã™ãƒ—ãƒ­ã‚°ãƒ©ãƒ 
 #include <stdio.h>
 #include <stdlib.h>
 
-// v0.1 000318 •\¦ƒƒbƒZ[ƒW‚ğC³(‹@”\•ÏX‚È‚µ)
+// v0.1 000318 è¡¨ç¤ºãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’ä¿®æ­£(æ©Ÿèƒ½å¤‰æ›´ãªã—)
 
 #define VERSION "v0.1"
 
-// src‚Ìstart‚©‚çend”Ô’n‚Ü‚Å‚ğdstƒtƒ@ƒCƒ‹‚É‘‚«o‚·B
+// srcã®startã‹ã‚‰endç•ªåœ°ã¾ã§ã‚’dstãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãå‡ºã™ã€‚
 bool cut( char *src, char *dst, long start, long end ) {
 	printf("$%04x to $%04x of '%s' is cut for '%s'\n", start, end, src, dst); 
 	FILE *fi, *fo;

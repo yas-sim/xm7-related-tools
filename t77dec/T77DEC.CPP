@@ -1,12 +1,12 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <process.h>
 #include <string.h>
 
-// v0.3 001004  ƒrƒbƒg”»’è•û–@‚ğAT77¨ƒrƒbƒgƒXƒgƒŠ[ƒ€‰»¨”»’è‚É•ÏXBˆ—ŠÔ‚Í‚©‚©‚é‚ªA³Šm
-// v0.4 001005	BASIC(I-CODE)=IBA, (ASCII)=BAS‚ÉŠg’£q‚ğ•ÏX
-// v0.5 001009  ƒ}ƒVƒ“Œêƒtƒ@ƒCƒ‹‚ğóMA‚PƒoƒCƒg—]•ª‚Éƒf[ƒ^‚ğ‘‚«‚ñ‚Å‚¢‚½‚Ì‚ğC³
-// V0.6 010114	ƒ}ƒVƒ“ŒêóMAƒwƒbƒ_‚Ì“Ç‚İ‚¾‚µŠJnˆÊ’u‚ğ5‘‚â‚µ‚Ä‚¢‚é‚Ì‚ÉA‚³‚ç‚ÉƒuƒƒbƒNƒTƒCƒY‚ğ5ˆø‚¢‚Ä‚µ‚Ü‚Á‚Ä‚¢‚½ƒoƒO‚ğC³
+// v0.3 001004  ãƒ“ãƒƒãƒˆåˆ¤å®šæ–¹æ³•ã‚’ã€T77â†’ãƒ“ãƒƒãƒˆã‚¹ãƒˆãƒªãƒ¼ãƒ åŒ–â†’åˆ¤å®šã«å¤‰æ›´ã€‚å‡¦ç†æ™‚é–“ã¯ã‹ã‹ã‚‹ãŒã€æ­£ç¢º
+// v0.4 001005	BASIC(I-CODE)=IBA, (ASCII)=BASã«æ‹¡å¼µå­ã‚’å¤‰æ›´
+// v0.5 001009  ãƒã‚·ãƒ³èªãƒ•ã‚¡ã‚¤ãƒ«ã‚’å—ä¿¡æ™‚ã€ï¼‘ãƒã‚¤ãƒˆä½™åˆ†ã«ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãè¾¼ã‚“ã§ã„ãŸã®ã‚’ä¿®æ­£
+// V0.6 010114	ãƒã‚·ãƒ³èªå—ä¿¡æ™‚ã€ãƒ˜ãƒƒãƒ€ã®èª­ã¿ã ã—é–‹å§‹ä½ç½®ã‚’5å¢—ã‚„ã—ã¦ã„ã‚‹ã®ã«ã€ã•ã‚‰ã«ãƒ–ãƒ­ãƒƒã‚¯ã‚µã‚¤ã‚ºã‚’5å¼•ã„ã¦ã—ã¾ã£ã¦ã„ãŸãƒã‚°ã‚’ä¿®æ­£
 
 #define VERSION		"0.6"
 
@@ -37,7 +37,7 @@ inline int GetBitStatus( FILE *fp, bool phase ) {
 
 int GetBit(FILE *fp, bool phase) {
 	int bit;
-	// —§‚¿ã‚ª‚èŒŸo
+	// ç«‹ã¡ä¸ŠãŒã‚Šæ¤œå‡º
 	do {
 		bit = GetBitStatus(fp, phase);
 		if(bit==-1) return -1;
@@ -46,7 +46,7 @@ int GetBit(FILE *fp, bool phase) {
 		bit = GetBitStatus(fp, phase);
 		if(bit==-1) return -1;
 	} while(bit==0);
-	int check_point = 312;		// 2400bps‚Å‚Ì3/4üŠúƒ|ƒCƒ“ƒg
+	int check_point = 312;		// 2400bpsã§ã®3/4å‘¨æœŸãƒã‚¤ãƒ³ãƒˆ
 	for(int i=0; i<check_point; i++) {
 		bit = GetBitStatus(fp, phase);
 	}
@@ -57,23 +57,23 @@ int GetByte(FILE *fp, bool phase) {
 	int bit, byte;
 	int stop1, stop2;
 	byte = 0;
-	// ƒXƒ^[ƒgƒrƒbƒg‘Ò‚¿
+	// ã‚¹ã‚¿ãƒ¼ãƒˆãƒ“ãƒƒãƒˆå¾…ã¡
 	do {
 		bit=GetBit(fp, phase);
 		if(bit==-1) return -1;
 	} while(bit!=0);
-	// ƒf[ƒ^ƒtƒŒ[ƒ€\’z
+	// ãƒ‡ãƒ¼ã‚¿ãƒ•ãƒ¬ãƒ¼ãƒ æ§‹ç¯‰
 	for(int i=0; i<8; i++) {
 		bit=GetBit(fp, phase);
 		if(bit==-1) return -1;
 		byte = (bit==0?0:0x80) | (byte>>1);
 	}
-	// ƒXƒgƒbƒvƒrƒbƒgƒ`ƒFƒbƒN
+	// ã‚¹ãƒˆãƒƒãƒ—ãƒ“ãƒƒãƒˆãƒã‚§ãƒƒã‚¯
 	stop1=GetBit(fp, phase);
 	if(stop1==-1) return -1;
 	stop2=GetBit(fp, phase);
 	if(stop2==-1) return -1;
-	if(stop1!=1 || stop2!=1) return -2;	// ƒtƒŒ[ƒ~ƒ“ƒOƒGƒ‰[
+	if(stop1!=1 || stop2!=1) return -2;	// ãƒ•ãƒ¬ãƒ¼ãƒŸãƒ³ã‚°ã‚¨ãƒ©ãƒ¼
 	return byte;
 }
 
@@ -81,7 +81,7 @@ int GetBlock( FILE *fp, bool phase, unsigned char *buff, int &type) {
 	int ch;
 	int previous = 0;
 	int len = 0;
-	// ƒwƒbƒ_ƒ}[ƒJ[(0x013c)‘Ò‚¿
+	// ãƒ˜ãƒƒãƒ€ãƒãƒ¼ã‚«ãƒ¼(0x013c)å¾…ã¡
 	while(1) {
 		ch = GetByte(fp, phase);
 		if(ch==-1) return -1;
@@ -91,7 +91,7 @@ int GetBlock( FILE *fp, bool phase, unsigned char *buff, int &type) {
 	int blen, sum;
 	if((type = GetByte(fp, phase))==-1) return -1;
 	if((blen = GetByte(fp, phase))==-1) return -1;
-	sum = type + blen;			// ƒ`ƒFƒbƒNƒTƒ€‰Šú’l
+	sum = type + blen;			// ãƒã‚§ãƒƒã‚¯ã‚µãƒ åˆæœŸå€¤
 	for(int i=0; i<blen; i++) {
 		ch = GetByte(fp, phase);
 		if(ch==-1) return -1;
@@ -130,24 +130,24 @@ void main(int argc, char *argv[])
 		exit(0);
 	}
 
-	// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+	// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æ
 	int source=0;
 	bool fVerbose = false;
-	bool fPhase=true;		// ‰¹ºƒtƒ@ƒCƒ‹‚ÌˆÊ‘Š(true=Normal False=Reverse)
-	bool fDump = false;		// ƒwƒbƒ_‚È‚Ç‚·‚×‚Ä‚Ìƒf[ƒ^‚ğƒfƒR[ƒh‚·‚é(true)‚©Aƒf[ƒ^‚Ì‚İ‚ÅƒR[ƒh‚·‚é‚©(false)
+	bool fPhase=true;		// éŸ³å£°ãƒ•ã‚¡ã‚¤ãƒ«ã®ä½ç›¸(true=Normal False=Reverse)
+	bool fDump = false;		// ãƒ˜ãƒƒãƒ€ãªã©ã™ã¹ã¦ã®ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ‡ã‚³ãƒ¼ãƒ‰ã™ã‚‹(true)ã‹ã€ãƒ‡ãƒ¼ã‚¿ã®ã¿ã§ã‚³ãƒ¼ãƒ‰ã™ã‚‹ã‹(false)
 	for(int i=1; i<argc; i++) {
 		if(argv[i][0]=='-' || argv[i][0]=='/') {
 			switch(argv[i][1]) {
 			case 'p':
-			case 'P':					// ˆÊ‘Š‚Ìw’è
+			case 'P':					// ä½ç›¸ã®æŒ‡å®š
 				switch(argv[i][2]) {
 				case 'n':
 				case 'N':
-					fPhase = true;		// ³‘Š
+					fPhase = true;		// æ­£ç›¸
 					break;
 				case 'r':
 				case 'R':
-					fPhase = false;		// ‹t‘Š
+					fPhase = false;		// é€†ç›¸
 					break;
 				}
 				break;
@@ -159,19 +159,19 @@ void main(int argc, char *argv[])
 				break;
 			case 'v':
 			case 'V':
-				// Verbose modeƒZƒbƒg
+				// Verbose modeã‚»ãƒƒãƒˆ
 				fVerbose = true;
 				break;
 			case 'd':
 			case 'D':
-				// Full dump ƒ‚[ƒh
+				// Full dump ãƒ¢ãƒ¼ãƒ‰
 				fDump = true;
 				break;
 			default:
 				break;
 			}
 		} else {
-			// ƒIƒvƒVƒ‡ƒ“w’èq‚ª‚È‚¢ê‡Aƒtƒ@ƒCƒ‹–¼‚Æ‚İ‚È‚·
+			// ã‚ªãƒ—ã‚·ãƒ§ãƒ³æŒ‡å®šå­ãŒãªã„å ´åˆã€ãƒ•ã‚¡ã‚¤ãƒ«åã¨ã¿ãªã™
 			source=i;
 		}
 	}
@@ -188,13 +188,13 @@ void main(int argc, char *argv[])
 	}
 
 	unsigned char buff[1024];
-	// ƒwƒbƒ_[ƒ`ƒFƒbƒN!
+	// ãƒ˜ãƒƒãƒ€ãƒ¼ãƒã‚§ãƒƒã‚¯!
 	fgets((char*)buff, 20, fpi);
 	if(strcmp((char*)buff, "XM7 TAPE IMAGE 0")!=0) {
 		puts("Source file is not a valid XM7 tape image file");
 		exit(1);
 	}
-	fseek(fpi, 0x10, SEEK_SET);		// ƒwƒbƒ_“Ç‚İ”ò‚Î‚µ
+	fseek(fpi, 0x10, SEEK_SET);		// ãƒ˜ãƒƒãƒ€èª­ã¿é£›ã°ã—
 
 	if(fDump==true) {
 		// Full Dump
@@ -210,16 +210,16 @@ void main(int argc, char *argv[])
 	} else {
 		// Data Dump
 		char outfile[20];
-		int type;				// óM‚µ‚½ƒuƒƒbƒN‚Ìí—Ş  00:ƒwƒbƒ_  01:ƒf[ƒ^ 0xff:ƒGƒ“ƒh
-		int filetype;			// ƒtƒ@ƒCƒ‹‚Ìí—Ş  00:BASIC 01:ASCII 02:BINARY
+		int type;				// å—ä¿¡ã—ãŸãƒ–ãƒ­ãƒƒã‚¯ã®ç¨®é¡  00:ãƒ˜ãƒƒãƒ€  01:ãƒ‡ãƒ¼ã‚¿ 0xff:ã‚¨ãƒ³ãƒ‰
+		int filetype;			// ãƒ•ã‚¡ã‚¤ãƒ«ã®ç¨®é¡  00:BASIC 01:ASCII 02:BINARY
 		int total_len;
 		int block_count;
-		int size, start, exec;	// ƒ}ƒVƒ“Œêƒtƒ@ƒCƒ‹‚Ì‚Æ‚«‚ÌƒXƒ^[ƒgƒAƒhƒŒƒXAƒTƒCƒYAÀsŠJnƒAƒhƒŒƒX
+		int size, start, exec;	// ãƒã‚·ãƒ³èªãƒ•ã‚¡ã‚¤ãƒ«ã®ã¨ãã®ã‚¹ã‚¿ãƒ¼ãƒˆã‚¢ãƒ‰ãƒ¬ã‚¹ã€ã‚µã‚¤ã‚ºã€å®Ÿè¡Œé–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹
 		int state=0;			// 00:Waiting for header   01:Data receiving
 		
-		int remain=65536;		// ƒ}ƒVƒ“Œê‚Ì‚Æ‚«‚Ì‚İg—pBÅŒã‚Ì3ƒoƒCƒg‚ÉŠJnƒAƒhƒŒƒX‚ª‚ ‚èA‚»‚ê‚ğæ‚èo‚·êŠ‚ğ”»’è‚·‚é‚Ì‚Ég—p‚·‚é
+		int remain=65536;		// ãƒã‚·ãƒ³èªã®ã¨ãã®ã¿ä½¿ç”¨ã€‚æœ€å¾Œã®3ãƒã‚¤ãƒˆã«é–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒã‚ã‚Šã€ãã‚Œã‚’å–ã‚Šå‡ºã™å ´æ‰€ã‚’åˆ¤å®šã™ã‚‹ã®ã«ä½¿ç”¨ã™ã‚‹
 		while(1) {
-			int len = GetBlock(fpi, fPhase, buff, type);		// 1ƒuƒƒbƒN“Ç‚İo‚µ
+			int len = GetBlock(fpi, fPhase, buff, type);		// 1ãƒ–ãƒ­ãƒƒã‚¯èª­ã¿å‡ºã—
 			if(len==-1) break;
 			if(len==-3) {
 				puts("Check sum error");
@@ -227,19 +227,19 @@ void main(int argc, char *argv[])
 			}
 			int i;
 			switch(state) {
-			case 0:						// ƒwƒbƒ_[‘Ò‚¿
-				if(type!=0) break;		// ƒwƒbƒ_‚Å‚Í‚È‚©‚Á‚½‚Ì‚Å–³‹
+			case 0:						// ãƒ˜ãƒƒãƒ€ãƒ¼å¾…ã¡
+				if(type!=0) break;		// ãƒ˜ãƒƒãƒ€ã§ã¯ãªã‹ã£ãŸã®ã§ç„¡è¦–
 				for(i=0; i<8; i++) {
 					outfile[i] = buff[i];
 				}
 				outfile[i] = '\0';
-				// ƒtƒ@ƒCƒ‹–¼‚ÌŒã‚ë‚ÌƒXƒy[ƒX‚ğíœ‚·‚é
+				// ãƒ•ã‚¡ã‚¤ãƒ«åã®å¾Œã‚ã®ã‚¹ãƒšãƒ¼ã‚¹ã‚’å‰Šé™¤ã™ã‚‹
 //				while(i>0) {
 //					i--;
 //					if(outfile[i]==' ') outfile[i]='\0'; else break;
 //				}
 				printf("\nFOUND:\"%s\"  ", outfile);
-				// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv‚Ìˆ—io—Íƒtƒ@ƒCƒ‹‚ÌŠg’£q•t‚¯‚Æ‚©j
+				// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—ã®å‡¦ç†ï¼ˆå‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­ä»˜ã‘ã¨ã‹ï¼‰
 				filetype = buff[8];
 				switch(filetype) {
 				case 0:
@@ -268,11 +268,11 @@ void main(int argc, char *argv[])
 				total_len=0;
 				fpo = fopen(outfile, "wb");
 				block_count = 0;
-				state = 1;				// ƒf[ƒ^óMó‘Ô‚É‘JˆÚ
+				state = 1;				// ãƒ‡ãƒ¼ã‚¿å—ä¿¡çŠ¶æ…‹ã«é·ç§»
 				break;
 			case 1:
-				// ƒf[ƒ^óMˆ—
-				if(type==0xff) {		// ENDƒuƒƒbƒNóM‚Ìˆ—
+				// ãƒ‡ãƒ¼ã‚¿å—ä¿¡å‡¦ç†
+				if(type==0xff) {		// ENDãƒ–ãƒ­ãƒƒã‚¯å—ä¿¡æ™‚ã®å‡¦ç†
 					if(fVerbose) {
 						printf("LENGTH=$%04x", total_len);
 						if(filetype==2) {
@@ -283,11 +283,11 @@ void main(int argc, char *argv[])
 						}
 					}
 					fclose(fpo);
-					state = 0;			// ƒwƒbƒ_‘Ò‚¿‚É‘JˆÚ
+					state = 0;			// ãƒ˜ãƒƒãƒ€å¾…ã¡ã«é·ç§»
 					break;
 				}
-				if(type!=1) break;		// ƒf[ƒ^ƒuƒƒbƒN‚Å‚È‚¢‚Ì‚Å–³‹
-				switch(filetype) {		// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv•Ê‚ÉóMˆ—‚ğ•ª‚¯‚é
+				if(type!=1) break;		// ãƒ‡ãƒ¼ã‚¿ãƒ–ãƒ­ãƒƒã‚¯ã§ãªã„ã®ã§ç„¡è¦–
+				switch(filetype) {		// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—åˆ¥ã«å—ä¿¡å‡¦ç†ã‚’åˆ†ã‘ã‚‹
 				case 0:		// BASIC Program
 					total_len += len;
 					for(i=0; i<len; i++) {
@@ -302,19 +302,19 @@ void main(int argc, char *argv[])
 					break;
 				case 2:		// Machine language
 					int start_pos = 0;
-					if(block_count==0) {		// Å‰‚Ìƒf[ƒ^ƒuƒƒbƒN‚Ì‚Íƒwƒbƒ_î•ñ‚ğæ‚èo‚·
+					if(block_count==0) {		// æœ€åˆã®ãƒ‡ãƒ¼ã‚¿ãƒ–ãƒ­ãƒƒã‚¯ã®æ™‚ã¯ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’å–ã‚Šå‡ºã™
 						size = (buff[1]<<8) | buff[2];
 						start = (buff[3]<<8) | buff[4];
-						remain = size;		// ‘S‘Ì‚Ìc‚è“]‘—”‚ğİ’è
-						start_pos = 5;		// ƒwƒbƒ_‚Ì•ªƒ_ƒ“ƒvŠJnˆÊ’u‚ğ‚¸‚ç‚·
+						remain = size;		// å…¨ä½“ã®æ®‹ã‚Šè»¢é€æ•°ã‚’è¨­å®š
+						start_pos = 5;		// ãƒ˜ãƒƒãƒ€ã®åˆ†ãƒ€ãƒ³ãƒ—é–‹å§‹ä½ç½®ã‚’ãšã‚‰ã™
 					}
 					block_count++;
 					for(int i=start_pos; i<len; i++) {
 						if(remain>0) {
 							fputc(buff[i], fpo);
 							total_len++;
-						} else {			// c‚èƒTƒCƒY‚ª0‚Ìê‡‚ÍAÅŒã‚É–„‚ß‚Ä‚ ‚éÀsŠJnƒAƒhƒŒƒX‚ğæ“¾‚µ‚ÄI—¹
-							exec = (buff[i+3]<<8) | buff[i+4];	// FF 00 00‚ğ“Ç‚İ”ò‚Î‚·
+						} else {			// æ®‹ã‚Šã‚µã‚¤ã‚ºãŒ0ã®å ´åˆã¯ã€æœ€å¾Œã«åŸ‹ã‚ã¦ã‚ã‚‹å®Ÿè¡Œé–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å–å¾—ã—ã¦çµ‚äº†
+							exec = (buff[i+3]<<8) | buff[i+4];	// FF 00 00ã‚’èª­ã¿é£›ã°ã™
 							break;
 						}
 						remain--;

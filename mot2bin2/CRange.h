@@ -1,4 +1,4 @@
-#ifndef _CRANGE_H_
+﻿#ifndef _CRANGE_H_
 #define _CRANGE_H_
 
 #include <stdio.h>

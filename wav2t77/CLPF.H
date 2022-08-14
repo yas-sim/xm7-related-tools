@@ -1,4 +1,4 @@
-#ifndef _CLPF_H_
+ï»¿#ifndef _CLPF_H_
 #define _CLPF_H_
 
 #include "CFILTER.H"
@@ -16,7 +16,7 @@ public:
 		for(int i=0; i<CLPF_DEPTH; i++) {
 			m_Buff[i] = CLPF_AUDIO_CENTER;
 		}
-		m_Integrate = 0x8000;		// ƒTƒEƒ“ƒh‚ÌƒZƒ“ƒ^[’l
+		m_Integrate = 0x8000;		// ã‚µã‚¦ãƒ³ãƒ‰ã®ã‚»ãƒ³ã‚¿ãƒ¼å€¤
 	}
 	virtual void DataInput( unsigned long data );
 	virtual unsigned long DataOutput( void );

@@ -1,24 +1,24 @@
-#include "CAGC.H"
+ï»¿#include "CAGC.H"
 #include <math.h>
 
 #define SIGN(num)	(num<0?-1:num>0?1:0)
 
-#define CAGC_AUDIO_MAX	(CAGC_AUDIO_CENTER*50/100)	// Å‘å’l‚Ì50%‚ğ–Ú•W‚ÉƒQƒCƒ“İ’è‚·‚é
-#define CAGC_GAIN_LIMIT	(8*0x100)					// Å‘åƒQƒCƒ“
+#define CAGC_AUDIO_MAX	(CAGC_AUDIO_CENTER*50/100)	// æœ€å¤§å€¤ã®50%ã‚’ç›®æ¨™ã«ã‚²ã‚¤ãƒ³è¨­å®šã™ã‚‹
+#define CAGC_GAIN_LIMIT	(8*0x100)					// æœ€å¤§ã‚²ã‚¤ãƒ³
 
 #include <stdio.h>
 
 void CAGC::DataInput( unsigned long data ) {
 	int delta;
-	m_latestdata = (long)data;						// ÅVƒf[ƒ^‚ğ•Û‘¶
-	data = abs(data-CAGC_AUDIO_CENTER);				// ƒf[ƒ^‚Ìâ‘Î’l‚ğæ‚é
+	m_latestdata = (long)data;						// æœ€æ–°ãƒ‡ãƒ¼ã‚¿ã‚’ä¿å­˜
+	data = abs(data-CAGC_AUDIO_CENTER);				// ãƒ‡ãƒ¼ã‚¿ã®çµ¶å¯¾å€¤ã‚’å–ã‚‹
 	delta = m_olddata - data;
-	if(SIGN(delta)==-1 && SIGN(m_olddelta)==1) {	// ƒf[ƒ^‚Ìƒs[ƒN‚ğŒŸo
+	if(SIGN(delta)==-1 && SIGN(m_olddelta)==1) {	// ãƒ‡ãƒ¼ã‚¿ã®ãƒ”ãƒ¼ã‚¯ã‚’æ¤œå‡º
 		m_lpf.DataInput(data);
 		int gain;
-		gain = (CAGC_AUDIO_MAX*0x100)/m_lpf.DataOutput();		// ƒQƒCƒ“‚ğŒvZ
-		m_gain += (gain-m_gain)/10;								// ƒQƒCƒ“•â³
-		if(m_gain>CAGC_GAIN_LIMIT) m_gain = CAGC_GAIN_LIMIT;	// ƒQƒCƒ“ƒŠƒ~ƒbƒ^
+		gain = (CAGC_AUDIO_MAX*0x100)/m_lpf.DataOutput();		// ã‚²ã‚¤ãƒ³ã‚’è¨ˆç®—
+		m_gain += (gain-m_gain)/10;								// ã‚²ã‚¤ãƒ³è£œæ­£
+		if(m_gain>CAGC_GAIN_LIMIT) m_gain = CAGC_GAIN_LIMIT;	// ã‚²ã‚¤ãƒ³ãƒªãƒŸãƒƒã‚¿
 	}
 	m_olddelta = delta;
 	m_olddata = data;
@@ -27,14 +27,14 @@ void CAGC::DataInput( unsigned long data ) {
 unsigned long CAGC::DataOutput( void ) {
 	short snd;
 	unsigned long result;
-	// ƒfƒJƒbƒvƒŠƒ“ƒO(DC¬•ªœ‹)
+	// ãƒ‡ã‚«ãƒƒãƒ—ãƒªãƒ³ã‚°(DCæˆåˆ†é™¤å»)
 	snd = m_latestdata-CAGC_AUDIO_CENTER;
-	// U••â³
+	// æŒ¯å¹…è£œæ­£
 	snd = (snd*m_gain)/0x100;
-	// ƒNƒŠƒbƒsƒ“ƒOˆ—
+	// ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°å‡¦ç†
 	if(snd<(-CAGC_AUDIO_CENTER)+1)	snd = (-CAGC_AUDIO_CENTER)+1;
 	if(snd>CAGC_AUDIO_CENTER-1)		snd = CAGC_AUDIO_CENTER-1;
-	// ƒoƒCƒAƒX•t‰Á
+	// ãƒã‚¤ã‚¢ã‚¹ä»˜åŠ 
 	result = snd + CAGC_AUDIO_CENTER;
 //	printf("%x -> %x = %x\n", m_latestdata, m_gain, result);
 	return result;

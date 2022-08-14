@@ -1,4 +1,4 @@
-#ifndef _FMERR_H_
+﻿#ifndef _FMERR_H_
 #define _FMERR_H_
 
 #define FM_NO_ERROR				(0)

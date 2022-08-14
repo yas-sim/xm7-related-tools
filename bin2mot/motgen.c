@@ -1,11 +1,11 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #include "motgen.h"
 
 static SFORM motDATA;
 
-/* SFORM‚Ì’†g‚ğ‹ó‚É‚·‚é */
+/* SFORMã®ä¸­èº«ã‚’ç©ºã«ã™ã‚‹ */
 void motInit( void )
 {
 	motDATA.Type=0;
@@ -14,19 +14,19 @@ void motInit( void )
 	motDATA.Sum=0;
 }
 
-/* ƒŒƒR[ƒhƒ^ƒCƒv‚ğƒZƒbƒg‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚¿ã‚¤ãƒ—ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ */
 void motSetType( unsigned char type )
 {
 	motDATA.Type=type;
 }
 
-/* ƒŒƒR[ƒhŠJnƒAƒhƒŒƒX‚ğƒZƒbƒg‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰é–‹å§‹ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ */
 void motSetAddress( unsigned long address  )
 {
 	motDATA.Address=address;
 }
 
-/* ƒŒƒR[ƒh‚ğo—Í‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã™ã‚‹ */
 static void motPut( void )
 {
 	int i;
@@ -67,10 +67,10 @@ static void motPut( void )
 	for(i=0; i<motDATA.Size; i++ ) {
 		fprintf(stdout, "%02X", motDATA.Data[i]);
 	}
-	fprintf(stdout, "%02X\n", (unsigned char)(~(motDATA.Sum)));		/* ƒf[ƒ^‡Œv‚Ì•â”‚ªƒ`ƒFƒbƒNƒTƒ€ */
+	fprintf(stdout, "%02X\n", (unsigned char)(~(motDATA.Sum)));		/* ãƒ‡ãƒ¼ã‚¿åˆè¨ˆã®è£œæ•°ãŒãƒã‚§ãƒƒã‚¯ã‚µãƒ  */
 }
 
-/* —­‚Ü‚Á‚Ä‚¢‚éƒf[ƒ^‚ğo—Í‚µAƒoƒbƒtƒ@‚ğƒtƒ‰ƒbƒVƒ…‚·‚é */
+/* æºœã¾ã£ã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›ã—ã€ãƒãƒƒãƒ•ã‚¡ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã™ã‚‹ */
 void motFlush( void )
 {
 	motPut();
@@ -79,8 +79,8 @@ void motFlush( void )
 	motDATA.Sum=0;
 }
 
-/* ƒŒƒR[ƒh‚Éƒf[ƒ^‚ğƒXƒgƒbƒN‚·‚é */
-/* ƒf[ƒ^‚ªƒŒƒR[ƒh’·‚É‚È‚Á‚½‚çA‚»‚ê‚Ü‚Å‚Ìƒf[ƒ^‚ğo—Í‚·‚é */
+/* ãƒ¬ã‚³ãƒ¼ãƒ‰ã«ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒƒã‚¯ã™ã‚‹ */
+/* ãƒ‡ãƒ¼ã‚¿ãŒãƒ¬ã‚³ãƒ¼ãƒ‰é•·ã«ãªã£ãŸã‚‰ã€ãã‚Œã¾ã§ã®ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›ã™ã‚‹ */
 void motStock( unsigned char stkdata )
 {
 	motDATA.Data[motDATA.Size++]=stkdata;

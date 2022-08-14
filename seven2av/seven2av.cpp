@@ -1,10 +1,10 @@
-#include <stdlib.h>
+ï»¿#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #define VERSION	"v0.3"
 
-// v0.3 -CompatibleROMƒIƒvƒVƒ‡ƒ“‚ğ’Ç‰ÁBsubsys_a.rom‚Æsubsys_b.rom‚Ì©“®¶¬‚ğ—}§‚·‚éƒIƒvƒVƒ‡ƒ“
+// v0.3 -CompatibleROMã‚ªãƒ—ã‚·ãƒ§ãƒ³ã‚’è¿½åŠ ã€‚subsys_a.romã¨subsys_b.romã®è‡ªå‹•ç”Ÿæˆã‚’æŠ‘åˆ¶ã™ã‚‹ã‚ªãƒ—ã‚·ãƒ§ãƒ³
 
 bool _CopyFile( char *src, char *dst ) {
 	FILE *fpi, *fpo;
@@ -25,7 +25,7 @@ bool SUBSYS( bool fCompatibleROM ) {
 	FILE *fpi, *fpo;
 	if((fpi=fopen("SUBSYS_C.ROM", "rb"))==NULL) return false;
 	
-	// SUBSYS_C.ROM‚Ìæ“ª‚©‚ç0x800ƒoƒCƒg‚ğ4‰ñƒRƒs[‚µ‚ÄSUBSYS_CG.ROM‚ğì‚é
+	// SUBSYS_C.ROMã®å…ˆé ­ã‹ã‚‰0x800ãƒã‚¤ãƒˆã‚’4å›ã‚³ãƒ”ãƒ¼ã—ã¦SUBSYS_CG.ROMã‚’ä½œã‚‹
 	if((fpo=fopen("SUBSYSCG.ROM", "wb"))==NULL) { fclose(fpi); return false; }
 	for(int i=0; i<4; i++) {
 		fseek(fpi, 0, SEEK_SET);
@@ -36,7 +36,7 @@ bool SUBSYS( bool fCompatibleROM ) {
 	fclose(fpo);
 
 	if(fCompatibleROM==false) {
-		// SUBSYS_C.ROM‚Ì0x800ƒoƒCƒg–Ú‚©‚ç0x2000ƒoƒCƒg•ª‚ğƒRƒs[‚µ‚ÄSUBSYS_A.ROM‚ğì‚é
+		// SUBSYS_C.ROMã®0x800ãƒã‚¤ãƒˆç›®ã‹ã‚‰0x2000ãƒã‚¤ãƒˆåˆ†ã‚’ã‚³ãƒ”ãƒ¼ã—ã¦SUBSYS_A.ROMã‚’ä½œã‚‹
 		if((fpo=fopen("SUBSYS_A.ROM", "wb"))==NULL) { fclose(fpi); return false; }
 		fseek(fpi, 0x800, SEEK_SET);
 		for(int j=0; j<0x2000; j++) {
@@ -45,13 +45,13 @@ bool SUBSYS( bool fCompatibleROM ) {
 		fclose(fpo);
 
 		fclose(fpi);
-		// SUBSYS_A.ROM‚ğƒRƒs[‚µ‚ÄSUBSYS_B.ROM‚ğì‚é
+		// SUBSYS_A.ROMã‚’ã‚³ãƒ”ãƒ¼ã—ã¦SUBSYS_B.ROMã‚’ä½œã‚‹
 		return _CopyFile("SUBSYS_A.ROM", "SUBSYS_B.ROM");
 	}
 	return true;
 }
 
-// ƒCƒjƒVƒG[ƒ^ROM‚ğì‚é(INITIATE.ROM)
+// ã‚¤ãƒ‹ã‚·ã‚¨ãƒ¼ã‚¿ROMã‚’ä½œã‚‹(INITIATE.ROM)
 bool INITIATE( void ) {
 	FILE *fpi, *fpo;
 	if((fpo=fopen("INITIATE.ROM", "wb"))==NULL) return false;
@@ -65,26 +65,26 @@ bool INITIATE( void ) {
 	}
 	fclose(fpi);
 
-	// ƒu[ƒgROM‚Ì•ª‚ğc‚µ‚Ä0‚Å–„‚ß‚é
-	for(;length<0x1800; length++) fputc(0, fpo);		// ƒtƒ@ƒCƒ‹ƒTƒCƒY‚ª0x1800‚É‚È‚é‚Ü‚Å0‚Å–„‚ß‚é
+	// ãƒ–ãƒ¼ãƒˆROMã®åˆ†ã‚’æ®‹ã—ã¦0ã§åŸ‹ã‚ã‚‹
+	for(;length<0x1800; length++) fputc(0, fpo);		// ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºãŒ0x1800ã«ãªã‚‹ã¾ã§0ã§åŸ‹ã‚ã‚‹
 
-	// ƒu[ƒgROM(BOOT_BAS.ROM)‚ğƒRƒs[‚·‚é
+	// ãƒ–ãƒ¼ãƒˆROM(BOOT_BAS.ROM)ã‚’ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	if((fpi=fopen("BOOT_BAS.ROM", "rb"))==NULL) { fclose(fpi); return false; }
-	// ROM‚Ì“à—e‚ğ‘S‚ÄƒRƒs[‚·‚é
+	// ROMã®å†…å®¹ã‚’å…¨ã¦ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	for(length=0; length<0x200; length++) {
 		fputc(fgetc(fpi), fpo);
 	}
 
-	// ƒu[ƒgROM(BOOT_DOS.ROM)‚ğƒRƒs[‚·‚é
+	// ãƒ–ãƒ¼ãƒˆROM(BOOT_DOS.ROM)ã‚’ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	if((fpi=fopen("BOOT_DOS.ROM", "rb"))==NULL) { fclose(fpi); return false; }
-	// ROM‚Ì“à—e‚ğ‘S‚ÄƒRƒs[‚·‚é
+	// ROMã®å†…å®¹ã‚’å…¨ã¦ã‚³ãƒ”ãƒ¼ã™ã‚‹
 	for(length=0; length<0x200; length++) {
 		fputc(fgetc(fpi), fpo);
 	}
 
-	for(length=0; length<0x0400-2; length++) fputc(0, fpo);	// ƒtƒ@ƒCƒ‹‚ÌÅŒã-2‚Ü‚Å0‚Å–„‚ß‚é
+	for(length=0; length<0x0400-2; length++) fputc(0, fpo);	// ãƒ•ã‚¡ã‚¤ãƒ«ã®æœ€å¾Œ-2ã¾ã§0ã§åŸ‹ã‚ã‚‹
 
-	// ƒCƒjƒVƒG[ƒ^ROM‚ÖŒü‚¯‚½ƒŠƒZƒbƒgƒxƒNƒ^
+	// ã‚¤ãƒ‹ã‚·ã‚¨ãƒ¼ã‚¿ROMã¸å‘ã‘ãŸãƒªã‚»ãƒƒãƒˆãƒ™ã‚¯ã‚¿
 	fputc(0x60, fpo); fputc(0x00, fpo);
 
 	fclose(fpi);
@@ -94,8 +94,8 @@ bool INITIATE( void ) {
 
 void Title( void ) {
 	puts("XM7 File generator for V2 " VERSION);
-	puts("‚±‚ÌƒvƒƒOƒ‰ƒ€‚ÍAXM7 V1—p‚Ìƒtƒ@ƒCƒ‹‚©‚çAV2‚É•K—v‚Èƒtƒ@ƒCƒ‹‚ğì‚èo‚·ƒvƒƒOƒ‰ƒ€‚Å‚·");
-	puts("“¯‚¶ƒfƒBƒŒƒNƒgƒŠ‚ÉAV1—p‚ÌˆÈ‰º‚Ìƒtƒ@ƒCƒ‹‚ª•K—v‚Å‚·");
+	puts("ã“ã®ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã¯ã€XM7 V1ç”¨ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰ã€V2ã«å¿…è¦ãªãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä½œã‚Šå‡ºã™ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã§ã™");
+	puts("åŒã˜ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã«ã€V1ç”¨ã®ä»¥ä¸‹ã®ãƒ•ã‚¡ã‚¤ãƒ«ãŒå¿…è¦ã§ã™");
 	puts("BOOT_BAS.ROM, BOOT_DOS.ROM, SUBSYS_C.ROM");
 }
 

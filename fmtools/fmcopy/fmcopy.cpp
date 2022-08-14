@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <CFDImg.h>
 #include <CFilesys.h>
@@ -13,9 +13,9 @@ protected:
 	CEntry ent;
 
 	CFDImg InFD, OutFD;
-	FLHANDLE *hInFile;			// “ü—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹(F-BASICƒtƒ@ƒCƒ‹ƒVƒXƒeƒ€)
-	FLHANDLE *hOutFile;			// “ü—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹(F-BASICƒtƒ@ƒCƒ‹ƒVƒXƒeƒ€)
-	FDHANDLE *hInFD, *hOutFD;	// “üo—ÍFDƒCƒ[ƒWƒtƒ@ƒCƒ‹‚Ìƒnƒ“ƒhƒ‹
+	FLHANDLE *hInFile;			// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«(F-BASICãƒ•ã‚¡ã‚¤ãƒ«ã‚·ã‚¹ãƒ†ãƒ )
+	FLHANDLE *hOutFile;			// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«(F-BASICãƒ•ã‚¡ã‚¤ãƒ«ã‚·ã‚¹ãƒ†ãƒ )
+	FDHANDLE *hInFD, *hOutFD;	// å…¥å‡ºåŠ›FDã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒãƒ³ãƒ‰ãƒ«
 
 protected:
 
@@ -40,11 +40,11 @@ public:
 			exit(1);
 		}
 		
-		strncpy(infdimage,  argv[1], 510);	// ƒfƒBƒXƒNƒCƒ[ƒWƒtƒ@ƒCƒ‹–¼
-		strncpy(outfdimage, argv[2], 510);	// ƒfƒBƒXƒNƒCƒ[ƒWƒtƒ@ƒCƒ‹–¼
-		strncpy(tgtfile,    argv[3], 9);	// ƒfƒBƒXƒNƒCƒ[ƒW“à‚Ìƒtƒ@ƒCƒ‹–¼
+		strncpy(infdimage,  argv[1], 510);	// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«å
+		strncpy(outfdimage, argv[2], 510);	// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«å
+		strncpy(tgtfile,    argv[3], 9);	// ãƒ‡ã‚£ã‚¹ã‚¯ã‚¤ãƒ¡ãƒ¼ã‚¸å†…ã®ãƒ•ã‚¡ã‚¤ãƒ«å
 
-		// ƒIƒvƒVƒ‡ƒ“‰ðÍ
+		// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æž
 		for(int i=4; i<argc; i++) {
 			switch(argv[i][0]) {
 			case '/':
@@ -72,7 +72,7 @@ public:
 		char DataBuff[0x10000];
 		char *wptr;
 //--------------------------------------------------------------
-// “ü—ÍFDƒCƒ[ƒWAƒtƒ@ƒCƒ‹‚ÌƒI[ƒvƒ“
+// å…¥åŠ›FDã‚¤ãƒ¡ãƒ¼ã‚¸ã€ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚ªãƒ¼ãƒ—ãƒ³
 		hInFD = fs.FMMountFD(infdimage);
 		if(hInFD==false) {
 			printf("Failed to mount input FD image file.\n");
@@ -81,14 +81,14 @@ public:
 			puts("File not found");
 			exit(1);
 		}
-		// ƒGƒ“ƒgƒŠî•ñ‚ðŽæ“¾
+		// ã‚¨ãƒ³ãƒˆãƒªæƒ…å ±ã‚’å–å¾—
 		fs.FMGetFileInfo(hInFD, tgtfile, &ent);
 		hInFile = fs.FMOpen(hInFD, tgtfile, FM_OPEN_READ, 0, 0, 0);
 		if(hInFile==NULL) {
 			puts("Faild to open input file");
 			exit(-1);
 		}
-		// ƒtƒ@ƒCƒ‹‚Ì’†g‚ð“Ç‚Ýo‚·
+		// ãƒ•ã‚¡ã‚¤ãƒ«ã®ä¸­èº«ã‚’èª­ã¿å‡ºã™
 		wptr = DataBuff;
 		do {
 			if(fs.FMRead(hInFile, wptr, 1)==0) break;
@@ -99,7 +99,7 @@ public:
 		fs.FMUnmountFD(hInFD);
 
 //--------------------------------------------------------------
-// o—ÍFDƒCƒ[ƒWAƒtƒ@ƒCƒ‹‚ÌƒI[ƒvƒ“
+// å‡ºåŠ›FDã‚¤ãƒ¡ãƒ¼ã‚¸ã€ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚ªãƒ¼ãƒ—ãƒ³
 		hOutFD = fs.FMMountFD(outfdimage);
 		if(hOutFD==NULL) {
 			printf("Failed to mount FD image file.\n");
@@ -110,7 +110,7 @@ public:
 			puts("Faild to open output file");
 			exit(-1);
 		}
-		// ƒtƒ@ƒCƒ‹“à—e‚Ì‘‚«ž‚Ý
+		// ãƒ•ã‚¡ã‚¤ãƒ«å†…å®¹ã®æ›¸ãè¾¼ã¿
 		fs.FMWrite(hOutFile, DataBuff, wptr-DataBuff);
 		if(fVerbose) printf("%d bytes copied\n", wptr-DataBuff);
 

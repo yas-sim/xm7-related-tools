@@ -1,9 +1,9 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #define VERSION		"V0.2"
 
-// v0.2 ƒvƒƒOƒ‰ƒ€I—¹Žž‚ÌƒŠƒ^[ƒ“ƒR[ƒh‚ª‚¨‚©‚µ‚©‚Á‚½‚Ì‚ðC³
+// v0.2 ãƒ—ãƒ­ã‚°ãƒ©ãƒ çµ‚äº†æ™‚ã®ãƒªã‚¿ãƒ¼ãƒ³ã‚³ãƒ¼ãƒ‰ãŒãŠã‹ã—ã‹ã£ãŸã®ã‚’ä¿®æ­£
 
 void Usage( void )
 {

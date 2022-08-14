@@ -1,6 +1,6 @@
-// v0.1 : MinAddr���L�^���AMinAddr-MaxAddr�͈̔͂������o�͂���悤�ɕύX
-//		  SH�p�ɃA�h���X�̏�ʐ��r�b�g���}�X�N���Ă����̂�p�~
-// v0.2 : �v���O�����I�����̖߂�l���C��(make�΍�)
+﻿// v0.1 : MinAddrを記録し、MinAddr-MaxAddrの範囲だけを出力するように変更
+//		  SH用にアドレスの上位数ビットをマスクしていたのを廃止
+// v0.2 : プログラム終了時の戻り値を修正(make対策)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,7 +40,7 @@ public:
 		pTop = NULL;
 	}
 
-	// �Q�͈̔͂��d�Ȃ荇���Ă��邩�ǂ����`�F�b�N����
+	// ２つの範囲が重なり合っているかどうかチェックする
 	bool isOverlap( unsigned long top1, unsigned long bottom1,
 					unsigned long top2, unsigned long bottom2 ) {
 		bool result;
@@ -48,24 +48,24 @@ public:
 
 		result = true;
 		
-		// ���E�����̂��߂�+1,-1���Z��32�r�b�g�̐������b�v���E���h���Ă��܂��̂�h��
+		// 境界条件のための+1,-1演算で32ビットの数がラップラウンドしてしまうのを防ぐ
 		atop   =((top1   ==         0ul) ?          0ul :    top1-1);
 		abottom=((bottom1==0xfffffffful) ? 0xfffffffful : bottom1+1);
 
-		// �d�Ȃ��Ă��Ȃ��ꍇ�����o����B����ȊO�̏ꍇ�͏d�Ȃ��Ă���
+		// 重なっていない場合を検出する。それ以外の場合は重なっている
 		if( top2   <atop && bottom2<atop )	 result = false;
 		if( abottom<top2 && abottom<bottom2) result = false;
 		return result;
 	}
 
-	// �w��̂Q�͈̔̓f�[�^����������
+	// 指定の２つの範囲データを結合する
 	void combine( unsigned long top1, unsigned long bottom1,
 					unsigned long top2, unsigned long bottom2, CRange *range ) {
 		range->top = (top1<top2?top1:top2);
 		range->bottom = (bottom1<bottom2?bottom2:bottom1);
 	}
 
-	// �͈̓f�[�^��ǉ�����
+	// 範囲データを追加する
 	void add( unsigned long top, unsigned long bottom ) {
 		CRange *ptr, *prevptr;
 		ptr = pTop;
@@ -81,7 +81,7 @@ public:
 		}
 	}
 
-	// �o�^����Ă���f�[�^�̐���Ԃ�
+	// 登録されているデータの数を返す
 	int getNumberOfItems( void ) {
 		int result = 0;
 		CRange *ptr;
@@ -93,7 +93,7 @@ public:
 		return result;
 	}
 
-	// �o�^����Ă���͈͂ŁA�����ł�����̂�S����������(1�p�X����)
+	// 登録されている範囲で、結合できるものを全部結合する(1パスだけ)
 	void combineAll_1( void ) {
 		CRange *refptr, *ptr, *prevptr, *tmpptr;
 		refptr = pTop;
@@ -103,7 +103,7 @@ public:
 			while(ptr!=NULL) {
 				if(isOverlap(refptr->top, refptr->bottom, ptr->top, ptr->bottom)) {
 					combine(refptr->top, refptr->bottom, ptr->top, ptr->bottom, refptr);
-					// �I�[�o�[���b�v���Ă����Ƃ���prevptr�͓����Ȃ�
+					// オーバーラップしていたときはprevptrは動かない
 					tmpptr = ptr;
 					prevptr->pNext = ptr->pNext;
 					ptr = ptr->pNext;
@@ -117,9 +117,9 @@ public:
 		}
 	}
 
-	// �o�^����Ă���͈͂ŁA�O��͈̔͂������ł�����̂̂݌�������
-	// ���ꂽ�Q�͈̔͂������ł���ꍇ���������Ȃ�
-	// ���̂��߁AS���R�[�h���Ɍ����͈͂̏��Ԃ��L�[�v�ł���
+	// 登録されている範囲で、前後の範囲が結合できるもののみ結合する
+	// 離れた２つの範囲が結合できる場合も結合しない
+	// そのため、Sレコード中に現れる範囲の順番をキープできる
 	void combineKeepOrder( void ) {
 		CRange *refptr, *tmpptr;
 		refptr = pTop;
@@ -135,17 +135,17 @@ public:
 		}
 	}
 
-	// �o�^����Ă���f�[�^�Ō����ł�����̂���������i�}���`�p�X���s�j
+	// 登録されているデータで結合できるものを結合する（マルチパス実行）
 	void combineAll( void )
 	{
 		int num;
 		do {
-			num = getNumberOfItems();	// �o�^����Ă���͈̓f�[�^�̐��𒲂ׂ�
+			num = getNumberOfItems();	// 登録されている範囲データの数を調べる
 			combineAll_1();
 		} while (getNumberOfItems()!=num);
 	}
 
-	// �o�^����Ă���͈̓f�[�^��\������
+	// 登録されている範囲データを表示する
 	void show( void ) {
 		CRange *ptr;
 		ptr = pTop;
@@ -167,7 +167,7 @@ bool BuffAlloc( unsigned long size )
 {
 	if(nBufSiz<size) {
 		unsigned long nAllocSize = ((size+_ALLOC_UNIT-1)/_ALLOC_UNIT)*_ALLOC_UNIT;
-		unsigned char *pTmp = (unsigned char*)realloc(pBuff, nAllocSize);	// �������m�ہI
+		unsigned char *pTmp = (unsigned char*)realloc(pBuff, nAllocSize);	// メモリ確保！
 		if(pTmp==NULL) {
 			puts("Memory allocation failed.");
 			puts("Too few memory");
@@ -181,7 +181,7 @@ bool BuffAlloc( unsigned long size )
 	return true;
 }
 
-// �^����ꂽ16�i�P�����𐔒l�ɕϊ�����
+// 与えられた16進１文字を数値に変換する
 unsigned char Hex2Bin( char ch )
 {
 	if(!isxdigit((int)ch)) return 0;
@@ -193,19 +193,19 @@ unsigned char Hex2Bin( char ch )
 	return ch;
 }
 
-// �^����ꂽ�|�C���^����Q���������o���A�����8�r�b�g16�i���̕\���Ƃ��Đ��l�ɕϊ�����
+// 与えられたポインタから２文字を取り出し、それを8ビット16進数の表現として数値に変換する
 unsigned char GetByte( char *ptr )
 {
 	return (Hex2Bin(*ptr)<<4) + Hex2Bin(*(ptr+1));
 }
 
-// �^����ꂽ�|�C���^���s���Ƃ��AS�t�H�[�}�b�g�̃A�h���X�����o��
-// �A�h���X���̓o�C�g���ň���n�Ŏw�肷��
+// 与えられたポインタを行頭とし、Sフォーマットのアドレスを取り出す
+// アドレス長はバイト数で引数nで指定する
 unsigned long GetAddress( char *ptr, int n )
 {
 	unsigned long addr;
 	addr = 0;
-	ptr+=4;					// �A�h���X��4�o�C�g�ڂ���n�܂�
+	ptr+=4;					// アドレスは4バイト目から始まる
 	for(int i=0; i<n; i++) {
 		addr = (addr<<8) + GetByte(ptr);
 		ptr+=2;
@@ -213,14 +213,14 @@ unsigned long GetAddress( char *ptr, int n )
 	return addr;
 }
 
-// �^����ꂽ�|�C���^��擪�Ƃ��AS�t�H�[�}�b�g�̃o�C�g�������o��
+// 与えられたポインタを先頭とし、Sフォーマットのバイト数を取り出す
 int GetRecordLength( char *ptr )
 {
 	return GetByte(ptr+2);
 }
 
-// �^����ꂽ�������S���R�[�h�Ƃ݂Ȃ��A��͂���
-// pBuff�ɂ��̃f�[�^����������
+// 与えられた文字列をSレコードとみなし、解析する
+// pBuffにそのデータを書き込む
 void mot2bin( char *pLine )
 {
 	int ptr = 0;
@@ -232,7 +232,7 @@ void mot2bin( char *pLine )
 	case '0':
 		return;
 	case '1':
-		adrlen = 2;		// �A�h���X�̒���(�o�C�g�P��)
+		adrlen = 2;		// アドレスの長さ(バイト単位)
 		break;
 	case '2':
 		adrlen = 3;
@@ -245,24 +245,24 @@ void mot2bin( char *pLine )
 	}
 	addr = GetAddress(pLine, adrlen);
 	length = GetRecordLength(pLine);
-	length -= adrlen + 1;					// �A�h���X�̕��ƁA�`�F�b�N�T���̕��������Ă���
-//	addr = addr & ~0xe0000000;				// SH�͏�ʃA�h���X�͏o�͂���Ȃ��̂Ń}�X�N����
+	length -= adrlen + 1;					// アドレスの分と、チェックサムの分を引いておく
+//	addr = addr & ~0xe0000000;				// SHは上位アドレスは出力されないのでマスクする
 
-	oRanges.add(addr, addr+length-1);		// �g�p�͈͂��L�^����
+	oRanges.add(addr, addr+length-1);		// 使用範囲を記録する
 
-	// 1�s���̃f�[�^���o�b�t�@�ɏ�������
+	// 1行分のデータをバッファに書き込む
 	int ch;
-	pLine += adrlen*2 + 2 + 2;				// �A�h���X�ƁA���R�[�h���ƃ��R�[�h�w�b�_�̕����X�L�b�v
-	if(nMinAddr>addr) {						// �ŏ��������݃A�h���X���L�^����
+	pLine += adrlen*2 + 2 + 2;				// アドレスと、レコード長とレコードヘッダの分をスキップ
+	if(nMinAddr>addr) {						// 最小書き込みアドレスを記録する
 		nMinAddr = addr;
 	}
 	for(int i=0; i<length; i++) {
-		ch = GetByte(pLine);				// �f�[�^����P�o�C�g�ǂݍ���
-		while(addr>=nBufSiz) {					// �������ރA�h���X���o�b�t�@�e�ʂ��z���Ă��Ȃ��`�F�b�N
-			BuffAlloc(addr+1);					// �o�b�t�@�e�ʂ��������čĊ��蓖��
+		ch = GetByte(pLine);				// データから１バイト読み込む
+		while(addr>=nBufSiz) {					// 書き込むアドレスがバッファ容量を越えていなかチェック
+			BuffAlloc(addr+1);					// バッファ容量を割増して再割り当て
 		}
 		pBuff[addr] = ch;
-		if(nMaxAddr<addr) {					// �ő发���݃A�h���X���L�^����
+		if(nMaxAddr<addr) {					// 最大書込みアドレスを記録する
 			nMaxAddr = addr;
 		}
 		pLine += 2;
@@ -296,7 +296,7 @@ int main( int argc, char *argv[]) {
 		exit(-1);
 	}
 
-	// �����o�b�t�@���蓖��
+	// 初期バッファ割り当て
 	pBuff = (unsigned char*)calloc(_ALLOC_UNIT, 1);
 	if(pBuff==NULL) {
 		puts("Too few memory");
@@ -309,15 +309,15 @@ int main( int argc, char *argv[]) {
 
 	char line[512];
 	while(1) {
-		fgets(line, 511, fi);			// �P�s�ǂݍ���
+		fgets(line, 511, fi);			// １行読み込み
 		if(feof(fi)) break;
 		mot2bin(line);
 	}
-	oRanges.combineAll();				// �L�^�����g�p�͈͂̂����A�����ł���͈͂���������
+	oRanges.combineAll();				// 記録した使用範囲のうち、結合できる範囲を結合する
 	puts("*** Used area");
-	oRanges.show();						// �g�p�͈͈ꗗ��\������
-//	fwrite(pBuff+nMinAddr, 1, nMaxAddr-nMinAddr+1, fo);	// �����o��
-	fwrite(pBuff         , 1, nMaxAddr         +1, fo);	// �����o��
+	oRanges.show();						// 使用範囲一覧を表示する
+//	fwrite(pBuff+nMinAddr, 1, nMaxAddr-nMinAddr+1, fo);	// 書き出し
+	fwrite(pBuff         , 1, nMaxAddr         +1, fo);	// 書き出し
 	printf("*** Min addres = 0x%08x  Max address = 0x%08x\n", nMinAddr, nMaxAddr);
 	puts("*** File conversion succeeded.");
 	free(pBuff);

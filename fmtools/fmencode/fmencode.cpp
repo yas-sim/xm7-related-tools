@@ -1,19 +1,19 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
 
 #include "CMotorolaS.h"
 
-// v0.1 001009	"iba"Šg’£q‚ğBASICƒoƒCƒiƒŠƒvƒƒOƒ‰ƒ€‚Æ‚µ‚Äˆµ‚¤‚æ‚¤‚É•ÏX
+// v0.1 001009	"iba"æ‹¡å¼µå­ã‚’BASICãƒã‚¤ãƒŠãƒªãƒ—ãƒ­ã‚°ãƒ©ãƒ ã¨ã—ã¦æ‰±ã†ã‚ˆã†ã«å¤‰æ›´
 
 #define VERSION "v0.1"
 
 class CFMENCODE {
 protected:
-	HANDLE hInFile, hOutFile;				// “üo—Íƒtƒ@ƒCƒ‹‚Ö‚Ìƒnƒ“ƒhƒ‹
-	char infile[512], outfile[512];			// o—Íƒtƒ@ƒCƒ‹–¼
+	HANDLE hInFile, hOutFile;				// å…¥å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®ãƒãƒ³ãƒ‰ãƒ«
+	char infile[512], outfile[512];			// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
 
-	bool fRaw;								// RAWƒ‚[ƒhƒtƒ‰ƒO
+	bool fRaw;								// RAWãƒ¢ãƒ¼ãƒ‰ãƒ•ãƒ©ã‚°
 
 	char filename[9];
 	unsigned char FileType;
@@ -22,23 +22,23 @@ protected:
 
 	bool fVerbose;
 protected:
-	// ƒtƒ@ƒCƒ‹–¼‚©‚çŠg’£q•”•ª‚Ì‚İ‚ğ”²‚«æ‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«åã‹ã‚‰æ‹¡å¼µå­éƒ¨åˆ†ã®ã¿ã‚’æŠœãå–ã‚‹
 	void GetFileExtention( char *filename, char *ext) {
 		int ln = 0;
 		char *ptr = filename;
-		while(*ptr) ptr++;								// •¶š—ñ‚ÌÅŒã‚ğ’T‚· 
-		while(ptr>=filename && *ptr!='.') ptr--;		// '.'‚ğŒ©‚Â‚¯‚é‚©A•¶š—ñ‚Ìæ“ª‚É‚­‚é‚Ü‚Å‰º‚ª‚é
+		while(*ptr) ptr++;								// æ–‡å­—åˆ—ã®æœ€å¾Œã‚’æ¢ã™ 
+		while(ptr>=filename && *ptr!='.') ptr--;		// '.'ã‚’è¦‹ã¤ã‘ã‚‹ã‹ã€æ–‡å­—åˆ—ã®å…ˆé ­ã«ãã‚‹ã¾ã§ä¸‹ãŒã‚‹
 		if(*ptr=='.') {
 			ptr++;
 			while(*ptr) {
-				*ext++ = *ptr++;						// '.'‚ªŒ©‚Â‚©‚Á‚½ê‡Aext‚Éptr+1ˆÈ~‚ğ•¡Ê
-				if(ln++>=3) break;						// Šg’£q‚ª‚R•¶š‚ğ’´‚¦‚½‚çƒ‹[ƒv‚ğ”²‚¯‚é
+				*ext++ = *ptr++;						// '.'ãŒè¦‹ã¤ã‹ã£ãŸå ´åˆã€extã«ptr+1ä»¥é™ã‚’è¤‡å†™
+				if(ln++>=3) break;						// æ‹¡å¼µå­ãŒï¼“æ–‡å­—ã‚’è¶…ãˆãŸã‚‰ãƒ«ãƒ¼ãƒ—ã‚’æŠœã‘ã‚‹
 			}
 		}
-		*ext = '\0';									// •¶š—ñ‚ğƒ^[ƒ~ƒl[ƒg‚·‚é
+		*ext = '\0';									// æ–‡å­—åˆ—ã‚’ã‚¿ãƒ¼ãƒŸãƒãƒ¼ãƒˆã™ã‚‹
 	}
 
-	// ƒtƒ@ƒCƒ‹–¼’†‚Ìƒx[ƒXƒtƒ@ƒCƒ‹–¼•”•ª‚ğ”²‚«o‚·
+	// ãƒ•ã‚¡ã‚¤ãƒ«åä¸­ã®ãƒ™ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«åéƒ¨åˆ†ã‚’æŠœãå‡ºã™
 	void GetFileBase( char *filename, char *base) {
 		int ln = 0;
 		while(*filename!='\0' && *filename!='.') {
@@ -48,14 +48,14 @@ protected:
 		*base = '\0';
 	}
 
-	// Šg’£q‚ğ‰ğÍ‚µ‚ÄAƒtƒ@ƒCƒ‹ƒ^ƒCƒv‚ğŒˆ’è‚·‚é
+	// æ‹¡å¼µå­ã‚’è§£æã—ã¦ã€ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—ã‚’æ±ºå®šã™ã‚‹
 	bool AnalyzeFileExtention( char *ext, unsigned char *FileType, bool *Ascii, bool *Random) {
-		// ƒfƒtƒHƒ‹ƒgƒtƒ@ƒCƒ‹ƒ^ƒCƒv‚ğİ’è‚µ‚Ä‚¨‚­
+		// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—ã‚’è¨­å®šã—ã¦ãŠã
 		*FileType = 1;
 		*Ascii = true;
 		*Random = false;
 		if(strlen(ext)<=3) {
-			// Šg’£q‚Ì’·‚³‚ª‚RˆÈ‰º‚Ì‚Æ‚«‚Ì‚İ‰ğÍ‚·‚é
+			// æ‹¡å¼µå­ã®é•·ã•ãŒï¼“ä»¥ä¸‹ã®ã¨ãã®ã¿è§£æã™ã‚‹
 			_strupr(ext);
 			if(strcmp(ext, "TXT")==0) {
 				*FileType	= 1;
@@ -94,7 +94,7 @@ protected:
 		WriteFile(hOutFile, buff, 3, &NOW, NULL);
 	}
 
-	// ‚×‚½‘‚İ
+	// ã¹ãŸæ›¸è¾¼ã¿
 	void EncodeRawFile( void ) {
 		unsigned char buff[4];
 		DWORD NOR, NOW;
@@ -106,7 +106,7 @@ protected:
 	}
 
 	void EncodeDataFile( void ) {
-		EncodeBasicFile();			// “¯‚¶ˆ—‚Å‚·‚Ü‚·
+		EncodeBasicFile();			// åŒã˜å‡¦ç†ã§ã™ã¾ã™
 	}
 
 	
@@ -131,7 +131,7 @@ protected:
 
 	void EncodeMachineFile( void )
 	{
-		unsigned char motbuf[0x10000];			// 64KBŠm•Û
+		unsigned char motbuf[0x10000];			// 64KBç¢ºä¿
 		unsigned long minadr, maxadr;
 		unsigned char buff[512];
 		CMotorolaS mot;
@@ -142,18 +142,18 @@ protected:
 		unsigned long entry;
 		while(ReadLine(buff, 510)) {
 			if(buff[0]!='S') continue;
-			mot.SetSRecord((char*)buff);				// SƒŒƒR[ƒh‚ğƒZƒbƒg
-			adr  = mot.GetLoadAddress();				// ƒ[ƒhƒAƒhƒŒƒX‚ğæ“¾
-			byte = mot.GetDataCount();					// ƒf[ƒ^”‚ğæ“¾
+			mot.SetSRecord((char*)buff);				// Sãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’ã‚»ãƒƒãƒˆ
+			adr  = mot.GetLoadAddress();				// ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å–å¾—
+			byte = mot.GetDataCount();					// ãƒ‡ãƒ¼ã‚¿æ•°ã‚’å–å¾—
 			unsigned int i;
 			switch(mot.GetRecordType()) {
 			case 1:
 			case 2:
 			case 3:
-				if(minadr>adr)			minadr = adr;		// Å¬ƒAƒhƒŒƒX‚ğ‹L˜^
-				if(maxadr<adr+byte-1u)	maxadr = adr+byte-1;// Å‘åƒAƒhƒŒƒX‚ğ‹L˜^
+				if(minadr>adr)			minadr = adr;		// æœ€å°ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¨˜éŒ²
+				if(maxadr<adr+byte-1u)	maxadr = adr+byte-1;// æœ€å¤§ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¨˜éŒ²
 				for(i=0; i<byte; i++) {
-					motbuf[adr+i] = mot.GetData(i);			// ƒf[ƒ^‚ğmotrola-sƒoƒbƒtƒ@‚ÉƒRƒs[
+					motbuf[adr+i] = mot.GetData(i);			// ãƒ‡ãƒ¼ã‚¿ã‚’motrola-sãƒãƒƒãƒ•ã‚¡ã«ã‚³ãƒ”ãƒ¼
 //					printf("%02x", motbuf[adr+i]);
 				}
 //				printf("\n");
@@ -173,43 +173,43 @@ protected:
 		buff[0] = (unsigned char)0x00;
 		buff[1] = (unsigned char)(size>>8);
 		buff[2] = (unsigned char)(size & 0x00ff);
-		WriteFile(hOutFile, buff, 3, &NOW, NULL);		// ƒtƒ@ƒCƒ‹ƒTƒCƒY‘‚«‚İ
+		WriteFile(hOutFile, buff, 3, &NOW, NULL);		// ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºæ›¸ãè¾¼ã¿
 		buff[0] = (unsigned char)(minadr>>8);
 		buff[1] = (unsigned char)(minadr & 0x00ff);
-		WriteFile(hOutFile, buff, 2, &NOW, NULL);		// ƒ[ƒhƒAƒhƒŒƒX‘‚«‚İ
-		WriteFile(hOutFile, motbuf+minadr, size, &NOW, NULL);	// Àƒf[ƒ^‘‚«‚İ
+		WriteFile(hOutFile, buff, 2, &NOW, NULL);		// ãƒ­ãƒ¼ãƒ‰ã‚¢ãƒ‰ãƒ¬ã‚¹æ›¸ãè¾¼ã¿
+		WriteFile(hOutFile, motbuf+minadr, size, &NOW, NULL);	// å®Ÿãƒ‡ãƒ¼ã‚¿æ›¸ãè¾¼ã¿
 		buff[0] = 0xff;
 		buff[1] = 0;
 		buff[2] = 0;
-		WriteFile(hOutFile, buff, 3, &NOW, NULL);		// ƒ_ƒ~[‚RƒoƒCƒg‘‚«‚İ
+		WriteFile(hOutFile, buff, 3, &NOW, NULL);		// ãƒ€ãƒŸãƒ¼ï¼“ãƒã‚¤ãƒˆæ›¸ãè¾¼ã¿
 		buff[0] = (unsigned char)(entry>>8);
 		buff[1] = (unsigned char)(entry & 0x00ff);
 		buff[2] = 0x1a;			// EOF
-		WriteFile(hOutFile, buff, 3, &NOW, NULL);		// ƒGƒ“ƒgƒŠ[ƒAƒhƒŒƒX&EOF‘‚«‚İ
+		WriteFile(hOutFile, buff, 3, &NOW, NULL);		// ã‚¨ãƒ³ãƒˆãƒªãƒ¼ã‚¢ãƒ‰ãƒ¬ã‚¹&EOFæ›¸ãè¾¼ã¿
 	}
 
-	// ƒwƒbƒ_î•ñ‚ğ•\¦‚·‚é
+	// ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’è¡¨ç¤ºã™ã‚‹
 	void ShowHeader( void ) {
 		if(fVerbose)
 			printf("Filename=%8s FileType=%d Ascii=%c Random=%c\n", filename, FileType, Ascii?'A':'B', Random?'R':'S');
 	}
 
-	// ƒwƒbƒ_î•ñ‚ğ‘‚«‚Ş
+	// ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’æ›¸ãè¾¼ã‚€
 	void WriteHeader( void )  {
 		char header[0x10];
 		DWORD NOW, ptr;
-		// ƒwƒbƒ_‚ğ0ƒNƒŠƒA
+		// ãƒ˜ãƒƒãƒ€ã‚’0ã‚¯ãƒªã‚¢
 		for(int i=0; i<0x10; i++) header[i]=0;
 		ptr=0;
-		// ƒtƒ@ƒCƒ‹–¼•¡Ê
-		for(i=0; i<9; i++) {
+		// ãƒ•ã‚¡ã‚¤ãƒ«åè¤‡å†™
+		for(int i=0; i<9; i++) {
 			header[ptr++] = filename[i];
 			if(filename[i]=='\0') break;
 		}
 		header[10] = FileType;
 		header[11] = Ascii;
 		header[12] = Random;
-		// ¯•Ê—pƒ}ƒWƒbƒNƒiƒ“ƒo[
+		// è­˜åˆ¥ç”¨ãƒã‚¸ãƒƒã‚¯ãƒŠãƒ³ãƒãƒ¼
 		header[13] = 'X';
 		header[14] = 'M';
 		header[15] = '7';
@@ -242,9 +242,9 @@ public:
 			exit(1);
 		}
 
-		strncpy(infile , argv[1], 510);	// “ü—Íƒtƒ@ƒCƒ‹(FMŒ`®)
+		strncpy(infile , argv[1], 510);	// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«(FMå½¢å¼)
 
-		// ƒIƒvƒVƒ‡ƒ“‰ğÍ
+		// ã‚ªãƒ—ã‚·ãƒ§ãƒ³è§£æ
 		for(int i=2; i<argc; i++) {
 			switch(argv[i][0]) {
 			case '/':
@@ -263,40 +263,40 @@ public:
 			}
 		}
 		
-		// “ü—Íƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
+		// å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 		hInFile = CreateFile(infile, GENERIC_READ, NULL, NULL, OPEN_EXISTING, NULL, NULL);
 		if(hInFile==INVALID_HANDLE_VALUE) {
 			puts("Failed to open input file");
 			exit(1);
 		}
 
-		// ƒx[ƒXƒtƒ@ƒCƒ‹–¼æ‚èo‚µ
+		// ãƒ™ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«åå–ã‚Šå‡ºã—
 		GetFileBase(infile, filename);
 
-		// Šg’£qæ‚èo‚µ•‰ğÍ
-		char ext[10];		// ƒtƒ@ƒCƒ‹Šg’£q
+		// æ‹¡å¼µå­å–ã‚Šå‡ºã—ï¼†è§£æ
+		char ext[10];		// ãƒ•ã‚¡ã‚¤ãƒ«æ‹¡å¼µå­
 		GetFileExtention(infile, ext);
 		AnalyzeFileExtention(ext, &FileType, &Ascii, &Random);
 
 		if(fVerbose) 
 			printf("fn=%s ext=%s %d %c %c\n", infile, ext, FileType, Ascii==true?'A':'B', Random==true?'1':'0');
 
-		// o—Íƒtƒ@ƒCƒ‹–¼‚ğì¬
+		// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ä½œæˆ
 		sprintf(outfile, "%s.%d%c%d", filename,
-			FileType,					// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv 0,1,2
-			Ascii?'A':'B',				// ƒAƒXƒL[ƒtƒ‰ƒO
+			FileType,					// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ— 0,1,2
+			Ascii?'A':'B',				// ã‚¢ã‚¹ã‚­ãƒ¼ãƒ•ãƒ©ã‚°
 			Random?1:0);
 		if(fVerbose)
 			printf("FM-FILE file ='%s'\n", outfile);
 
-		// o—Íƒtƒ@ƒCƒ‹ƒI[ƒvƒ“
+		// å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã‚ªãƒ¼ãƒ—ãƒ³
 		hOutFile = CreateFile(outfile, GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, NULL, NULL);
 		if(hOutFile==INVALID_HANDLE_VALUE) {
 			puts("Failed to open output file");
 			exit(1);
 		}
 
-		// ƒwƒbƒ_î•ñ‚ğ‘‚«‚Ş
+		// ãƒ˜ãƒƒãƒ€æƒ…å ±ã‚’æ›¸ãè¾¼ã‚€
 		WriteHeader();
 
 		switch(FileType) {
@@ -314,7 +314,7 @@ public:
 			EncodeMachineFile();
 			break;
 		case 9:
-			// -rƒIƒvƒVƒ‡ƒ“w’è
+			// -rã‚ªãƒ—ã‚·ãƒ§ãƒ³æŒ‡å®šæ™‚
 //			DecodeRawFile();
 			break;
 		default:
