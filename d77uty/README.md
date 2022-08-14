@@ -45,7 +45,7 @@ XM7で標準サポートされているディスクイメージファイル(.D77
 
 `d77uty original.d77 add addfile.d77 2`
 
-| | | | |
+|||||
 |-|-|-|-|
 |original.d77|addfile.d77||original.d77|
 |IMG1<br>IMG2<br>IMG3|ADD_IMG|→|IMG1<br>ADD_IMG<br>IMG2<br>IMG3|
@@ -54,7 +54,7 @@ XM7で標準サポートされているディスクイメージファイル(.D77
 
 `d77uty original.d77 add addfile.d77`
 
-| | | | |
+|||||
 |-|-|-|-|
 |original.d77|addfile.d77||original.d77|
 |IMG1<br>IMG2<br>IMG3|ADD_IMG|→|IMG1<br>IMG2<br>IMG3<br>ADD_IMG|
@@ -63,7 +63,7 @@ XM7で標準サポートされているディスクイメージファイル(.D77
 
 `d77uty original.d77 ext extfile.d77 2`
 
-| | | | |
+|||||
 |-|-|-|-|
 |original.d77||original.d77|extfile.d77|
 |IMG1<br>IMG2<br>IMG3|→|IMG1<br>IMG3|IMG2|
@@ -72,7 +72,7 @@ XM7で標準サポートされているディスクイメージファイル(.D77
 
 `d77uty original.d77 cpy extfile.d77 2`
 
-| | | | |
+|||||
 |-|-|-|-|
 |original.d77||original.d77|extfile.d77|
 |IMG1<br>IMG2<br>IMG3|→|IMG1<br>IMG2<br>IMG3|IMG2|
@@ -81,7 +81,7 @@ XM7で標準サポートされているディスクイメージファイル(.D77
 
 `d77uty original.d77 ord 231`
 
-| | | |
+||||
 |-|-|-|
 |original.d77||original.d77|
 |IMG1<br>IMG2<br>IMG3|→|IMG2<br>IMG3<br>IMG1|  
