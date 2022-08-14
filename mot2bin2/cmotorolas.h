@@ -50,7 +50,7 @@ private: //-----------------------------------------------------------------
 		if(strlen(pLine)+1<MAX_MOTOROLAS_LENGTH-1) {
 			char tmp[2];
 			tmp[0] = ch;
-			tmp[1] = NULL;
+			tmp[1] = '\0';
 			strcat(pLine, tmp);
 		}
 	}

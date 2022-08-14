@@ -92,7 +92,7 @@ void ImageExtract( char *imagename, char *extractname )
 
 	fseek(fpi, 0, SEEK_END);
 	long nFileSize = ftell(fpi);
-	if(g_fVerbose) printf("File Size=%d\n", nFileSize);
+	if(g_fVerbose) printf("File Size=%ld\n", nFileSize);
 	fseek(fpi, 0, SEEK_SET);
 
 	char *lpImageBuffer = new char[nFileSize];
@@ -102,7 +102,7 @@ void ImageExtract( char *imagename, char *extractname )
 	fprintf(fpot, "DiskName____= %s\n", dimg->DiskName);
 	fprintf(fpot, "WriteProtect= %s\n", dimg->WriteProtect==0?"OFF":"ON");
 	fprintf(fpot, "MediaType___= %s\n", dimg->MediaType==0?"2D":dimg->MediaType==0x10?"2DD":"2HD");
-	fprintf(fpot, "DiskSize____= %d\n", dimg->DiskSize);
+	fprintf(fpot, "DiskSize____= %ld\n", dimg->DiskSize);
 
 	TrackDecode(fpi, fpot, (void*)lpImageBuffer);
 

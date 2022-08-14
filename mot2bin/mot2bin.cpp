@@ -176,7 +176,7 @@ bool BuffAlloc( unsigned long size )
 			pBuff = pTmp;
 			nBufSiz = nAllocSize;
 		}
-		printf("BuffMemAlloc: %08x\n", nAllocSize);
+		printf("BuffMemAlloc: %08lx\n", nAllocSize);
 	}
 	return true;
 }
@@ -318,7 +318,7 @@ int main( int argc, char *argv[]) {
 	oRanges.show();						// 使用範囲一覧を表示する
 //	fwrite(pBuff+nMinAddr, 1, nMaxAddr-nMinAddr+1, fo);	// 書き出し
 	fwrite(pBuff         , 1, nMaxAddr         +1, fo);	// 書き出し
-	printf("*** Min addres = 0x%08x  Max address = 0x%08x\n", nMinAddr, nMaxAddr);
+	printf("*** Min addres = 0x%08lx  Max address = 0x%08lx\n", nMinAddr, nMaxAddr);
 	puts("*** File conversion succeeded.");
 	free(pBuff);
 	fcloseall();

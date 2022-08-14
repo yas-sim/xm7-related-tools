@@ -60,7 +60,7 @@ void Put( SFORM *data )
 		case 1:
 		case 9:	siz=3+data->Size;
 				adr=data->Address;
-				fprintf(stdout, "%02X%04LX", siz, adr);
+				fprintf(stdout, "%02X%04lX", siz, adr);
 				data->Sum+=siz;
 				data->Sum+=(unsigned char)((adr >>8) & 0x00ffu);
 				data->Sum+=(unsigned char) (adr		 & 0x00ffu);
@@ -68,7 +68,7 @@ void Put( SFORM *data )
 		case 2:
 		case 8:	siz=4+data->Size;
 				adr=data->Address;
-				fprintf(stdout, "%02X%06LX", siz, adr);
+				fprintf(stdout, "%02X%06lX", siz, adr);
 				data->Sum+=siz;
 				data->Sum+=(unsigned char)((adr >>16) & 0x00ffu);
 				data->Sum+=(unsigned char)((adr >> 8) & 0x00ffu);
@@ -77,7 +77,7 @@ void Put( SFORM *data )
 		case 3:
 		case 7:	siz=5+data->Size;
 				adr=data->Address;
-				fprintf(stdout, "%02X%08LX", siz, adr);
+				fprintf(stdout, "%02X%08lX", siz, adr);
 				data->Sum+=siz;
 				data->Sum+=(unsigned char)((adr >>24) & 0x00ffu);
 				data->Sum+=(unsigned char)((adr >>16) & 0x00ffu);

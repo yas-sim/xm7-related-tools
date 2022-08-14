@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	long size;
-	sscanf(argv[2], "%x", &size);
-	printf("Genarating 0x%x bytes of dummy file '%s'.\n", size, argv[1]);
+	sscanf(argv[2], "%lx", &size);
+	printf("Genarating 0x%lx bytes of dummy file '%s'.\n", size, argv[1]);
 	for(int i=0; i<size; i++) {
 		fputc(0, fp);
 	}

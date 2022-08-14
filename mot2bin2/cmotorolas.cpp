@@ -39,7 +39,7 @@ void CMotorolaS::GenerateSRecord( char *pLine )
 {
 	int nCount = 0;					// Sレコードの文字数をカウントする。MAX_MOTOROLAS_LENGTHを超えないように管理
 	if(!m_fAvailable) return;
-	pLine[0] = NULL;
+	pLine[0] = '\0';
 	AddChar(pLine, 'S');					// Sレコードのレコードヘッダ
 	AddChar(pLine, m_nRecordType + '0');	// レコードタイプ
 	AddHex(pLine, m_nByteCount);			// バイトカウント

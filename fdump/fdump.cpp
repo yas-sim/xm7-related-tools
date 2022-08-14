@@ -18,7 +18,7 @@ public:
 
 void Dump::dispadrs( void )
 {
-	printf("%08LX ", readptr);
+	printf("%08lX ", readptr);
 }
 
 void Dump::dispascii( void )

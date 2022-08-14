@@ -38,7 +38,7 @@ bool BuffAlloc( unsigned long size )
 			pBuff = pTmp;
 			nBufSiz = nAllocSize;
 		}
-		if(fVerbose) printf("BuffMemAlloc: %08x\n", nAllocSize);
+		if(fVerbose) printf("BuffMemAlloc: %08lx\n", nAllocSize);
 	}
 	return true;
 }
@@ -314,7 +314,7 @@ int main( int argc, char *argv[])
 		puts("*** Used area");
 		oRanges.show();					// 使用範囲一覧を表示する
 	}
-	if(fVerbose) printf("*** Max address = 0x%08x\n", nMaxAddr);	// 使用した最大アドレスを表示
+	if(fVerbose) printf("*** Max address = 0x%08lx\n", nMaxAddr);	// 使用した最大アドレスを表示
 	printf("*** File conversion succeeded.");
 	if(fVerbose) puts(" Trust me!"); else puts("");
 

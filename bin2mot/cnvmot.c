@@ -33,7 +33,7 @@ void main( int argc , char *argv[] )
 	motSetType(motHEADER);			/* ヘッダレコード */
 	motSetAddress(0L);
 	ptr=argv[1];
-	while(*ptr!=(char)NULL) {		/* ヘッダレコードの中身はファイル名 */
+	while(*ptr!='\0' /*(char)NULL*/) {		/* ヘッダレコードの中身はファイル名 */
 		motStock(*ptr++);
 	}
 	motFlush();

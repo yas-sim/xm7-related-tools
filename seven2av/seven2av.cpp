@@ -6,7 +6,7 @@
 
 // v0.3 -CompatibleROMオプションを追加。subsys_a.romとsubsys_b.romの自動生成を抑制するオプション
 
-bool _CopyFile( char *src, char *dst ) {
+bool _CopyFile( const char *src, const char *dst ) {
 	FILE *fpi, *fpo;
 	if((fpi=fopen(src, "rb"))==NULL) return false;
 	if((fpo=fopen(dst, "wb"))==NULL) {	fclose(fpi); return false; }

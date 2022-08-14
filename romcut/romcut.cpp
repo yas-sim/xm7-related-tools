@@ -7,8 +7,8 @@
 #define VERSION "v0.1"
 
 // srcのstartからend番地までをdstファイルに書き出す。
-bool cut( char *src, char *dst, long start, long end ) {
-	printf("$%04x to $%04x of '%s' is cut for '%s'\n", start, end, src, dst); 
+bool cut( const char *src, const char *dst, const long start, const long end ) {
+	printf("$%04lx to $%04lx of '%s' is cut for '%s'\n", start, end, src, dst); 
 	FILE *fi, *fo;
 	fi = fopen(src, "rb");
 	if(fi==NULL) {

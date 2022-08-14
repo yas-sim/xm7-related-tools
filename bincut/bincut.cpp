@@ -28,11 +28,11 @@ int main( int argc, char *argv[] )
 		perror("Output file open");
 	}
 	unsigned long start, end;
-	sscanf(argv[3], "%xl", &start);
-	sscanf(argv[4], "%xl", &end);
+	sscanf(argv[3], "%lx", &start);
+	sscanf(argv[4], "%lx", &end);
 
 	if(start>end) {
-		printf("The end address specified is lower than start address.(ST=%x, END=%x)\n", start, end);
+		printf("The end address specified is lower than start address.(ST=%lx, END=%lx)\n", start, end);
 		exit(-1);
 	}
 	if(fseek(fpi, start, SEEK_SET)) {

@@ -39,7 +39,7 @@ static void motPut( void )
 		case 1:
 		case 9:	siz=3+motDATA.Size;
 				adr=motDATA.Address;
-				fprintf(stdout, "%02X%04LX", siz, adr);
+				fprintf(stdout, "%02X%04lX", siz, adr);
 				motDATA.Sum+=siz;
 				motDATA.Sum+=(unsigned char)((adr >>8) & 0x00ffu);
 				motDATA.Sum+=(unsigned char) (adr	   & 0x00ffu);
@@ -47,7 +47,7 @@ static void motPut( void )
 		case 2:
 		case 8:	siz=4+motDATA.Size;
 				adr=motDATA.Address;
-				fprintf(stdout, "%02X%06LX", siz, adr);
+				fprintf(stdout, "%02X%06lX", siz, adr);
 				motDATA.Sum+=siz;
 				motDATA.Sum+=(unsigned char)((adr >>16) & 0x00ffu);
 				motDATA.Sum+=(unsigned char)((adr >> 8) & 0x00ffu);
@@ -56,7 +56,7 @@ static void motPut( void )
 		case 3:
 		case 7:	siz=5+motDATA.Size;
 				adr=motDATA.Address;
-				fprintf(stdout, "%02X%08LX", siz, adr);
+				fprintf(stdout, "%02X%08lX", siz, adr);
 				motDATA.Sum+=siz;
 				motDATA.Sum+=(unsigned char)((adr >>24) & 0x00ffu);
 				motDATA.Sum+=(unsigned char)((adr >>16) & 0x00ffu);

@@ -149,7 +149,7 @@ int main( int argc, char *argv[] ) {
 		Low = ptl;
 	}
 	if(fVerbose) {
-		printf("Comparator threshold  High 0x%04x   Low 0x%04x\n", High, Low);
+		printf("Comparator threshold  High 0x%04lx   Low 0x%04lx\n", High, Low);
 	}
 	CComparator cmp;
 	cmp.SetThreshold((High-CENTER)/2+CENTER, 
@@ -165,7 +165,7 @@ int main( int argc, char *argv[] ) {
 	}
 
 	if(fVerbose) {
-		printf("Sample freq %d[Hz]   Channel %d[ch]  Quantize bit %d[bit]  Phase %s\n", wav.GetSplRate(), wav.GetNOChanell(), 
+		printf("Sample freq %ld[Hz]   Channel %d[ch]  Quantize bit %d[bit]  Phase %s\n", wav.GetSplRate(), wav.GetNOChanell(), 
 			wav.GetBitPerSpl(), fPhase==true?"Normal":"Reverse");
 		if(fAGC) puts("AGC on"); else puts("AGC off");
 //		puts("PASS2: Converting...");
