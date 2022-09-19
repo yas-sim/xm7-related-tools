@@ -1,51 +1,57 @@
 ﻿#ifndef _CFLOPPY_H_
 #define _CFLOPPY_H_
 
+#include <string>
+#include <vector>
+
 #include "sysdef.h"
 #include "fmfslib.h"
 
 class FMFSLIB_API CSector {
 public:
-	unsigned char m_nC;
-	unsigned char m_nH;
-	unsigned char m_nR;
-	unsigned char m_nN;
-	unsigned char m_fDensity;			/* 00:MFM 40:FM */
-	unsigned char m_fDDM;				/* 00:Normal 10:DeletedDataMark */
-	unsigned char m_nStatus;
-	unsigned short m_nSectorSize;
-	unsigned char *m_pSectorData;
-	CSector() { m_pSectorData=nullptr; }
-	virtual ~CSector() { 
-//		if(m_pSectorData!=nullptr) {
-//			delete []m_pSectorData;
-//			m_pSectorData = nullptr;
-//		}
-	}
+	uint8_t m_nC;
+	uint8_t m_nH;
+	uint8_t m_nR;
+	uint8_t m_nN;
+	uint8_t m_nNumberOfSectors;
+	uint8_t m_fDensity;			/* 00:MFM 40:FM */
+	uint8_t m_fDDM;				/* 00:Normal 10:DeletedDataMark */
+	uint8_t m_nStatus;
+	uint16_t m_nSectorSize;
+	uint8_t *m_pSectorData;
+	CSector() :
+			m_nC(0), m_nH(0), m_nR(0), m_nN(0),
+			m_fDensity(0), m_fDDM(0),
+			m_nStatus(0),
+			m_nSectorSize(0),
+			m_pSectorData(nullptr)
+	{ }
+	virtual ~CSector() {};
 };
 
 class FMFSLIB_API CFloppy {
 protected:	/* Member data */
-	unsigned char	m_sDiskName[17];
-	unsigned char	m_fWriteProtect;		/* 00:Not protect  10:Write protected */
-	unsigned char	m_fDiskType;			/* 00:2D 10:2DD 20:2HD */
-	unsigned long	m_nDiskSize;
+	std::string		m_sDiskName;
+	uint8_t			m_fWriteProtect;		/* 00:Not protect  10:Write protected */
+	uint8_t			m_fDiskType;			/* 00:2D 10:2DD 20:2HD */
+	size_t			m_nDiskSize;
 	bool			m_fAvailable;			// false:Not available  true:Available
 
 public:		/* Member data */
 public:		/* Memver function */
-	CFloppy() {
-		m_sDiskName[0] = '\0';
-		m_fWriteProtect = 0x00;
-		m_fDiskType = 0x00;
-		m_nDiskSize = 0;
-		m_fAvailable = false;
+	CFloppy() : 
+			m_fWriteProtect(0x00), 
+			m_fDiskType(0x00), 
+			m_nDiskSize(0), 
+			m_fAvailable(false) 
+	{
+		m_sDiskName.clear();
 	}
 	virtual ~CFloppy() { };
 
 	virtual void ShowFDInfo( bool fShowTrackOffset ) = 0;
-	virtual FDC_STATUS	ReadSector( int C, int H, int R, CSector *sect ) = 0;
-	virtual FDC_STATUS	WriteSector( int C, int H, int R, CSector *sect ) = 0;
+	virtual FDC_STATUS	ReadSector( const int C, const int H, const int R, CSector &sect ) = 0;
+	virtual FDC_STATUS	WriteSector( const int C, const int H, const int R, CSector &sect ) = 0;
 	virtual bool isAvailable( void ) = 0;
 };
 

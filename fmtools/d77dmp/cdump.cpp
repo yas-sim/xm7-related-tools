@@ -5,7 +5,7 @@
 
 void CDump::dispadrs( void )
 {
-	printf("%08LX ", readptr);
+	printf("%08lX ", readptr);
 }
 
 void CDump::dispascii( void )
@@ -24,31 +24,30 @@ void CDump::flush( void )
 	dispascii();
 }
 
-void CDump::put( unsigned char ch )
+void CDump::put( uint8_t ch )
 {
-	
-	if(ch<' ' || ch==0xff) 	ascii[readptr & 0x0000000fu] = '.';
-	else					ascii[readptr & 0x0000000fu] = ch;
+	if(ch<' ' || ch==0xff) 	ascii[readptr & 0x0fu] = '.';
+	else					ascii[readptr & 0x0fu] = ch;
 
-	if((readptr & 0x000000fful)==0x00)
+	if((readptr & 0x00fful)==0x00)
 		puts("\n-OFFSET- +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +A +B +C +D +E +F 0123456789ABCDEF");
-	if((readptr & 0x0000000ful)==0x00) dispadrs();
+	if((readptr & 0x000ful)==0x00) dispadrs();
 	printf("%02X ", ch);
 	readptr++;
 	bytecount++;
-	if((readptr & 0x0000000ful)==0x00) dispascii();
+	if((readptr & 0x0ful)==0x00) dispascii();
 }
 
-void CDump::put( unsigned short ch )
+void CDump::put( uint16_t ch )
 {
-	put((unsigned char)((ch>>8) & 0x00fful));
-	put((unsigned char)((ch   ) & 0x00fful));
+	put((uint8_t)((ch>>8) & 0x00fful));
+	put((uint8_t)((ch   ) & 0x00fful));
 }
 
-void CDump::put( unsigned long ch )
+void CDump::put( uint32_t ch )
 {
-	put((unsigned char)((ch>>24) & 0x00fful));
-	put((unsigned char)((ch>>16) & 0x00fful));
-	put((unsigned char)((ch>> 8) & 0x00fful));
-	put((unsigned char)((ch    ) & 0x00fful));
+	put((uint8_t)((ch>>24) & 0x00fful));
+	put((uint8_t)((ch>>16) & 0x00fful));
+	put((uint8_t)((ch>> 8) & 0x00fful));
+	put((uint8_t)((ch    ) & 0x00fful));
 }

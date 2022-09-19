@@ -59,7 +59,7 @@ bool CFilesys::ReadCluster( FLHANDLE *hFile, int nCluster ) {
 	csect.m_pSectorData = (unsigned char*)hFile->pClusterBuff;
 	for(int sect=0; sect<UsedSect; sect++) {
 		int sctno = Cluster2LBA(nCluster)+sect;
-		hFile->phFD->pFD->ReadSector(LBA2C(sctno), LBA2H(sctno), LBA2R(sctno), &csect);
+		hFile->phFD->pFD->ReadSector(LBA2C(sctno), LBA2H(sctno), LBA2R(sctno), csect);
 		csect.m_pSectorData += SECT_SIZE;
 		hFile->nClusterDataSize += SECT_SIZE;
 	}
@@ -81,7 +81,7 @@ bool CFilesys::WriteCluster( FLHANDLE *hFile, int nCluster ) {
 	for(int sect=0; sect<UsedSect; sect++) {
 		int sctno = Cluster2LBA(nCluster)+sect;
 		csect.m_pSectorData = (unsigned char*)ptr;
-		hFile->phFD->pFD->WriteSector(LBA2C(sctno), LBA2H(sctno), LBA2R(sctno), &csect);
+		hFile->phFD->pFD->WriteSector(LBA2C(sctno), LBA2H(sctno), LBA2R(sctno), csect);
 		ptr += SECT_SIZE;
 	}
 	return true;
@@ -100,7 +100,7 @@ bool CFilesys::ReadFAT( FDHANDLE *hFD, char *pBuff ) {
     for(int i=0; i<NUMBER_OF_FAT; i++) {
 		tmpsect.m_pSectorData = (unsigned char*)(pBuff+i*SECT_SIZE);
 		if(hFD->pFD->ReadSector(LBA2C(FAT_LBA+i), LBA2H(FAT_LBA+i),
-				LBA2R(FAT_LBA+i), &tmpsect)!=0) err=false;
+				LBA2R(FAT_LBA+i), tmpsect)!=0) err=false;
     }
 	return err;
 }
@@ -112,7 +112,7 @@ bool CFilesys::WriteFAT( FDHANDLE *hFD, char *pBuff ) {
     for(int i=0; i<NUMBER_OF_FAT; i++) {
 		tmpsect.m_pSectorData = (unsigned char*)(pBuff+i*SECT_SIZE);
 		if(hFD->pFD->WriteSector(LBA2C(FAT_LBA+i), LBA2H(FAT_LBA+i),
-				LBA2R(FAT_LBA+i), &tmpsect)!=0) err=false;
+				LBA2R(FAT_LBA+i), tmpsect)!=0) err=false;
     }
 	return err;
 }
@@ -139,7 +139,7 @@ bool CFilesys::ReadEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
 	tmpsect.m_pSectorData = pSECT;
 	int sect = EntryNumber/EPS;
     if(hFD->pFD->ReadSector(LBA2C(DIR_LBA+sect), LBA2H(DIR_LBA+sect),
-    		LBA2R(DIR_LBA+sect), &tmpsect)!=0) return false;
+    		LBA2R(DIR_LBA+sect), tmpsect)!=0) return false;
 	int pos = (EntryNumber-(EntryNumber/EPS)*EPS)*BPE;
     for(int i=0; i<8; i++) {
         ent->pFilename[i] = pSECT[pos++];
@@ -159,10 +159,10 @@ bool CFilesys::WriteEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
 	tmpsect.m_pSectorData = pSECT;
 	int sect = EntryNumber/EPS;
     if(hFD->pFD->ReadSector(LBA2C(DIR_LBA+sect), LBA2H(DIR_LBA+sect),
-    		LBA2R(DIR_LBA+sect), &tmpsect)!=0) return false;
+    		LBA2R(DIR_LBA+sect), tmpsect)!=0) return false;
 	int pos = (EntryNumber-(EntryNumber/EPS)*EPS)*BPE;
     char fname[20];
-	wsprintf(fname, "%-8s", ent->pFilename);	// 左詰の8文字のファイル名を生成
+	sprintf(fname, "%-8s", ent->pFilename);	// 左詰の8文字のファイル名を生成
 	for(int i=0; i<8; i++) pSECT[pos++] = fname[i];
     pos+=3;		// Skip Reserve
     pSECT[pos++]=ent->nFileType;
@@ -170,7 +170,7 @@ bool CFilesys::WriteEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
     pSECT[pos++]=ent->fRandomAccess;
     pSECT[pos++]=ent->nTopCluster;
     if(hFD->pFD->WriteSector(LBA2C(DIR_LBA+sect), LBA2H(DIR_LBA+sect),
-    		LBA2R(DIR_LBA+sect), &tmpsect)!=0) return false;
+    		LBA2R(DIR_LBA+sect), tmpsect)!=0) return false;
 	return true;
 }
 
@@ -200,7 +200,7 @@ int CFilesys::FindEmptyCluster( FDHANDLE *hFD ) {
 int CFilesys::FindEntry( FDHANDLE *hFD, char *pFilename ) {
 	CEntry ent;
 	char fname[20];
-	wsprintf(fname, "%-8s", pFilename);
+	sprintf(fname, "%-8s", pFilename);
 	for(int entry=0; entry<=MAX_DIR; entry++) {
 		int i;
 		ReadEntry(hFD, entry, &ent);
@@ -218,7 +218,7 @@ bool CFilesys::CheckDiskID( FDHANDLE *hFD ) {
 	bool result=true;
 	CSector sect;
 	sect.m_pSectorData = new unsigned char [1024];
-	hFD->pFD->ReadSector(0, 0, 3, &sect);
+	hFD->pFD->ReadSector(0, 0, 3, sect);
 	if(sect.m_pSectorData[0]!='S' || 
 	   sect.m_pSectorData[1]!=' ' ||
 	   sect.m_pSectorData[2]!=' ') result=false;	// Illegal Disk ID
@@ -227,12 +227,12 @@ bool CFilesys::CheckDiskID( FDHANDLE *hFD ) {
 }
 
 // 指定のファイル名のファイルをマウントし、FDハンドル値を返す
-FDHANDLE *CFilesys::FMMountFD( char *fdimage ) {
+FDHANDLE *CFilesys::FMMountFD( std::string fdimage ) {
 	FDHANDLE *ptr = new FDHANDLE();
 	if(ptr==nullptr) return nullptr;
 
 	CFDImg *pFDImg = new CFDImg;
-	if(pFDImg->OpenFDImage((unsigned char*)fdimage)==false) {
+	if(pFDImg->OpenFDImage(fdimage)==false) {
 		delete pFDImg;
 		return nullptr;
 	}
@@ -288,7 +288,7 @@ FLHANDLE *CFilesys::FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetyp
 				return nullptr;
 			}
 			SetFATValue(hFD, emptycluster, 0xc0);	// クラスタを使用中にする
-			wsprintf(ent.pFilename, "%-8s", filename);
+			sprintf(ent.pFilename, "%-8s", filename);
 			ent.nTopCluster = emptycluster;
 			ent.nFileType = filetype;
 			ent.fAscii = ascii;
@@ -369,10 +369,9 @@ int CFilesys::Read1( FLHANDLE *hFile ) {
 int CFilesys::FMRead( FLHANDLE *hFile, char *pBuff, int nNOR ) {
 	int NOR = 0;
 	if(hFile==nullptr) return -1;
-	for(int NOR=0; NOR<nNOR; NOR++) {
+	for(NOR=0; NOR<nNOR; NOR++) {
 		if(hFile->fEOF==true) break;
 		int ch = Read1(hFile);
-//		printf("*%d ", ch);
 		if(ch<0) {
 			hFile->fEOF=true;
 			break;

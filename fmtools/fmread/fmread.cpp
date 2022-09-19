@@ -10,7 +10,7 @@ protected:
 	CFilesys fs;
 	char tgtfile[10], fdimage[512];
 
-	HANDLE hOutFile;			// 出力ファイルへのハンドル
+	std::ofstream hOutFile;		// 出力ファイルへのハンドル
 	char outfile[20];			// 出力ファイル名
 
 	CEntry ent;
@@ -23,23 +23,20 @@ protected:
 
 	void ReadRawFile( void ) {
 		unsigned char buff[4];
-		DWORD NOW;
-		hFile->fAscii = 0;	// 強制的にバイナリモードにする
 		while(1) {
 			int nor = fs.FMRead(hFile, (char*)buff, 1);
 			if(nor>0) {
-				WriteFile(hOutFile, &buff, 1, &NOW, NULL);
-//				printf("%c", buff[0]);
+				hOutFile.write(reinterpret_cast<char*>(&buff), 1);
 			}
 			if(fs.FMEof(hFile)==true) break;
 		}
 	}
 
 	// ヘッダ情報を書き込む
-	void WriteHeader( HANDLE hFile, char *filename, unsigned char FileType,
+	void WriteHeader( std::ofstream &hFile, char *filename, unsigned char FileType,
 								unsigned char Ascii, unsigned char Random )  {
 		char header[0x10];
-		DWORD NOW, ptr;
+		size_t ptr;
 		// ヘッダを0クリア
 		for(int i=0; i<0x10; i++) header[i]=0;
 		ptr=0;
@@ -55,7 +52,7 @@ protected:
 		header[13] = 'X';
 		header[14] = 'M';
 		header[15] = '7';
-		WriteFile(hFile, header, 0x10, &NOW, NULL);
+		hFile.write(reinterpret_cast<char*>(header), 0x10);
 	}
 
 public:
@@ -126,9 +123,8 @@ public:
 		if(fVerbose) {
 			printf("Output file='%s'\n", outfile);
 		}
-
-		hOutFile = CreateFile(outfile, GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, NULL, NULL);
-		if(hOutFile==INVALID_HANDLE_VALUE) {
+		hOutFile.open(std::string(outfile), std::ios::out | std::ios::binary | std::ios::trunc);
+		if(!hOutFile.is_open()) {
 			puts("Failed to open output file");
 			exit(1);
 		}
@@ -136,7 +132,7 @@ public:
 		WriteHeader(hOutFile, tgtfile, ent.nFileType, ent.fAscii, ent.fRandomAccess);
 		ReadRawFile();		// ファイルの中身を読み出す(小細工なし)
 		
-		CloseHandle(hOutFile);
+		hOutFile.close();
 		fs.FMClose(hFile);
 		fs.FMUnmountFD(hFD);
 	}

@@ -6,7 +6,9 @@
 #define FM_NO_DISK_SPACE		(2)
 #define FM_NOT_A_FBASIC_DISK	(3)
 
-const char ErrString[][80] = {
+#include <string>
+
+const std::vector<std::string> ErrString = {
 	"NO ERROR",
 	"File not found",
 	"No disk space",

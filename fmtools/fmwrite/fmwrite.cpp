@@ -7,13 +7,14 @@
 
 #include "CMotorolaS.h"
 
+#include <iostream>
 
 class CFMWRITE {
 protected:
 	CFilesys fs;
 	char tgtfile[10], fdimage[512];
 
-	HANDLE hInFile;				// 入力ファイルへのハンドル
+	std::fstream hInFile;		// 入力ファイルへのハンドル
 	char infile[512];			// 入力ファイル名
 
 	CFDImg FD;
@@ -31,14 +32,13 @@ protected:
 protected:
 
 	bool ReadHeader( void ) {
-		DWORD NOR;
+		uint32_t NOR;
 		unsigned char header[0x10];
-		BOOL status = ReadFile(hInFile, header, 0x10, &NOR, NULL);
-		if(status==0) {
-			DWORD error = GetLastError();
-			char errstr[512];
-			FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error,
-				0, errstr, 510, NULL);
+		hInFile.read(reinterpret_cast<char*>(header), 0x10);
+		bool status = hInFile.fail();
+		if(status==true) {
+			std::cerr << "Header read error." << std::endl;
+			return false;
 		}
 		if(header[13]!='X' || header[14]!='M' || header[15]!='7') return false;
 		// ファイル名抜き取り
@@ -69,11 +69,10 @@ public:
 	
 	void WriteRawFile( void ) {
 		unsigned char buff[4];
-		DWORD NOR;
-		hFile->fAscii = 0;	// 強制的にバイナリモードにする
 		while(1) {
-			BOOL status = ReadFile(hInFile, buff, 1, &NOR, NULL);
-			if(NOR>0) {
+			hInFile.read(reinterpret_cast<char*>(&buff), 1);
+			bool status = hInFile.fail();
+			if(!status) {
 				fs.FMWrite(hFile, (char*)buff, 1);
 			} else break;
 		}
@@ -108,8 +107,8 @@ public:
 		}
 
 		// 入力ファイルオープン
-		hInFile = CreateFile(infile, GENERIC_READ, NULL, NULL, OPEN_EXISTING, NULL, NULL);
-		if(hInFile==INVALID_HANDLE_VALUE) {
+		hInFile.open(infile, std::ios::in | std::ios::binary);
+		if(!hInFile.is_open()) {
 			puts("Failed to open input file");
 			exit(1);
 		}
@@ -133,7 +132,7 @@ public:
 		// ファイル内容を書き込む
 		WriteRawFile();
 
-		CloseHandle(hInFile);
+		hInFile.close();
 		fs.FMClose(hFile);
 		fs.FMUnmountFD(hFD);
 	}

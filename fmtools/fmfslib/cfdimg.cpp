@@ -1,5 +1,7 @@
 ﻿#define FMFSLIB_EXPORTS
 
+#include <iostream>
+
 #include "cfdimg.h"
 
 #if VERBOSE==1
@@ -22,7 +24,7 @@ long CFDImg::GetSectorOffset( int C, int H, int R ) {
 	int sect_count = 0;
 	CSectorImg sect;
 	do {
-		ReadSectorID(Offset, &sect);
+		ReadSectorID(Offset, sect);
 		if(sect.m_nC==C && sect.m_nH==H && sect.m_nR==R) break;
 		Offset += (sect.m_nSectorSize+16);		// 16 is a size of sector header
 	} while(sect_count++ < sect.m_nNumberOfSectors);
@@ -31,64 +33,57 @@ long CFDImg::GetSectorOffset( int C, int H, int R ) {
 
 // 指定のオフセット位置からセクタのID情報を読み取る
 // セクタデータの読み出しは行わない
-bool CFDImg::ReadSectorID( long Offset, CSector *sect ) {
-	if(m_hFDImage==INVALID_HANDLE_VALUE) return 0;
-	DWORD NOR;
-	CSectorImg *scti = (CSectorImg*)sect;
-	unsigned char reserve[5];
-	SetFilePointer(m_hFDImage, Offset, nullptr, FILE_BEGIN);
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nC,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nH,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nR,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nN,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nNumberOfSectors,	2, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_fDensity,			1, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_fDDM,				1, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nStatus,			1, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)reserve,					5, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&scti->m_nSectorSize,		2, &NOR, nullptr) == 0) { SHOW_ERROR; }
+bool CFDImg::ReadSectorID( long Offset, CSector &sect ) {
+	if(!m_hFDImage.is_open()) return 0;
+	uint8_t reserve[5];
+	m_hFDImage.seekg(Offset, std::ios::beg);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_nC), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_nH), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_nR), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_nN), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_nNumberOfSectors), 2);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_fDensity), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_fDDM), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_nStatus), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&reserve), 5);
+	m_hFDImage.read(reinterpret_cast<char*>(&sect.m_nSectorSize), 2);
 	return true;
 }
 
 // 指定のCHRのセクタを読み出す
 // sectのm_pSectorDataが指す領域にデータを書き込む。
 // m_pSectorDataには領域を確保しておく必要あり
-FDC_STATUS	CFDImg::ReadSector( int C, int H, int R, CSector *sect ) {
-	if(m_hFDImage==INVALID_HANDLE_VALUE) return 0;
+FDC_STATUS	CFDImg::ReadSector( const int C, const int H, const int R, CSector &sect ) {
+	if(!m_hFDImage.is_open()) return 0;
 	long Offset;
-	DWORD NOR;
+	uint64_t NOR;
 	Offset = GetSectorOffset(C, H, R);
 	if(Offset==0) return 1;											// Sector not found
 	ReadSectorID(Offset, sect);
-//	if(sect->m_pSectorData!=nullptr) delete[](sect->m_pSectorData);		// Release reserved memory area
-//	sect->m_pSectorData = new unsigned char [sect->m_nSectorSize];	// Reserve memory area 
-//	if(sect->m_pSectorData==nullptr) return 2;							// Not enough memory
-	if(ReadFile(m_hFDImage, (LPVOID)sect->m_pSectorData, sect->m_nSectorSize, &NOR, nullptr) == 0) { SHOW_ERROR; }
+	m_hFDImage.read(reinterpret_cast<char*>(sect.m_pSectorData), sect.m_nSectorSize);
 	return 0;
 }
 
 // 指定のCHRのセクタに、sect.m_pSectorDataが指す領域のデータを書き込む
 // 指定のセクタがない場合は書き込みを行わない(新規にセクタを作ったりはしない)
 // sectの持っているCHRNは使用しない(引数のCHRのみ有効)
-FDC_STATUS	CFDImg::WriteSector( int C, int H, int R, CSector *sect ) {
-	if(m_hFDImage==INVALID_HANDLE_VALUE) return 0;
+FDC_STATUS	CFDImg::WriteSector( int C, int H, int R, CSector &sect ) {
+	if(!m_hFDImage.is_open()) return 0;
 	long Offset;
-	DWORD NOW;
 	Offset = GetSectorOffset(C, H, R);
 	if(Offset==0) return 1;		// Sector not found
 	ReadSectorID(Offset, sect);	// SectorIDを読み飛ばし、データ部の頭だしをする
 	if(m_fWriteProtect==0x10) return FDC_WRITE_PROTECTED;	// Write Protected!
-	if(WriteFile(m_hFDImage, (LPCVOID)sect->m_pSectorData, sect->m_nSectorSize, &NOW, nullptr) == 0) { SHOW_ERROR; }
+	m_hFDImage.write(reinterpret_cast<char*>(sect.m_pSectorData), sect.m_nSectorSize);
 	return 0;
 }
 
 // FD Imageファイルをオープンする。成功した場合、自動的にヘッダ情報も読み込む
-bool CFDImg::OpenFDImage( unsigned char *pFileName )
+bool CFDImg::OpenFDImage( const std::string &FileName )
 {
-	m_hFDImage = CreateFile( (LPCTSTR)pFileName, GENERIC_READ | GENERIC_WRITE, 0,
-						nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, nullptr);
-	if(m_hFDImage==INVALID_HANDLE_VALUE) {
-		SHOW_ERROR;
+	m_hFDImage = std::fstream(FileName, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+	if(!m_hFDImage.is_open()) {
+		std::cout << "Error opening file '" << FileName << "'." << std::endl;
 		return false;
 	}
 	if(ReadHeader()==false) return false;
@@ -97,25 +92,26 @@ bool CFDImg::OpenFDImage( unsigned char *pFileName )
 
 // FD Imageファイルをクローズする
 bool CFDImg::CloseFDImage( void ) {
-	if(m_hFDImage!=INVALID_HANDLE_VALUE) {
-		CloseHandle(m_hFDImage);
-		m_hFDImage = INVALID_HANDLE_VALUE;
+	if(m_hFDImage.is_open()) {
+		m_hFDImage.close();
 	}
 	return true;
 }
 
 // FD Imageのヘッダ情報を読み出す
 bool CFDImg::ReadHeader( void ) {
-	if(m_hFDImage==INVALID_HANDLE_VALUE) return false;
-	DWORD NOR;		// Number Of Read
-	SetFilePointer(m_hFDImage, 0, nullptr, FILE_BEGIN);
-	if(ReadFile(m_hFDImage, (LPVOID)m_sDiskName,		17, &NOR, nullptr) == 0) { SHOW_ERROR; }
-	SetFilePointer(m_hFDImage, 17+9, nullptr, FILE_BEGIN);
-	if(ReadFile(m_hFDImage, (LPVOID)&m_fWriteProtect,	1, &NOR, nullptr)==0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&m_fDiskType,		1, &NOR, nullptr)==0) { SHOW_ERROR; }
-	if(ReadFile(m_hFDImage, (LPVOID)&m_nDiskSize,		4, &NOR, nullptr)==0) { SHOW_ERROR; }
-	for(int i=0; i<=_CFDIMAGE_MAX_TRACK_; i++) {
-		if(ReadFile(m_hFDImage, (LPVOID)&m_nTrackOffset[i],	4, &NOR, nullptr)==0) { SHOW_ERROR; }
+	if(!m_hFDImage.is_open()) return false;
+	m_hFDImage.seekg(0, std::ios::beg);
+
+	uint64_t dmy;
+	m_sDiskName.resize(16);
+	m_hFDImage.read(const_cast<char*>(m_sDiskName.c_str()), 16);
+	m_hFDImage.seekg(17+9, std::ios::beg);
+	m_hFDImage.read(reinterpret_cast<char*>(&m_fWriteProtect), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&m_fDiskType), 1);
+	m_hFDImage.read(reinterpret_cast<char*>(&m_nDiskSize), 4);
+	for(int i=0; i<_CFDIMAGE_MAX_TRACK_; i++) {
+		m_hFDImage.read(reinterpret_cast<char*>(&m_nTrackOffset[i]), 4);
 	}
 	return true;
 }

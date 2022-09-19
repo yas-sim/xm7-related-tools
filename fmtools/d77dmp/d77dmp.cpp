@@ -65,15 +65,15 @@ public:
 	void ShowSector( int trk, int sct ) {
 		CSector sect;
 		CDump dump;
-		unsigned char buff[4096];
-		sect.m_pSectorData = (unsigned char*)buff;
+		uint8_t buff[4096];
+		sect.m_pSectorData = buff;
 		printf("Dumping TRK=%d SCT=%d", trk, sct);
-		if(fd.ReadSector(trk/2, trk%2, sct, &sect)!=0) {
+		if(fd.ReadSector(trk/2, trk%2, sct, sect)!=0) {
 			puts("Failed to read sector");
 			return;
 		}
 		for(int i=0; i<256; i++) {
-			dump.put((unsigned char)buff[i]);
+			dump.put(buff[i]);
 		}
 		dump.flush();
 	}
@@ -134,7 +134,7 @@ public:
 			printf("Illegal parameter");
 			exit(-1);
 		}
-		if(fd.OpenFDImage((unsigned char*)argv[1])==false) {
+		if(fd.OpenFDImage(std::string(reinterpret_cast<char*>(argv[1])))==false) {
 			puts("Failed to open FD image file");
 			exit(1);
 		}

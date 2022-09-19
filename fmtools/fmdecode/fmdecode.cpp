@@ -1,8 +1,10 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
 
 #include "cmotorolas.h"
+
+#include <iostream>
+#include <fstream>
 
 // v0.1 "iba"拡張子を受け付けるように変更
 
@@ -10,7 +12,8 @@
 
 class CFMDECODE {
 protected:
-	HANDLE hInFile, hOutFile;	// 入出力ファイルへのハンドル
+	std::ifstream hInFile;
+	std::ofstream hOutFile;	// 入出力ファイルへのハンドル
 	char infile[512], outfile[512];			// 出力ファイル名
 
 	bool fRaw;					// RAWモードフラグ
@@ -24,14 +27,11 @@ protected:
 protected:
 	void DecodeBasicFile( void ) {
 		unsigned char buff[4];
-		DWORD NOW, NOR;
-		BOOL status;
-		status = ReadFile(hInFile, buff, 2, &NOR, NULL);		// Dummy read (skip 2 bytes)
+		hInFile.read(reinterpret_cast<char*>(buff), 2);		// Dummy read (skip 2 bytes)
 		while(1) {
-			status = ReadFile(hInFile, buff, 1, &NOR, NULL);
-			if(NOR>0) {
-				WriteFile(hOutFile, &buff, 1, &NOW, NULL);
-//				printf("%c", buff[0]);
+			hInFile.read(reinterpret_cast<char*>(buff), 1);
+			if(!hInFile.fail()) {
+				hOutFile.write(reinterpret_cast<char*>(buff), 1);
 				if(Ascii==true) {
 					if(buff[0]==0x1a) break;
 				}
@@ -41,25 +41,20 @@ protected:
 
 	void DecodeRawFile( void ) {
 		unsigned char buff[4];
-		DWORD NOW, NOR;
-		BOOL status;
 		while(1) {
-			status = ReadFile(hInFile, buff, 1, &NOR, NULL);
-			if(NOR>0) {
-				WriteFile(hOutFile, &buff, 1, &NOW, NULL);
+			hInFile.read(reinterpret_cast<char*>(buff), 1);
+			if(!hInFile.fail()) {
+				hOutFile.write(reinterpret_cast<char*>(buff), 1);
 			} else break;
 		}
 	}
 
 	void DecodeAsciiFile( void ) {
 		unsigned char buff[4];
-		DWORD NOW, NOR;
-		BOOL status;
 		while(1) {
-			status = ReadFile(hInFile, buff, 1, &NOR, NULL);
-			if(NOR>0) {
-				WriteFile(hOutFile, &buff, 1, &NOW, NULL);
-//				printf("%c", buff[0]);
+			hInFile.read(reinterpret_cast<char*>(buff), 1);
+			if(!hInFile.fail()) {
+				hOutFile.write(reinterpret_cast<char*>(buff), 1);
 				if(Ascii==true) {
 					if(buff[0]==0x1a) break;
 				}
@@ -72,31 +67,29 @@ protected:
 		unsigned char buff[4];
 		unsigned long nFileSize;
 		unsigned short nStartAddr, nEntryAddr;
-		DWORD NOW, NOR;
-		BOOL status;
-		status = ReadFile(hInFile, buff, 3, &NOR, NULL);
+		hInFile.read(reinterpret_cast<char*>(buff), 3);
 		nFileSize = (buff[0]<<16) | (buff[1]<<8) | buff[2];
 //		printf("File size=%06x\n", nFileSize);
-		status = ReadFile(hInFile, buff, 2, &NOR, NULL);
+		hInFile.read(reinterpret_cast<char*>(buff), 2);
 		nStartAddr = (buff[0]<<8) | buff[1];
 		char *data = new char[nFileSize+1];
 		// データ本体を読み出す
-		status = ReadFile(hInFile, data, nFileSize, &NOR, NULL);
-		if(status==0 && NOR==0) {
+		hInFile.read(reinterpret_cast<char*>(data), nFileSize);
+		if(hInFile.fail()) {
 			puts("Unexpected EOF");
 			delete []data;
 			exit(1);
 		}
 		// Dummyを読み飛ばす(この３バイトは何のためにあるんだろう?)
-		status = ReadFile(hInFile, buff, 3, &NOR, NULL);
-		if(status==0 && NOR==0) {
+		hInFile.read(reinterpret_cast<char*>(buff), 3);
+		if(hInFile.fail()) {
 			puts("Unexpected EOF(1)");
 			delete []data;
 			exit(1);
 		}
 		// エントリーアドレスを読み出す
-		status = ReadFile(hInFile, buff, 2, &NOR, NULL);
-		if(status==0 && NOR==0) {
+		hInFile.read(reinterpret_cast<char*>(buff), 2);
+		if(hInFile.fail()) {
 			puts("Unexpected EOF(1)");
 			delete []data;
 			exit(1);
@@ -118,7 +111,7 @@ protected:
 			}
 			mot.GetSRecordBuff(outbuff);
 			strcat(outbuff, "\n");
-			WriteFile(hOutFile, outbuff, strlen(outbuff), &NOW, NULL);
+			hOutFile.write(reinterpret_cast<char*>(outbuff), strlen(outbuff));
 //			puts(outbuff);
 		}
 		// エンドレコードを生成
@@ -126,15 +119,14 @@ protected:
 		mot.SetRecordType(9);
 		mot.GetSRecordBuff(outbuff);
 		strcat(outbuff, "\n");
-		WriteFile(hOutFile, outbuff, strlen(outbuff), &NOW, NULL);
+		hOutFile.write(reinterpret_cast<char*>(outbuff), strlen(outbuff));
 //		puts(outbuff);
 		delete []data;
 	}
 
 	bool ReadHeader( void ) {
-		DWORD NOR;
 		unsigned char header[0x10];
-		ReadFile(hInFile, header, 0x10, &NOR, NULL);
+		hInFile.read(reinterpret_cast<char*>(header), 0x10);
 		if(header[13]!='X' || header[14]!='M' || header[15]!='7') return false;
 		// ファイル名抜き取り
 		for(int i=0; i<9; i++) {
@@ -201,8 +193,8 @@ public:
 		}
 		
 		// 入力ファイルオープン
-		hInFile = CreateFile(infile, GENERIC_READ, NULL, NULL, OPEN_EXISTING, NULL, NULL);
-		if(hInFile==INVALID_HANDLE_VALUE) {
+		hInFile.open(infile, std::ios::in | std::ios::binary);
+		if(!hInFile.is_open()) {
 			printf("Failed to open input file '%s'\n", infile);
 			exit(1);
 		}
@@ -232,10 +224,10 @@ public:
 		if(fVerbose) printf("Output file='%s'\n", outfile);
 
 		// 出力ファイルオープン
-		hOutFile = CreateFile(outfile, GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, NULL, NULL);
-		if(hOutFile==INVALID_HANDLE_VALUE) {
+		hOutFile.open(outfile, std::ios::out | std::ios::trunc);
+		if(!hOutFile.fail()) {
 			printf("Failed to open output file '%s'\n", outfile);
-			exit(1);
+		//	exit(1);
 		}
 
 		ShowHeader();
@@ -258,8 +250,8 @@ public:
 		default:
 			break;
 		}
-		CloseHandle(hInFile);
-		CloseHandle(hOutFile);
+		hInFile.close();
+		hOutFile.close();
 	}
 };
 

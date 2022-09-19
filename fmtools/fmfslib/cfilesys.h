@@ -129,7 +129,7 @@ public:
 	}
 	virtual ~CFilesys() {};
 public:
-	FDHANDLE*	FMMountFD( char *fdimage );
+	FDHANDLE*	FMMountFD( std::string fdimage );
 	bool		FMUnmountFD( FDHANDLE *hFD ); 
 	FLHANDLE*	FMOpen( FDHANDLE *hFD, char *filename, int mode, int filetype, int ascii, int random);
 	bool		FMClose( FLHANDLE *hFile );
