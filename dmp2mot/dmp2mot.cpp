@@ -1,7 +1,8 @@
 ﻿#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <tchar.h>
+#include <wchar.h>
+#include <locale.h>
 #include <locale>
 
 #define VERSION	"0.1"
@@ -58,7 +59,7 @@ bool split( char *string ) {
 	g_nov = 0;
 	strncpy(tmpbuff, string, 255);
 	ptr = strtok(tmpbuff, " :=\t");			// 最初のトークンを切り出す
-	while(ptr!=NULL) {
+	while(ptr!=nullptr) {
 		if(g_nov>=MAX_VAL) break;			// 数値配列の要素数を超えるときは終了する
 		g_val[g_nov++] = hex2val(ptr);		// 数値に変換
 		ptr = strtok(NULL, " \t");			// 二つ目以降のトークンを切り出す
@@ -154,7 +155,7 @@ void ReadConvertTable( void ) {
 	FILE *fp;
 	ctbl *ptr;
 	char buff[128];
-	if((fp=fopen("cnvtbl.txt","rt"))==NULL) return;
+	if((fp=fopen("cnvtbl.txt", "rt"))==nullptr) return;
 	while(!feof(fp)) {
 		fgets(buff, 127, fp);
 		ptr = cnvtbl.AddTbl();
@@ -260,7 +261,7 @@ int main( int argc, char *argv[]) {
 			break;
 		}
 	}
-	if(strlen(infile)==0) strcpy(infile, "test.txt");
+	if(strlen(infile) ==0) strcpy(infile,  "test.txt");
 	if(strlen(outfile)==0) strcpy(outfile, "test.mot");
 
 	FILE *fpi, *fpo;

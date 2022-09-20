@@ -225,7 +225,8 @@ bool CFilesys::CheckDiskID( FDHANDLE *hFD ) {
 	sect.m_pSectorData = new unsigned char [1024];
 	hFD->pFD->ReadSector(0, 0, 3, sect, numRead);
 	if((sect.m_pSectorData[0]!='S' || sect.m_pSectorData[1]!=' ' || sect.m_pSectorData[2]!=' ') &&
-	   (sect.m_pSectorData[0]!='S' || sect.m_pSectorData[1]!='Y' || sect.m_pSectorData[2]!='S')) 
+	   (sect.m_pSectorData[0]!='S' || sect.m_pSectorData[1]!='Y' || sect.m_pSectorData[2]!='S') &&
+	   (sect.m_pSectorData[0]!='S' || sect.m_pSectorData[1]!='\0' || sect.m_pSectorData[2]!='\0')) 
 		result=false;	// Illegal Disk ID
 	delete []sect.m_pSectorData;
 	return result;
