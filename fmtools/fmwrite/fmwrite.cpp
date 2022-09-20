@@ -14,7 +14,7 @@ protected:
 	CFilesys fs;
 	char tgtfile[10], fdimage[512];
 
-	std::fstream hInFile;		// 入力ファイルへのハンドル
+	std::ifstream hInFile;		// 入力ファイルへのハンドル
 	char infile[512];			// 入力ファイル名
 
 	CFDImg FD;
@@ -107,7 +107,7 @@ public:
 		}
 
 		// 入力ファイルオープン
-		hInFile.open(infile, std::ios::in | std::ios::binary);
+		hInFile.open(infile, std::ios::binary);
 		if(!hInFile.is_open()) {
 			puts("Failed to open input file");
 			exit(1);

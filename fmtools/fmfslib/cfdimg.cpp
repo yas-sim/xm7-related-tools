@@ -53,14 +53,15 @@ bool CFDImg::ReadSectorID( long Offset, CSector &sect ) {
 // 指定のCHRのセクタを読み出す
 // sectのm_pSectorDataが指す領域にデータを書き込む。
 // m_pSectorDataには領域を確保しておく必要あり
-FDC_STATUS	CFDImg::ReadSector( const int C, const int H, const int R, CSector &sect ) {
+FDC_STATUS	CFDImg::ReadSector( const int C, const int H, const int R, CSector &sect, size_t &numRead ) {
+	numRead = 0;
 	if(!m_hFDImage.is_open()) return 0;
 	long Offset;
-	uint64_t NOR;
 	Offset = GetSectorOffset(C, H, R);
 	if(Offset==0) return 1;											// Sector not found
 	ReadSectorID(Offset, sect);
 	m_hFDImage.read(reinterpret_cast<char*>(sect.m_pSectorData), sect.m_nSectorSize);
+	numRead = sect.m_nSectorSize;
 	return 0;
 }
 
@@ -74,6 +75,7 @@ FDC_STATUS	CFDImg::WriteSector( int C, int H, int R, CSector &sect ) {
 	if(Offset==0) return 1;		// Sector not found
 	ReadSectorID(Offset, sect);	// SectorIDを読み飛ばし、データ部の頭だしをする
 	if(m_fWriteProtect==0x10) return FDC_WRITE_PROTECTED;	// Write Protected!
+	m_hFDImage.seekp(Offset + 0x10, std::ios::beg);
 	m_hFDImage.write(reinterpret_cast<char*>(sect.m_pSectorData), sect.m_nSectorSize);
 	return 0;
 }
@@ -81,7 +83,7 @@ FDC_STATUS	CFDImg::WriteSector( int C, int H, int R, CSector &sect ) {
 // FD Imageファイルをオープンする。成功した場合、自動的にヘッダ情報も読み込む
 bool CFDImg::OpenFDImage( const std::string &FileName )
 {
-	m_hFDImage = std::fstream(FileName, std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+	m_hFDImage = std::fstream(FileName, std::ios::in | std::ios::out | std::ios::binary);
 	if(!m_hFDImage.is_open()) {
 		std::cout << "Error opening file '" << FileName << "'." << std::endl;
 		return false;

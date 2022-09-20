@@ -57,9 +57,10 @@ bool CFilesys::ReadCluster( FLHANDLE *hFile, int nCluster ) {
 	}
 	hFile->nClusterDataSize = 0;
 	csect.m_pSectorData = (unsigned char*)hFile->pClusterBuff;
+	size_t numRead;
 	for(int sect=0; sect<UsedSect; sect++) {
 		int sctno = Cluster2LBA(nCluster)+sect;
-		hFile->phFD->pFD->ReadSector(LBA2C(sctno), LBA2H(sctno), LBA2R(sctno), csect);
+		hFile->phFD->pFD->ReadSector(LBA2C(sctno), LBA2H(sctno), LBA2R(sctno), csect, numRead);
 		csect.m_pSectorData += SECT_SIZE;
 		hFile->nClusterDataSize += SECT_SIZE;
 	}
@@ -96,11 +97,12 @@ bool CFilesys::ReadNextCluster( FLHANDLE *hFile ) {
 bool CFilesys::ReadFAT( FDHANDLE *hFD, char *pBuff ) {
     bool err;
 	CSector tmpsect;
+	size_t numRead;
     err=true;
     for(int i=0; i<NUMBER_OF_FAT; i++) {
 		tmpsect.m_pSectorData = (unsigned char*)(pBuff+i*SECT_SIZE);
 		if(hFD->pFD->ReadSector(LBA2C(FAT_LBA+i), LBA2H(FAT_LBA+i),
-				LBA2R(FAT_LBA+i), tmpsect)!=0) err=false;
+				LBA2R(FAT_LBA+i), tmpsect, numRead)!=0) err=false;
     }
 	return err;
 }
@@ -135,11 +137,12 @@ bool CFilesys::SetFATValue( FDHANDLE *hFD, int cluster, int value ) {
 
 bool CFilesys::ReadEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
     CSector tmpsect;
+	size_t numRead;
 	unsigned char pSECT[SECT_SIZE];
 	tmpsect.m_pSectorData = pSECT;
 	int sect = EntryNumber/EPS;
     if(hFD->pFD->ReadSector(LBA2C(DIR_LBA+sect), LBA2H(DIR_LBA+sect),
-    		LBA2R(DIR_LBA+sect), tmpsect)!=0) return false;
+    		LBA2R(DIR_LBA+sect), tmpsect, numRead)!=0) return false;
 	int pos = (EntryNumber-(EntryNumber/EPS)*EPS)*BPE;
     for(int i=0; i<8; i++) {
         ent->pFilename[i] = pSECT[pos++];
@@ -155,11 +158,12 @@ bool CFilesys::ReadEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
 // エントリ情報をディスクに書き込む
 bool CFilesys::WriteEntry( FDHANDLE *hFD, int EntryNumber, CEntry *ent ) {
     CSector tmpsect;
+	size_t numRead;
     unsigned char pSECT[SECT_SIZE];
 	tmpsect.m_pSectorData = pSECT;
 	int sect = EntryNumber/EPS;
     if(hFD->pFD->ReadSector(LBA2C(DIR_LBA+sect), LBA2H(DIR_LBA+sect),
-    		LBA2R(DIR_LBA+sect), tmpsect)!=0) return false;
+    		LBA2R(DIR_LBA+sect), tmpsect, numRead)!=0) return false;
 	int pos = (EntryNumber-(EntryNumber/EPS)*EPS)*BPE;
     char fname[20];
 	sprintf(fname, "%-8s", ent->pFilename);	// 左詰の8文字のファイル名を生成
@@ -217,11 +221,12 @@ int CFilesys::FindEntry( FDHANDLE *hFD, char *pFilename ) {
 bool CFilesys::CheckDiskID( FDHANDLE *hFD ) {
 	bool result=true;
 	CSector sect;
+	size_t numRead;
 	sect.m_pSectorData = new unsigned char [1024];
-	hFD->pFD->ReadSector(0, 0, 3, sect);
-	if(sect.m_pSectorData[0]!='S' || 
-	   sect.m_pSectorData[1]!=' ' ||
-	   sect.m_pSectorData[2]!=' ') result=false;	// Illegal Disk ID
+	hFD->pFD->ReadSector(0, 0, 3, sect, numRead);
+	if((sect.m_pSectorData[0]!='S' || sect.m_pSectorData[1]!=' ' || sect.m_pSectorData[2]!=' ') &&
+	   (sect.m_pSectorData[0]!='S' || sect.m_pSectorData[1]!='Y' || sect.m_pSectorData[2]!='S')) 
+		result=false;	// Illegal Disk ID
 	delete []sect.m_pSectorData;
 	return result;
 }

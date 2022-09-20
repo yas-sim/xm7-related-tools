@@ -50,7 +50,7 @@ public:		/* Memver function */
 	virtual ~CFloppy() { };
 
 	virtual void ShowFDInfo( bool fShowTrackOffset ) = 0;
-	virtual FDC_STATUS	ReadSector( const int C, const int H, const int R, CSector &sect ) = 0;
+	virtual FDC_STATUS	ReadSector( const int C, const int H, const int R, CSector &sect, size_t &numRead ) = 0;
 	virtual FDC_STATUS	WriteSector( const int C, const int H, const int R, CSector &sect ) = 0;
 	virtual bool isAvailable( void ) = 0;
 };

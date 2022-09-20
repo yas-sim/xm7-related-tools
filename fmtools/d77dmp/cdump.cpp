@@ -26,7 +26,7 @@ void CDump::flush( void )
 
 void CDump::put( uint8_t ch )
 {
-	if(ch<' ' || ch==0xff) 	ascii[readptr & 0x0fu] = '.';
+	if(ch<' ' || ch>=0x7f) 	ascii[readptr & 0x0fu] = '.';
 	else					ascii[readptr & 0x0fu] = ch;
 
 	if((readptr & 0x00fful)==0x00)

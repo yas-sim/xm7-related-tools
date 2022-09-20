@@ -65,14 +65,15 @@ public:
 	void ShowSector( int trk, int sct ) {
 		CSector sect;
 		CDump dump;
+		size_t numRead;
 		uint8_t buff[4096];
 		sect.m_pSectorData = buff;
 		printf("Dumping TRK=%d SCT=%d", trk, sct);
-		if(fd.ReadSector(trk/2, trk%2, sct, sect)!=0) {
+		if(fd.ReadSector(trk/2, trk%2, sct, sect, numRead)!=0) {
 			puts("Failed to read sector");
 			return;
 		}
-		for(int i=0; i<256; i++) {
+		for(int i=0; i<numRead; i++) {
 			dump.put(buff[i]);
 		}
 		dump.flush();

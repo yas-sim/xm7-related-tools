@@ -43,7 +43,7 @@ public:		/* Memver function */
 	bool OpenFDImage( const std::string &pFileName );
 	bool CloseFDImage( void );
 	virtual void ShowFDInfo( bool fShowTrackOffset );
-	virtual FDC_STATUS	ReadSector( const int C, const int H, const int R, CSector &sect ) override;
+	virtual FDC_STATUS	ReadSector( const int C, const int H, const int R, CSector &sect, size_t &numRead ) override;
 	virtual FDC_STATUS	WriteSector( const int C, const int H, const int R, CSector &sect ) override;
 	virtual bool isAvailable( void ) { return m_fAvailable; }
 };
