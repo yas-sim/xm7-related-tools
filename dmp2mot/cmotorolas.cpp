@@ -39,7 +39,7 @@ void CMotorolaS::GenerateSRecord( char *pLine )
 {
 	int nCount = 0;					// Sレコードの文字数をカウントする。MAX_MOTOROLAS_LENGTHを超えないように管理
 	if(!m_fAvailable) return;
-	pLine[0] = NULL;
+	pLine[0] = '\n';
 	AddChar(pLine, 'S');					// Sレコードのレコードヘッダ
 	AddChar(pLine, m_nRecordType + '0');	// レコードタイプ
 	AddHex(pLine, m_nByteCount);			// バイトカウント
@@ -98,7 +98,7 @@ bool CMotorolaS::AnalyzeSRecord( char *pLine )
 		nReadPtr += 2;
 	}
 	unsigned char *pTmpBuff = new unsigned char[nDataCount];	// 一時的データバッファを確保する
-	if(pTmpBuff==NULL) return false;					// メモリが足りない…
+	if(pTmpBuff==nullptr) return false;					// メモリが足りない…
 	for(int i=0; i<nDataCount; i++) {
 		ch = GetHex(pLine, nReadPtr);
 		pTmpBuff[i] = ch;

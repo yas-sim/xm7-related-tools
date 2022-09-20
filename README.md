@@ -29,7 +29,7 @@ cmake --build . --config Release
 |[d77uty](./d77uty/)|D77イメージのディスク順番とかを操作するツール|
 |[dmygen](./dmygen/)|たしか、ダミーファイルを作成するツール|
 |[fdump](./fdump/)|ファイルダンプ|
-|[fmtools](./fmtools/)|F-BASICフォーマットのD77イメージを直接操作するツール。ディレクトリをみたりファイルを抜き出したり|
+|[fmtools](./fmtools/)|F-BASICフォーマットのD77イメージを直接操作するツール。ディレクトリをみたりファイルを抜き出したり。含まれているツールの詳細は下記`fmtools` family toolsテーブルを参照|
 |[fontp](./fontp/)|XM7用のフォントファイルを作成するツール|
 |[krom](./krom/)|漢字ROM相当のデータを作るツール。たぶん動かない|
 |[mot2bin](./mot2bin/)|MotorolaSファイルをバイナリに変換|
@@ -40,3 +40,14 @@ cmake --build . --config Release
 |[t772wav](./t772wav/)|T77カセットイメージファイルをWav音声ファイルに変換|
 |[t77dec](./t77dec/)|T77カセットイメージファイルの中身を確認したりファイルを取り出したり|
 |[wav2t77](./wav2t77/)|Wav音声ファイルをT77カセットイメージファイルに変換|
+
+- `fmtools` family tools  
+|Tool name|Description|
+|-|-|
+|`fmdir`|D77イメージファイル内のファイル名を表示|
+|`fmread`|D77イメージファイルからファイルを読み出し、fmread形式のファイルを作る|
+|`fmwrite`|D77イメージファイルにfmread形式のファイルを書き込む|
+|`fmcopy`|D77イメージファイル間でファイルをコピーする|
+|`fmdecode`|fmread形式のファイルを扱いやすい形式に変換する|
+|`fmencode`|ファイルfmread形式に変換する|
+|`d77dmp`|D77イメージファイル内のセクタダンプ表示をする|
