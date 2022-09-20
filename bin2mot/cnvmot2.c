@@ -123,7 +123,7 @@ void main( int argc , char *argv[] )
 	SetType(0, &data);			/* ヘッダレコード */
 	SetAddress(0L, &data);
 	ptr=argv[1];
-	while(*ptr!=nullptr) {	/* ヘッダレコードの中身はファイル名 */
+	while(*ptr!='\0') {	/* ヘッダレコードの中身はファイル名 */
 		Stock(*ptr++, &data);
 	}
 	Put(&data);
