@@ -72,8 +72,8 @@ void main( int argc, char *argv[])
 	fs.FMGetFirstEntry(hFD, &ent);
 	for(int i=0; i<151; i++) {
 		if((unsigned char)ent.pFilename[0]!=0xff || fAll==true) {
-			printf("%8s %1d %c %1d", ent.pFilename, ent.nFileType,
-				ent.fAscii==0?'B':'A', ent.fRandomAccess);
+			printf("%8s %1d %c %c", ent.pFilename, ent.nFileType,
+				ent.fAscii==0?'B':'A', ent.fRandomAccess==0?'S':'R');
 			int cluster = ent.nTopCluster, n = 1;
 			// クラスタチェインを追いかける
 			while(fAll==false) {		// fAll==trueの時にクラスタチェインを追いかけると無限ループに入ってしまう
